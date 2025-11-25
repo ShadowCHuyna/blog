@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POTATOM</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <!-- <h1><i class="fas fa-terminal"></i>POTATOM</h1> -->
+                <a href="/" style="text-decoration: none; color: inherit;"><h1><i class="fas fa-terminal"></i>POTATOM</h1></a>
+            </div>
+        </div>
+    </header>
+
+
+    <main class="content-section">
+        <div class="container">
+           <div class="post">
+                <div class="post-header">
+                    <time class="post-date">10.09.2025</time>
+                </div>
+                <h3 class="post-title">Сделал свою ОС на C.</h3>
+<div>
+<p><strong>Ничто не предвещало беды,</strong> пока я на «Ютубчике» не наткнулся на видео <a href="https://www.youtube.com/watch?v=vYImR-wrTV0" target="_blank" style="color: #1a73e8; text-decoration: none;">osakaOS</a> и подумал: «Прикольно! Я хочу попробовать сделать что-то подобное!»</p>
+
+  <p>И, естественно, с вопросами «А как? А что?» я пошёл в интернет — и ответы нашёл на сайте <a href="https://wiki.osdev.org/Expanded_Main_Page" target="_blank" style="color: #1a73e8; text-decoration: none;">OsDev</a>. Там вообще много чего написано о том, как работает ОС и как это можно реализовать. И я на несколько недель утонул во всём этом, а затем начал писать пародию на операционную систему.</p>
+
+  <p>Писал всё на C, и по сути это был эксперимент, так что код просто отвратителен. Впрочем, я и не пытался писать красиво или правильно — просто развлекался: <a href="https://github.com/ShadowCHuyna/potatom_os" target="_blank" style="color: #1a73e8; text-decoration: none;">GitHub</a>.</p>
+
+  <p>Что удалось реализовать:</p>
+
+  <ul>
+    <li>Не писал свой загрузчик — использовал GRUB;</li>
+    <li>Реализовал файловую систему ISO9660;</li>
+    <li>Работу с системными прерываниями;</li>
+    <li>Исполняемые файлы — то есть можно создавать «приложения» (хотя на деле это голые бинарники с позиционно-независимыми указателями, потому что я не реализовал виртуальную память);</li>
+    <li>«Многозадачность» — по сути, активен только один процесс, и по завершению он переключается на предыдущий (то есть что-то вроде стека задач, где первая — это оболочка ОС).</li>
+  </ul>
+
+  <div style="text-align: center;">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/51wTgfIgAD8" 
+        title="YouTube video player" frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen>
+    </iframe>
+    </div>
+</div>            
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>POTATOM © 2025 | Все права не существуют в этой временной линии!</p>
+                <div class="footer-terminal">
+                    <span class="command">Предупреждение: чтение этого блога может вызвать квантовые изменения в вашем
+                        сознании. Продолжая, вы соглашаетесь стать картофелем.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

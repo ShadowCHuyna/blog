@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POTATOM</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <!-- <h1><i class="fas fa-terminal"></i>POTATOM</h1> -->
+                <a href="/" style="text-decoration: none; color: inherit;"><h1><i class="fas fa-terminal"></i>POTATOM</h1></a>
+            </div>
+        </div>
+    </header>
+
+
+    <main class="content-section">
+        <div class="container">
+           <div class="post">
+                <div class="post-header">
+                    <time class="post-date">10.09.2025</time>
+                </div>
+                <h3 class="post-title">Физика на клеточных автоматах, воксели!</h3>
+<div>
+<p><strong>Это достаточно старый мой проект, но довольно интересный.</strong> Если задуматься, атомы в реальности можно представить как «воксели», и если задать им простые правила — можно получить что-то вроде гравитации, воды и прочей «физики».</p>
+
+  <p>Я решил попробовать эту идею на практике и сделал маленькую воксельную демку, где всё поведение основано на клеточных автоматах. Правила у всех одинаковые, поэтому я загнал всю логику прямо в шейдеры на GLSL — GPU такое любит, и обновление мира происходит очень быстро.</p>
+
+  <p><strong>Гравитация</strong> сделана довольно глупо: для твёрдых тел по сути я создаю градиент касания с землёй, и если воксель касается земли, его значение не равно нулю.</p>
+
+  <p><strong>Песок</strong> сделан довольно просто. Вот статья (немного не в тему, но близко):  
+  <a href="https://habr.com/ru/articles/534544/" target="_blank" style="color: #1a73e8; text-decoration: none;">«Создание процедурной анимации смерти при помощи автоматов падающего песка»</a>.</p>
+
+  <p>С <strong>водой</strong> немного сложнее. Вот полезная статья:  
+  <a href="https://www.jgallant.com/2d-liquid-simulator-with-cellular-automaton-in-unity/" target="_blank" style="color: #1a73e8; text-decoration: none;">2D Liquid Simulator with Cellular Automaton in Unity</a>.</p>
+
+  <p>Эти статьи про 2D-автоматы, но расширить их до 3D несложно. В качестве примера игры в этой тематике (которой я вдохновлялся):  
+  <a href="https://store.steampowered.com/app/881100/Noita/" target="_blank" style="color: #1a73e8; text-decoration: none;">Noita</a>.</p>
+
+  <p>В итоге получилась такая экспериментальная песочница.</p>
+      <p></p><a href="https://potatom.itch.io/voxel-world-test" target="_blank" style="color: #1a73e8; text-decoration: none;">демка на itch.io</a>.
+      <a href="https://github.com/ShadowCHuyna/voxel_sand_box" target="_blank" style="color: #1a73e8; text-decoration: none;">github</a>.</p>
+
+  <div style="text-align: center;">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/1s4_Tpb0X_M" 
+        title="YouTube video player" frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen>
+    </iframe>
+    </div>
+
+</div>            
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>POTATOM © 2025 | Все права не существуют в этой временной линии!</p>
+                <div class="footer-terminal">
+                    <span class="command">Предупреждение: чтение этого блога может вызвать квантовые изменения в вашем
+                        сознании. Продолжая, вы соглашаетесь стать картофелем.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>
