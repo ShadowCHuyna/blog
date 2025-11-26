@@ -1,0 +1,90 @@
+
+.container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.terminal-section {
+    padding: 3rem 0;
+    
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --text-primary: #e4e4e4;
+    --text-secondary: #a0a0a0;
+    --text-accent: #6a9955;
+    --text-command: #4fa6c7;
+    --border-color: #404040;
+    --terminal-green: #4ec9b0;
+}
+
+.terminal-window {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.terminal-header {
+    background-color: var(--bg-secondary);
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.terminal-title {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.terminal-body {
+    padding: 1.5rem;
+}
+
+.terminal-line {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.prompt {
+    color: var(--text-accent);
+    font-weight: bold;
+}
+
+.command {
+    color: var(--text-command);
+}
+
+.cursor {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+
+.post-frame {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* 16:9 = 9 / 16 = 0.5625 → 56.25% */
+  margin: 1.5rem 0;
+  overflow: hidden;
+  border-radius: 8px; /* опционально: скругление углов */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* опционально: тень */
+}
+
+.post-frame iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}

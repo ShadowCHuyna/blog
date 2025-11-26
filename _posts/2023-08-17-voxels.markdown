@@ -1,0 +1,23 @@
+---
+layout: post
+title:  "Физика на клеточных автоматах, воксели!"
+date:   2023-08-17
+---
+Это достаточно старый мой проект, но довольно интересный. Если задуматься, атомы в реальности можно представить как «воксели», и если задать им простые правила — можно получить что-то вроде гравитации, воды и прочей «физики».
+
+Я решил попробовать эту идею на практике и сделал маленькую воксельную демку, где всё поведение основано на клеточных автоматах. Правила у всех одинаковые, поэтому я загнал всю логику прямо в шейдеры на GLSL — GPU такое любит, и обновление мира происходит очень быстро.
+
+Гравитация сделана довольно глупо: для твёрдых тел по сути я создаю градиент касания с землёй, и если воксель касается земли, он не равен 0. Песок сделан довольно просто — вот статейка, немного не в тему: [«Создание процедурной анимации смерти при помощи автоматов падающего песка»](https://habr.com/ru/articles/534544/). С водой немного сложнее — вот [статейка](https://www.jgallant.com/2d-liquid-simulator-with-cellular-automaton-in-unity/). Эти статьи про 2D-автоматы, но расширить до 3D не сложно. Как пример игры в этой тематике (которой я вдохновлялся): [Noita](https://store.steampowered.com/app/881100/Noita/).
+
+Получилась такая экспериментальная песочница.  
+[Демка на itch.io](https://potatom.itch.io/voxel-world-test) | [GitHub](https://github.com/ShadowCHuyna/voxel_sand_box)
+
+<link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}">
+
+<div class="post-frame">
+    <iframe src="https://www.youtube.com/embed/1s4_Tpb0X_M" 
+        title="YouTube video player" frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen>
+    </iframe>
+</div>
