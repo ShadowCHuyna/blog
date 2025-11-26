@@ -13,4 +13,4 @@ date:   2025-11-24
 
 В общем, развлекаюсь!
 
-![Приставка](/assets/imgs/linux_tv_box.jpg)
+![Приставка](/blog/assets/imgs/linux_tv_box.jpg)
