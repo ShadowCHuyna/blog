@@ -32,13 +32,15 @@ description: >- # this means to ignore newlines until "baseurl:"
 # github_username:  ShadowCHuyna
 
 # Build settings
-theme: minima
+# theme: minima
+remote_theme: jekyll/minima
 plugins:
   - jekyll-feed
+  - jekyll-remote-theme
 
 minima:
   skin: dark
-  hide_site_feed_link: true
+  hide_site_feed_link: false
   # show_excerpts: true
   social_links:
     - title: github
