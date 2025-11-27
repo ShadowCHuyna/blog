@@ -9,5 +9,5 @@ date:   2025-11-18
 
 В общем, не знаю. Забавная идея, но как правильно сделать — не знаю.
 
-![HTTP-сервер](/blog/assets/imgs/esp32_site.jpg)  
-![Спайщик филамента](/blog/assets/imgs/esp32.jpg)
+![HTTP-сервер](/assets/imgs/esp32_site.jpg)  
+![Спайщик филамента](/assets/imgs/esp32.jpg)
