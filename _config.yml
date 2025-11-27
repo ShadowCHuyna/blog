@@ -25,7 +25,8 @@ title: POTATOM
 #   email: "vladimirkalilec@gmail.com"
 
 
-description: POTATOM © 2025 | Все права не существуют в этой временной линии! 
+description: POTATOM Пишу код, разбираю железо, делюсь находками.
+foot: POTATOM © 2025 | Все права не существуют в этой временной линии!
 # >- # this means to ignore newlines until "baseurl:"
 
 # baseurl: "/blog" # the subpath of your site, e.g. /blog
