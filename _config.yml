@@ -37,7 +37,6 @@ remote_theme: jekyll/minima
 plugins:
   - jekyll-feed
   - jekyll-remote-theme
-  - jekyll-analytics
 
 minima:
   skin: dark
@@ -53,11 +52,6 @@ minima:
     - title: telegram
       icon: telegram
       url: https://t.me/Ded_POTAToma
-
-jekyll_analytics:
-  GoogleAnalytics:          # Add, if you want to track with Google Analytics
-    id: G-PKC67E6C6Q          # Required - replace with your tracking id
-    anonymizeIp: false      # Optional - Default: false - set to true for anonymized tracking
 
 
 
