@@ -1,9 +1,9 @@
+search: false
 backend:
   name: github
   repo: ShadowCHuyna/blog
   branch: main
-  auth_mode: implicit
-  app_id: Ov23li0KvXYgAbUXUXck
+  base_url: "https://auth.potatom.ru"
 
 media_folder: "assets/images"
 public_folder: "/assets/images"
