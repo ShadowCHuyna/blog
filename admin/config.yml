@@ -1,21 +1,24 @@
-search: false
 backend:
   name: github
   repo: ShadowCHuyna/blog
   branch: main
   base_url: "https://auth.potatom.ru"
 
-media_folder: "assets/images"
-public_folder: "/assets/images"
-site_url: https://potatom.ru
-display_url: https://potatom.ru
+media_folder: "/assets/imgs"
+public_folder: "/"
+
+publish_mode: editorial_workflow
 
 collections:
   - name: "posts"
     label: "Posts"
     folder: "_posts"
     create: true
+    format: "frontmatter"
+    extension: "markdown"
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
-      - {label: "Title", name: "title", widget: "string"}
-      - {label: "Publish Date", name: "date", widget: "datetime"}
-      - {label: "Body", name: "body", widget: "markdown"}
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Publish Date", name: "date", widget: "datetime" }
+      - { label: "Body", name: "body", widget: "markdown" }
+      - { label: "Tags", name: "tags", widget: "list" }
