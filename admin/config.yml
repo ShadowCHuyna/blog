@@ -2,6 +2,8 @@ backend:
   name: github
   repo: ShadowCHuyna/blog
   branch: main
+  auth_mode: implicit
+  app_id: Ov23li0KvXYgAbUXUXck
 
 media_folder: "assets/images"
 public_folder: "/assets/images"
