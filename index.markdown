@@ -10,16 +10,16 @@ layout: home
     <div class="container">
         <div class="terminal-window">
             <div class="terminal-header">
-                <span class="terminal-title">artalaski@potatom:~</span>
+                <span class="terminal-title">sch@potatom:~</span>
             </div>
             <div class="terminal-body">
                 <div class="terminal-line">
-                    <span class="prompt">artalaski@potatom:~$</span>
+                    <span class="prompt">sch@potatom:~$</span>
                     <span class="command">whoami</span>
                 </div>
-                <p style="color: #e4e4e4;">artalaski, малютка-кодер, пишу о том, как развлекаюсь.</p>
+                <p style="color: #e4e4e4;">sch, малютка-кодер, пишу о том, как развлекаюсь.</p>
                 <div class="terminal-line">
-                    <span class="prompt">artalaski@potatom:~$</span>
+                    <span class="prompt">sch@potatom:~$</span>
                     <span class="command cursor">_</span>
                 </div>
             </div>

@@ -27,7 +27,7 @@ author:
 
 description: >- # this means to ignore newlines until "baseurl:"
   POTATOM © 2025 | Все права не существуют в этой временной линии! 
-# baseurl: "" # the subpath of your site, e.g. /blog
+baseurl: "/blog" # the subpath of your site, e.g. /blog
 # url: "" # the base hostname & protocol for your site, e.g. http://example.com
 # github_username:  ShadowCHuyna
 
@@ -37,6 +37,7 @@ remote_theme: jekyll/minima
 plugins:
   - jekyll-feed
   - jekyll-remote-theme
+  - jekyll-analytics
 
 minima:
   skin: dark
@@ -46,6 +47,18 @@ minima:
     - title: github
       icon: github
       url: "https://github.com/ShadowCHuyna"
+    - title: youtube
+      icon: youtube
+      url: "https://www.youtube.com/@potatomcorporation4975"
+    - title: telegram
+      icon: telegram
+      url: https://t.me/Ded_POTAToma
+
+jekyll_analytics:
+  GoogleAnalytics:          # Add, if you want to track with Google Analytics
+    id: G-PKC67E6C6Q          # Required - replace with your tracking id
+    anonymizeIp: false      # Optional - Default: false - set to true for anonymized tracking
+
 
 
 # Exclude from processing.
