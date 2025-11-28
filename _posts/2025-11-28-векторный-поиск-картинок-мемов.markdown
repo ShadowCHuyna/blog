@@ -20,4 +20,4 @@ date: 2025-11-28T23:26:00.000+10:00
 
 [Код проекта](https://github.com/ShadowCHuyna/meme_archive)
 
-![meme archive](assets/imgs/meme-archive.png)
+![meme archive](/assets/imgs/meme-archive.png)
