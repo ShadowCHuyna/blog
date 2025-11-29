@@ -1,0 +1,41 @@
+---
+title: Сделал что то вроде видеоредактора
+date: 2025-11-29T14:20:00.000+10:00
+description: "Создание видео из скрипта на Python: инструмент в стиле Ren'Py с
+  использованием pygame и FFmpeg. Пример кода, рендеринг кадров и озвучка текста
+  для автоматической генерации видео."
+---
+
+Вообще, я хотел сделать что-то вроде инструмента для создания видео из скрипта. Хотел, чтобы скрипт был похож на [Ren'Py](https://www.renpy.org/) — как в визуальных новеллах: загрузка картинок, их отображение, озвучка текста.
+
+Для рендеринга я использую [pygame](https://www.pygame.org/) и передаю кадры в [FFmpeg](https://www.ffmpeg.org/). Саму идею отправки кадров в FFmpeg я подсмотрел в репозитории [tsoding/rendering-video-in-c-with-ffmpeg](https://github.com/tsoding/rendering-video-in-c-with-ffmpeg).
+
+[Код проекта](https://github.com/ShadowCHuyna/ScriptDrivenVideoEditor)
+
+Пример скрипта:
+
+```py
+from sdve import Sprite, ScriptDrivenVideoEditor, say, wait
+
+sdve = ScriptDrivenVideoEditor(FPS=10, window=(1920, 1080))
+
+neco_arc = Sprite("./assets/imgs/neco.jpg")
+gabriel = Sprite("./assets/imgs/sus.jpg")
+
+neco_arc.show(x=200, y=200)
+say("Уверяю вас, это не бесполезный скрипт")
+wait(0.3)
+
+gabriel.show(x=1300, y=300)
+say("Тишина, я тут главный мем!")
+wait(2)
+
+sdve.render_video()
+```
+
+<div style="position: relative; width: 100%;">
+    <video style="position: relative; width: 100%;" controls>
+    <source src="/assets/imgs/sdve_video.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video> 
+</div>
