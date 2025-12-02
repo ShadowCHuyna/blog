@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}">
+
+
+<div class="post-frame">
+    <div class="youtube-placeholder">
+        Загрузка видео...<br>
+        <a href="https://www.youtube.com/watch?v={{ include.id }}" target="_blank">Ссылка на видео</a>
+    </div>
+    <div class="youtube-error">
+        YouTube недоступен в вашем регионе.<br>
+        <a href="https://www.youtube.com/watch?v={{ include.id }}" target="_blank">Ссылка на видео</a>
+    </div>
+    <iframe src="https://www.youtube.com/embed/{{ include.id }}" 
+        title="YouTube video player" frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen>
+    </iframe>
+</div>
+
+<script src="/assets/scripts/iframe_controller.js"></script>

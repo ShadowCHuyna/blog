@@ -22,3 +22,4 @@ collections:
       - { label: "Publish Date", name: "date", widget: "datetime" }
       - { label: "Body", name: "body", widget: "markdown" }
       - { label: "Description", name: "description", widget: "string" }
+      - { label: "Layout", name: "layout", widget: "string",  default: "post"}

@@ -88,3 +88,44 @@
   height: 100%;
   border: none;
 }
+
+.youtube-placeholder, .youtube-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #404040;
+  color: #e4e4e4;
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  text-align: center;
+  padding: 20px;
+  z-index: 1;
+}
+
+.youtube-error {
+  display: none;
+  background-color: #404040;
+  color: #d32f2f;
+}
+
+.youtube-error a {
+  color: #1a0dab;
+  text-decoration: underline;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+/* Скрыть placeholder когда iframe загружается */
+.post-frame iframe {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.post-frame iframe.loaded {
+  opacity: 1;
+}

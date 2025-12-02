@@ -13,12 +13,4 @@ description: "физика в воксельном мире с помощью к
 Получилась такая экспериментальная песочница.  
 [Демка на itch.io](https://potatom.itch.io/voxel-world-test) | [GitHub](https://github.com/ShadowCHuyna/voxel_sand_box)
 
-<link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}">
-
-<div class="post-frame">
-    <iframe src="https://www.youtube.com/embed/1s4_Tpb0X_M" 
-        title="YouTube video player" frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen>
-    </iframe>
-</div>
+{% include youtube.html id="1s4_Tpb0X_M" %}
