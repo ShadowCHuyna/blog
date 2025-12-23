@@ -20,6 +20,15 @@ layout: page
 <div class="container">
   <h1>404</h1>
 
-  <p><strong>Page not found :(</strong></p>
-  <p>The requested page could not be found.</p>
+  <p><strong>А где страничка? А что вы ищите тут? Странички то нету :(</strong></p>
+  <img id="fun"></img>
+
+  <script>
+    const img = document.getElementById("fun");
+    if(Math.random()>0.5){
+      img.src = "/assets/imgs/uwы.jpeg"
+    }else{
+      img.src = "/assets/imgs/good_gateway.jpeg"  
+    }
+  </script>
 </div>

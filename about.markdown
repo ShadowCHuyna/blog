@@ -1,18 +1,30 @@
-<!-- ---
+---
 layout: page
-title: About
+title: а кто?
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
+<link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}">
 
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
+<section class="terminal-section">
+    <div class="container">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-title">sch@potatom:~</span>
+            </div>
+            <div class="terminal-body">
+                <div class="terminal-line">
+                    <span class="prompt">sch@potatom:~$</span>
+                    <span class="command">whoami</span>
+                </div>
+                <p style="color: #e4e4e4;">sch, малютка-кодер, пишу о том, как развлекаюсь.</p>
+                <div class="terminal-line">
+                    <span class="prompt">sch@potatom:~$</span>
+                    <span class="command cursor">_</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
-
-
-[jekyll-organization]: https://github.com/jekyll -->
+я не знаю что тут написать в "ногах" сайта есть ссылки на тг, github.
