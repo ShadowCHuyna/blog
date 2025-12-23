@@ -27,4 +27,18 @@ permalink: /about/
     </div>
 </section>
 
+<style>
+    img {
+        max-width: 100%;
+        vertical-align: middle;
+        
+        display: block;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
 я не знаю что тут написать в "ногах" сайта есть ссылки на тг, github.
+![ыыы](/assets/imgs/yuy.jpg)
+развлекаюсь пишу какуюто фигню или делаю а если не делаю значит скорее всего сплю.
