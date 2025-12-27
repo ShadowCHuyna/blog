@@ -2,7 +2,7 @@
 title: несовершенство бытия
 date: 2018-12-28T01:19:00.000+10:00
 description: пиздюшня
-layout: meta
+layout: post
 ---
 ТРИ ДНЯ В ЛЕСУ
 
