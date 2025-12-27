@@ -14,9 +14,12 @@
     --text-primary: #e4e4e4;
     --text-secondary: #a0a0a0;
     --text-accent: #6a9955;
-    --text-command: #4fa6c7;
+    --text-command: #e4e4e4;
     --border-color: #404040;
     --terminal-green: #4ec9b0;
+
+    --text-user: #6a9955;
+    --text-path: #4fa6c7;
 }
 
 .terminal-window {
@@ -60,8 +63,23 @@
 }
 
 .cursor {
-    animation: blink 1s infinite;
+    display: inline-block;
+    width: 8px;
+    height: 1.2em;
+    background-color: var(--text-primary);
+    margin-left: 2px;
+    animation: blink 1s steps(1) infinite;
+    vertical-align: bottom;
 }
+
+.prompt-user {
+    color: var(--text-user);
+}
+
+.prompt-path {
+    color: var(--text-path);
+}
+
 
 @keyframes blink {
     0%, 50% { opacity: 1; }

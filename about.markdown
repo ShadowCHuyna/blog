@@ -4,28 +4,7 @@ title: а кто?
 permalink: /about/
 ---
 
-<link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}">
-
-<section class="terminal-section">
-    <div class="container">
-        <div class="terminal-window">
-            <div class="terminal-header">
-                <span class="terminal-title">sch@potatom:~</span>
-            </div>
-            <div class="terminal-body">
-                <div class="terminal-line">
-                    <span class="prompt">sch@potatom:~$</span>
-                    <span class="command">whoami</span>
-                </div>
-                <p style="color: #e4e4e4;">sch, малютка-кодер, пишу о том, как развлекаюсь.</p>
-                <div class="terminal-line">
-                    <span class="prompt">sch@potatom:~$</span>
-                    <span class="command cursor">_</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+{% include terminal.html %}
 
 <style>
     img {
@@ -39,6 +18,15 @@ permalink: /about/
     }
 </style>
 
-я не знаю что тут написать в "ногах" сайта есть ссылки на тг, github.
-![ыыы](/assets/imgs/yuy.jpg)
-развлекаюсь пишу какуюто фигню или делаю а если не делаю значит скорее всего сплю.
+*Потатом* — это классицизм на грани с абсурдистским нарративом. Пока ты хочешь ходить — *потатом* станет лежать. Без удовольствия, по-злому, из своих собственных соображений. Никакого напускного нонконформизма. Исключительная мудрость. Нет статности — да стойкости.
+
+Мы не станем плясать под дудку тщеславной публики поколения Альфа. Выходит так, что ценители психоделики без аудитории, обращающиеся к несуществующим третьим лицам, мыслят трезвее. Ценим любую жизнь больше ваших трепетов. Комфортом и добром вычленяем вашу гнилую плоть из турецкого донера экзистенции на вертеле витальности.
+
+Когда интервьюер средней руки по имени Д. спросит:  
+— В чём сила?  
+
+Единственным верным ответом будет:  
+— В *потатоме*.
+
+Источник: POTATOM.AI
+![ыыы](/assets/imgs/use_ai.png)
