@@ -34,6 +34,15 @@ const fs = {
     "/home/bork": [],
     "/home/sch/readme.txt": "hello from sch"
 };
+const COMMANDS = {
+    ls: 'list directory contents',
+    cd: 'change directory',
+    pwd: 'print working directory',
+    cat: 'print file contents',
+    whoami: 'print current user',
+    clear: 'clear terminal',
+    help: 'show this help'
+};
 
 let cwd = "/home";
 let inputBuffer = "";
@@ -100,6 +109,14 @@ function execute(cmd) {
         case 'ls':
             printLine(fs[cwd]?.join('  ') || '');
             break;
+        case 'help':
+            Object.entries(COMMANDS).forEach(([cmd, desc]) => {
+                printLine(`${cmd.padEnd(8)} - ${desc}`);
+            });
+            printLine('___________________')
+            printLine(`UwЫ тут ничего нет.`)
+            break;
+
 
         case 'cd':
             if (arg === '..') {
