@@ -1,0 +1,166 @@
+<link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}">
+
+<section class="terminal-section">
+    <div class="container">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-title">guest@potatom</span>
+            </div>
+
+            <div class="terminal-body" id="terminal" tabindex="0"></div>
+        </div>
+    </div>
+</section>
+
+<script>
+const terminal = document.getElementById('terminal');
+
+terminal.addEventListener('click', () => {
+    terminal.focus();
+});
+
+document.addEventListener('keydown', e => {
+    terminal.focus();
+});
+terminal.addEventListener('keydown', e => {
+    if (e.key === ' ') e.preventDefault();
+});
+
+
+const fs = {
+    "/home": ["sch", "l0cal8", "bork"],
+    "/home/sch": ["readme.txt"],
+    "/home/l0cal8": [],
+    "/home/bork": [],
+    "/home/sch/readme.txt": "hello from sch"
+};
+
+let cwd = "/home";
+let inputBuffer = "";
+
+/* ---------- render ---------- */
+function printPromptLine(command) {
+    const line = document.createElement('div');
+    line.className = 'terminal-line';
+
+    line.innerHTML = `
+        <span class="prompt">
+            <span class="prompt-user">guest@potatom</span>:
+            <span class="prompt-path">${cwd}</span>$
+        </span>
+        <span class="command">${command}</span>
+    `;
+
+    terminal.appendChild(line);
+}
+
+
+function renderPrompt() {
+    const line = document.createElement('div');
+    line.className = 'terminal-line input-line';
+
+    line.innerHTML = `
+        <span class="prompt">
+            <span class="prompt-user">guest@potatom</span>:
+            <span class="prompt-path">${cwd}</span>$
+        </span>
+        <span class="command">${inputBuffer}</span>
+        <span class="cursor"></span>
+    `;
+
+    terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+function clearInputLine() {
+    const line = terminal.querySelector('.input-line');
+    if (line) line.remove();
+}
+
+function printLine(text = "") {
+    const line = document.createElement('div');
+    line.className = 'command';
+    line.textContent = text;
+    terminal.appendChild(line);
+}
+
+/* ---------- helpers ---------- */
+
+function parentDir(path) {
+    if (path === "/home") return "/home";
+    return path.split('/').slice(0, -1).join('/') || "/home";
+}
+
+/* ---------- commands ---------- */
+
+function execute(cmd) {
+    const [name, arg] = cmd.split(' ');
+
+    switch (name) {
+        case 'ls':
+            printLine(fs[cwd]?.join('  ') || '');
+            break;
+
+        case 'cd':
+            if (arg === '..') {
+                cwd = parentDir(cwd);
+            } else {
+                const next = `${cwd}/${arg}`;
+                if (fs[next] && Array.isArray(fs[next])) {
+                    cwd = next;
+                } else {
+                    printLine(`cd: no such file or directory: ${arg}`);
+                }
+            }
+            break;
+
+        case 'pwd':
+            printLine(cwd);
+            break;
+
+        case 'whoami':
+            printLine('guest');
+            break;
+
+        case 'cat':
+            const file = `${cwd}/${arg}`;
+            fs[file]
+                ? printLine(fs[file])
+                : printLine(`cat: ${arg}: No such file`);
+            break;
+
+        case 'clear':
+            terminal.innerHTML = '';
+            break;
+
+        default:
+            printLine(`${name}: command not found`);
+    }
+}
+
+/* ---------- input ---------- */
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        clearInputLine();
+        printPromptLine(inputBuffer);
+        execute(inputBuffer.trim());
+
+        inputBuffer = "";
+        renderPrompt();
+        return;
+    }
+
+    if (e.key === 'Backspace') {
+        inputBuffer = inputBuffer.slice(0, -1);
+    } else if (e.key.length === 1) {
+        inputBuffer += e.key;
+    }
+
+    clearInputLine();
+    renderPrompt();
+});
+
+/* init */
+renderPrompt();
+</script>
