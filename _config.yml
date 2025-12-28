@@ -56,6 +56,12 @@ minima:
       icon: telegram
       url: https://t.me/Ded_POTAToma
 
+defaults:
+  - scope:
+      path: ""          # ко всем файлам
+      type: "posts"     # или pages
+    values:
+      last_modified_at: "2025-12-29"
 
 
 # Exclude from processing.
