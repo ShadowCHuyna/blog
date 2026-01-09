@@ -85,7 +85,7 @@ execute store result bossbar minecraft:bossbar value run data get entity @n[tag=
 
 Но не переживай. У тебя ничего не получится, у меня тоже не получилось!
 
-![img](assets/imgs/1767938640.png)
+![Женщина](assets/imgs/1767938640.png)
 
 **Интересные проекты:**
 
@@ -103,7 +103,10 @@ execute store result bossbar minecraft:bossbar value run data get entity @n[tag=
 
 * [Terralith](https://modrinth.com/datapack/terralith) - Самый популярный датапак на генерацию мира.
 
+![img](https://images.squarespace-cdn.com/content/v1/6240c1f3e10b50416d969a84/45c5d625-285c-4477-974e-771012c8e23a/2022-05-27_23.40.23.jpg)
 * [Vanilla Tweaks](https://vanillatweaks.net/picker/datapacks/) - Генератор Датапаков! Можно собрать единый датапак из нескольких.
+
+![img](https://i.imgur.com/cXOkR6I.png)
 
 ## Как я использую датапаки? Какие датапаки лучше выбрать?
 
