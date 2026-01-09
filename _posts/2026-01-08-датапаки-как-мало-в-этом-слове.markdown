@@ -85,6 +85,8 @@ execute store result bossbar minecraft:bossbar value run data get entity @n[tag=
 
 Но не переживай. У тебя ничего не получится, у меня тоже не получилось!
 
+![img](assets/imgs/1767938640.png)
+
 **Интересные проекты:**
 
 * BadApple на генераторе мира.
