@@ -81,7 +81,7 @@ BadApple на диалогах
 
 {% include youtube.html id="VZIwxrKHlqg" %}
 
-Just Atlas
+Just Atlas - Карта 
 
 {% include youtube.html id="AMXi4InjjkM" %}
 
