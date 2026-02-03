@@ -35,5 +35,6 @@ layout: post
 
 
 ---
-bork`дубровый: написал [тг бота](@mem_archive_bot).</br>
+bork`дубровый: написал [тг бота](@mem_archive_bot).
+
 sch: [memearchive](https://memearchive.potatom.ru/).
