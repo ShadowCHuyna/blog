@@ -4,8 +4,10 @@ date: 2026-02-04T21:01:00.000+07:00
 last_modified_at: 2026-02-04T21:01:00.000+07:00
 author:
   - bork
-description: rcon
-keywords: rcon
+description: "Управление серверами через Telegram: добавляйте RCON-серверы,
+  настраивайте команды и запускайте их мгновенно."
+keywords: rcon, server, admin, managment, ркон, minecraft, майнкрафт, сервера,
+  потатом, potatom, барнаул
 layout: post
 ---
 Слабонервным не читать!!!
