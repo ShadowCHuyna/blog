@@ -1,0 +1,14 @@
+---
+title: ПОЧТА!!!
+date: 2026-02-18T03:02:00.000+10:00
+last_modified_at: 2026-02-18T03:02:00.000+10:00
+author:
+  - sch
+description: Поднял почтовый сервер mailcow
+keywords: почта mailcow
+layout: post
+---
+Развернул почтовый сервер [Mailcow](https://mailcow.email/). Особых сложностей нет — всё работает через Docker, так что почту можно поднять очень быстро.  
+Для удобства сделал простую [страничку регистрации](https://mail.potatom.ru/registration/), где можно создать себе ящик.  
+
+![сидит и отправляет email bork`у](/assets/imgs/nekoarc_pc.png)
