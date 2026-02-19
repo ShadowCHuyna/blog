@@ -1,7 +1,7 @@
 ---
 title: ПОЧТА!!!
 date: 2026-02-18T03:02:00.000+10:00
-last_modified_at: 2026-02-18T03:02:00.000+10:00
+last_modified_at: 2026-02-19T16:37:00.000+10:00
 author:
   - sch
 description: Поднял почтовый сервер mailcow
@@ -12,4 +12,4 @@ layout: post
 Для удобства сделал простую [страничку регистрации](https://mail.potatom.ru/registration/), где можно создать себе ящик.  
 
 ![сидит и отправляет email bork`у](/assets/imgs/nekoarc_pc.png)
-<p style="text-align: center; color: gray; font-size: 0.9em;">сидит и отправляет email bork`у</p>
+<p style="text-align: center; color: gray; font-size: 0.9em;">лежит и отправляет email bork`у</p>
