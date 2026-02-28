@@ -1,7 +1,7 @@
 ---
 title: Я принял красную таблетку, чтобы посмотреть на Matrix изнутри
-date: 2026-02-28T17:34:00.000+07:00
-last_modified_at: 2026-02-28T17:34:00.000+07:00
+date: 2026-02-28T17:44:00.000+07:00
+last_modified_at: 2026-02-28T17:44:00.000+07:00
 author:
   - bork
 description: Potatom часть Matrix. Matrix часть Potatom'a. 🥔 Мы запустили свой
