@@ -37,6 +37,10 @@ foot: POTATOM © 2019-2026 | Все права не существуют в эт
 # Build settings
 # theme: minima
 remote_theme: jekyll/minima
+
+collections:
+  projects:
+    output: true
 plugins:
   - jekyll-feed
   - jekyll-remote-theme
@@ -61,6 +65,11 @@ defaults:
   - scope:
       path: ""          # ко всем файлам
       type: "posts"     # или pages
+    values:
+      last_modified_at: "2025-12-29"
+  - scope:
+      path: ""          # ко всем файлам
+      type: "projects"     # или projects
     values:
       last_modified_at: "2025-12-29"
 

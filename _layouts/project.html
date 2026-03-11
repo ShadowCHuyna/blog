@@ -1,0 +1,114 @@
+---
+layout: base
+---
+
+<div class="project">
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">{{ page.title | escape }}</h1>
+    <div class="post-meta">
+      {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+      {% assign pdate = page.date | date_to_xmlschema %}
+      {%- if page.modified_date %}<span class="meta-label">Published:</span>{% endif %}
+      <time class="dt-published" datetime="{{ pdate }}" itemprop="datePublished">
+        {{ pdate | date: date_format }}
+      </time>
+      {%- if page.modified_date -%}
+        <span class="bullet-divider">•</span>
+        <span class="meta-label">Updated:</span>
+        {%- assign mdate = page.modified_date | date_to_xmlschema %}
+        <time class="dt-modified" datetime="{{ mdate }}" itemprop="dateModified">
+          {{ mdate | date: date_format }}
+        </time>
+      {%- endif -%}
+      {%- if page.author %}
+      <div class="{% unless page.modified_date %}force-inline {% endunless %}post-authors">
+        {%- for author in page.author %}
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">{{ author }}</span></span>
+          {%- if forloop.last == false %}, {% endif -%}
+        {% endfor %}
+      </div>
+      {%- endif %}
+    </div>
+    <style>
+      img {
+          max-width: 100%;
+          vertical-align: middle;
+          
+          display: block;
+          max-width: 100%;
+          margin-left: auto;
+          margin-right: auto;
+      }
+    </style>
+  </header>
+
+  {{ content }}
+
+
+  {% if site.paginate %}
+    {% assign projects = paginator.projects %}
+  {% else %}
+    {% assign projects = site.projects %}
+  {% endif %}
+
+
+  {%- if projects.size > 0 -%}
+    <!--  -->
+    {%- if page.list_title -%}
+    <h2 class="post-list-heading">{{ page.list_title }}</h2>
+    {%- endif -%}
+    <ul class="post-list">
+    {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+    {%- for post in projects reversed -%}
+    <li style="border: 1px solid #333; border-radius: 6px; padding: 1.2rem; margin-bottom: 1.5rem; background: #1e1e1e;">
+        <span class="post-meta">{{ post.date | date: date_format }}</span>
+        <h3>
+            <a class="post-link" href="{{ post.url | relative_url }}">
+            {{ post.title | escape }}
+            </a>
+        </h3>
+        {%- if post.author -%}
+            <p class="post-authors" style="margin: 0.5em 0; font-size: 0.95em;">
+            от:&nbsp;
+            {%- for author in post.author -%}
+                <span style="background-color: #333; color: #fff; padding: 0.15em 0.4em; border-radius: 3px; font-weight: 600;">{{ author }}</span>{%- unless forloop.last %}, {% endunless -%}
+            {%- endfor -%}
+            </p>
+        {%- endif -%}
+        {%- if post.description -%}
+            <p class="post-description">{{ post.description | escape }}</p>
+        {%- elsif site.minima.show_excerpts -%}
+            {{ post.excerpt }}
+        {%- endif -%}
+    </li>
+    {%- endfor -%}
+    </ul>
+    <!--  -->
+    {% if site.paginate %}
+      <div class="pager">
+        <ul class="pagination">
+        {%- if paginator.previous_page %}
+          <li>
+            <a href="{{ paginator.previous_page_path | relative_url }}" class="previous-page" title="Go to Page {{ paginator.previous_page }}">
+              {{ paginator.previous_page }}
+            </a>
+          </li>
+        {%- else %}
+          <li><div class="pager-edge">•</div></li>
+        {%- endif %}
+          <li><div class="current-page">{{ paginator.page }}</div></li>
+        {%- if paginator.next_page %}
+          <li>
+            <a href="{{ paginator.next_page_path | relative_url }}" class="next-page" title="Go to Page {{ paginator.next_page }}">
+              {{ paginator.next_page }}
+            </a>
+          </li>
+        {%- else %}
+          <li><div class="pager-edge">•</div></li>
+        {%- endif %}
+        </ul>
+      </div>
+    {%- endif %}
+  {%- endif -%}
+</div>

@@ -1,0 +1,242 @@
+---
+title: PCPM - Пакетный менеджер для C
+date: 2026-02-23T20:32:00.000+10:00
+last_modified_at: 2026-02-23T20:32:00.000+10:00
+author:
+  - sch
+description: пакетный менеджер для C библиотек на python. Скачивает библиотеки
+  генерирует код.
+keywords: "c, python, пакетный менеджер "
+layout: post
+---
+Дело было вечером, делать было нечего, и я решил: а почему бы не сделать "пакетный" менеджер для `C` библиотек.
+> в `C` нет пакетов, потому что нет механизма пространств имён. Всё живёт в общем пространстве символов, так что корректнее говорить не о пакетах, а о менеджере библиотек.
+
+Просто скачивать библиотеки - скучно. Поэтому пакет - это `python`-скрипт, который может сделать какую-то полезную (или не очень) фигню: сгенерировать код, подготовить обёртки, подтянуть бинарники, что угодно.
+
+[список доступных пакетов](https://github.com/ShadowCHuyna/pcpm-packages)
+
+[github](https://github.com/ShadowCHuyna/pcpm)
+
+---
+
+### Оглавление
+
+- [Зачем](#зачем)
+- [Примеры](#примеры)
+    - [pjim](#pjim)
+    - [raylib-module](#raylib-module)
+- [Установка](#установка)
+- [Команды](#команды)
+- [Конфигурация проекта](#конфигурация-проекта)
+
+---
+
+### зачем?
+
+Мне хотелось:
+1. управления зависимостями.
+2. минимизировать ручной установки флагов и путей.
+3. кодогенерация.
+
+---
+
+### примеры
+
+#### pjim
+
+Пакет `pjim` генерирует 2 функции вида  
+`pjim_<struct name>_<serialization/deserialization>`  
+для структур, помеченных `// @PJIM`.
+
+Используется библиотека [tsoding/jim](https://github.com/tsoding/jim).
+
+```c
+#include <stdio.h>
+#include "jim.h"
+#include "jimp.h"
+#include "pjim.h"
+
+// @PJIM
+typedef struct
+{
+    int number;
+    int number_arr_capacity;
+    int number_arr[10];
+} some_struct;
+
+
+int main(void){
+    Jim jim = {.pp=4};
+    some_struct ss = {.number=33, .number_arr_capacity=3};
+    for (size_t i = 0; i < ss.number_arr_capacity; i++)
+        ss.number_arr[i] = i;
+    
+    // serialization
+    pjim_some_struct_serialization(&jim, &ss); // автоматически сгенерированная функция
+    printf("сериализованная структура JSON:\n");
+    fwrite(jim.sink, jim.sink_count, 1, stdout);
+
+    // deserialization
+    printf("\nдесериализованная структура:\n");
+    some_struct ds = {0};
+    Jimp jimp = {0};
+    jimp_begin(&jimp, "", jim.sink, jim.sink_count); 
+    pjim_some_struct_deserialization(&jimp, &ds); // автоматически сгенерированная функция
+
+    printf("{\n\t\"number\": %d,\n\t\"number_arr_capacity\": %d,\n\t\"number_arr\": [\n", ds.number, ds.number_arr_capacity);
+    for (size_t i = 0; i < ds.number_arr_capacity; i++)
+        printf("\t\t%d,\n", ds.number_arr[i]);
+    printf("\t]\n}\n");
+    return 0;
+}
+```
+
+`./build/bin/main`:
+
+```json
+сериализованная структура JSON:
+{
+    "number": 33,
+    "number_arr_capacity": 3,
+    "number_arr": [
+        0,
+        1,
+        2
+    ]
+}
+десериализованная структура:
+{
+    "number": 33,
+    "number_arr_capacity": 3,
+    "number_arr": [
+        0,
+        1,
+        2,
+    ]
+}
+```
+
+То есть ты просто помечаешь структуру, а пакет сам генерирует функции для сериализации/десериализации.
+
+Для запуска примера:
+1. `pcpm init`
+2. `pcpm install pjim`
+3. ctrl+c, ctrl+v
+4. `pcpm build run`
+
+---
+
+#### raylib-module
+
+Пакет `raylib-module` - это попытка сделать что-то вроде «модулей».
+Если попробовать слинковать в проекте две библиотеки, у которых есть хотя бы одна функция с одинаковым именем (или у тебя такая уже есть), то получаешь ошибку линковки. Сюрприз.
+
+Вместо этого:
+- `RaylibModule` - структура с указателями на все функции.
+- `import_RaylibModule` - загружает `dll/so` и заполняет структуру.
+- В коде ты работаешь через `rl->FunctionName`.
+
+Конфликтов символов нет, потому что ничего не линкуется напрямую. Функции подтягиваются во время выполнения и хранятся в структуре с указателями, а не попадают в таблицу символов итогового бинарника.
+Минус: макросы, завязанные на функции, ломаются. Но их можно переписать под указатели.
+
+Используется библиотека: [raysan5/raylib](https://github.com/raysan5/raylib)
+
+```c
+#include "raylib-module.h"
+RaylibModule* rl;
+
+int main(void){
+    rl = import_RaylibModule("./libraylib.so.5.5.0");
+
+    rl->InitWindow(800, 450, "raylib [core] example - basic window");
+    while (!rl->WindowShouldClose())
+    {
+        rl->BeginDrawing();
+            rl->ClearBackground(RAYWHITE);
+            rl->DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
+        rl->EndDrawing();
+    }
+    rl->CloseWindow();
+
+    return 0;
+}
+```
+
+Для запуска:
+1. `pcpm init`
+2. `pcpm install raylib-module`
+3. ctrl+c, ctrl+v
+4. `pcpm build run`
+
+---
+
+## Установка
+
+Зависимости:
+- make
+- python3
+- pip
+- git
+
+Установка:
+1. `git clone https://github.com/ShadowCHuyna/pcpm --depth=1`
+2. `make install`
+
+Удаление: `make uninstall`
+
+Создание проекта:
+1. `pcpm init` - создание проекта
+2. `pcpm build run` - сборка и запуск.
+
+---
+
+### команды
+
+```
+init              Создать новый проект
+install (i)       Установить зависимости проекта
+build (b)         Собрать проект
+run (r)           Запустить проект
+remove            Удалить пакеты из проекта
+set_template      Создать или обновить шаблон config.json
+```
+
+---
+
+## Конфигурация проекта
+
+```json
+{
+    "name": "example_name",
+    "target_name": "example_bin_name",
+    "mirrors": [
+        "http://pcpmirror.potatom.ru/packages",
+        "/example/path"
+    ],
+    "origin": "./libs",
+    "compilation_args": ["-Wall", "-Wextra"],
+    "compiler": "gcc",
+    "linking_args": [],
+    "linker": "ld",
+    "workers": 4,
+    "assets": [],
+    "dependencies": {
+        "pjim": {}
+    }
+}
+```
+
+- `name` - имя проекта. Используется внутри `pcpm`, чисто идентификатор.
+- `target_name` - имя итогового бинарника.
+- `mirrors` - список источников пакетов. Можно указать HTTP-зеркало или локальную директорию.
+- `origin` - куда устанавливаются библиотеки. (по умолчанию `./`)
+- `compilation_args` - флаги компилятора (`-Wall`, `-O2`, и т.п.).
+- `compiler` - какой компилятор использовать (`gcc`, `clang` и т.п.).
+- `linking_args` - флаги линковки (`-lm`, `-lpthread` и т.п.).
+- `linker` - какой линковщик использовать.
+- `workers` - количество потоков сборки.
+- `assets` - директории с ресурсами (копируются в `./build/bin`).
+- `dependencies` - зависимости проекта. 
+
+`dependencies`, `assets`, `workers`, `linking_args`, `compiler`, `compilation_args`, `origin`, `mirrors` - не обязательны.
