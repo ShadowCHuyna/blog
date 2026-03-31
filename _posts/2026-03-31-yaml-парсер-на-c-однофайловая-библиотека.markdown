@@ -214,4 +214,7 @@ gcc -std=c11 -o app app.c -lm
 
 По поводу UwU я точно не сошел сума!? ^v^
 
-![OwO](/assets/imgs/drugs.mp4)
+<video controls width="600">
+  <source src="/assets/imgs/drugs.mp4" type="video/mp4">
+  Ваш браузер не поддерживает видео.
+</video>
