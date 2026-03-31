@@ -1,0 +1,217 @@
+---
+title: YAML парсер на C
+date: 2026-03-31T21:30:00.000+10:00
+last_modified_at: 2026-03-31T21:30:00.000+10:00
+author:
+  - sch
+description: YMLParser - однофайловый YAML 1.2.2 парсер для C11. Один .h файл,
+  никаких зависимостей. Поддерживает якоря, merge key, многодокументные потоки,
+  UTF-16/32.
+keywords: yaml парсер c, yaml c11, yaml библиотека c, single header yaml,
+  парсить yaml c, yaml parser c library, yml parser, c yaml
+layout: post
+---
+Простой yaml парсер. OwO
+
+[github](https://github.com/ShadowCHuyna/YMLParser)
+
+---
+
+### Оглавление
+
+- [Зачем](#зачем)
+- [Использование](#использование)
+  - [Базовый разбор](#базовый-разбор)
+  - [Обход массивов и объектов](#обход-массивов-и-объектов)
+  - [Обработка ошибок](#обработка-ошибок)
+  - [Несколько документов](#несколько-документов)
+- [Как устроено внутри](#как-устроено-внутри)
+- [Подключение](#подключение)
+
+---
+
+### Зачем
+
+Нужен был YAML-парсер для C. Нормальные варианты типа libyaml - это сложновато :3 хотелось что-то попроще.
+
+YMLParser решает это одним `.h` файлом ^w^:
+
+- **YAML 1.2.2 Core Schema** - `null`, `bool`, `int` (`42`, `0xFF`, `0o17`), `float` (`.inf`, `.nan`), строки
+- **Якоря и алиасы** (`&anchor` / `*alias`), **merge key** (`<<`)
+- **Блочные скаляры** (`|` literal, `>` folded) со всеми вариантами chomping
+- **Многодокументные потоки** (`---` / `...`), якоря не переживают границу документа
+- **UTF-16 LE/BE и UTF-32 LE/BE** - автоматическая транскодировка в UTF-8
+- **Thread-safe**: ошибки в `_Thread_local`, можно парсить из нескольких потоков без мьютексов UwU
+- **C11**, без POSIX, без `strdup`, без `_POSIX_C_SOURCE`
+
+---
+
+### Использование
+
+#### Базовый разбор
+
+```c
+#define YMLPARSER_IMPLEMENTATION
+#include "YMLParser.h"
+#include <stdio.h>
+
+int main(void) {
+    const char *yml =
+        "name: Alice\n"
+        "age: 30\n"
+        "score: 9.5\n"
+        "active: true\n";
+
+    YMLValue *root = YMLParse(yml);
+    if (YMLErrorPrint() != 0) return 1;
+
+    YMLValue *name   = YMLMapGet(root->value.object, "name");
+    YMLValue *age    = YMLMapGet(root->value.object, "age");
+    YMLValue *score  = YMLMapGet(root->value.object, "score");
+    YMLValue *active = YMLMapGet(root->value.object, "active");
+
+    printf("name=%s age=%lld score=%g active=%s\n",
+        name->value.string,
+        (long long)age->value.integer,
+        score->value.number,
+        active->value.boolean ? "yes" : "no");
+
+    YMLDestroy(root);
+    return 0;
+}
+```
+
+```sh
+gcc -std=c11 -o app app.c -lm
+```
+
+Типы определяются автоматически по Core Schema - `30` → `YML_INT`, `9.5` → `YML_FLOAT`, `true` → `YML_BOOL`. ^v^
+
+#### Обход массивов и объектов
+
+```c
+const char *yml =
+    "users:\n"
+    "  - Alice\n"
+    "  - Bob\n"
+    "  - Charlie\n"
+    "config:\n"
+    "  host: localhost\n"
+    "  port: 8080\n";
+
+YMLValue *root = YMLParse(yml);
+
+/* массив - прямая индексация */
+YMLValue *users = YMLMapGet(root->value.object, "users");
+for (size_t i = 0; i < YMLArrayLen(users->value.array); i++)
+    printf("user: %s\n", users->value.array[i].value.string);
+
+/* объект - итерация по парам */
+YMLValue *cfg = YMLMapGet(root->value.object, "config");
+YMLMapForech(cfg->value.object, key, val)
+    printf("%s = %s\n", key, val->value.string);
+
+YMLDestroy(root);
+```
+
+#### Обработка ошибок
+
+Два режима - явная проверка через `.ok` или глобальное состояние через `YMLErrorPrint()`. :3
+
+```c
+int ok = 0;
+char *err = NULL;
+
+YMLValue *root = YMLParse("broken: [yaml\n", .ok=&ok, .error=&err);
+if (ok != 0) {
+    fprintf(stderr, "parse error %d: %s\n", ok, err);
+    return 1;
+}
+
+/* проверка типа при получении значения */
+YMLValue *port = YMLMapGet(root->value.object, "port",
+    .ok=&ok, .type=YML_INT);
+if (ok != 0) {
+    fprintf(stderr, "port: %s\n", err);
+}
+```
+
+Ошибки - `_Thread_local`, каждый поток видит только свои. Можно парсить из нескольких потоков одновременно без мьютексов.
+
+#### Несколько документов
+
+```c
+const char *stream =
+    "---\n"
+    "name: Alice\n"
+    "age: 30\n"
+    "...\n"
+    "---\n"
+    "name: Bob\n"
+    "age: 25\n";
+
+YMLValue **docs = YMLParseStream(stream);
+if (YMLErrorPrint() != 0) return 1;
+
+for (size_t i = 0; i < YMLArrayLen(docs); i++) {
+    YMLValue *name = YMLMapGet(docs[i]->value.object, "name");
+    printf("doc %zu: %s\n", i, name->value.string);
+}
+
+YMLDestroyStream(docs);
+```
+
+Якоря не переживают границу документа - соответствует спецификации YAML 1.2.2. ^w^
+
+---
+
+### Как устроено внутри
+
+Два прохода OwO:
+
+```
+const char* → lex() → da<Token> → parse_node() → YMLValue*
+```
+
+**Лексер** делает один линейный проход по строке и выдаёт плоский массив токенов. Отслеживает глубину flow-контекста (`[`, `{`) - в нём правила чуть другие. Блочные скаляры (`|`, `>`) обрабатываются целиком в лексере.
+
+**Парсер** - рекурсивный спуск по токенам. Строит дерево `YMLValue` на куче.
+
+Внутри используются два контейнера:
+- `_da` - dynamic array со скрытым заголовком перед первым элементом
+- `_hm` - hash map с открытой адресацией (djb2, linear probing)
+
+В single-header режиме все внутренние функции становятся `static` - в глобальное пространство имён ничего не утекает. ^v^
+
+---
+
+### Подключение
+
+Скачать `YMLParser.h` из корня репозитория и положить рядом с проектом.
+
+В **одном** `.c` файле:
+
+```c
+#define YMLPARSER_IMPLEMENTATION
+#include "YMLParser.h"
+```
+
+Во всех остальных:
+
+```c
+#include "YMLParser.h"
+```
+
+Собрать:
+
+```sh
+gcc -std=c11 -o app app.c -lm
+```
+
+Единственный флаг - `-lm` для `HUGE_VAL` и `NAN`. Больше ничего. UwU
+
+---
+
+По поводу UwU я точно не сошел сума!? ^v^
+
+![OwO](/assets/imgs/drugs.mp4)
