@@ -97,7 +97,7 @@ const char *yml =
     "  - Charlie\n"
     "config:\n"
     "  host: localhost\n"
-    "  port: 8080\n";
+    "  port: \"8080\"\n";
 
 YMLValue *root = YMLParse(yml);
 
