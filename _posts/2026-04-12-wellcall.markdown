@@ -38,6 +38,8 @@ layout: post
 
 Но к чему это все...
 
+---
+
 ## WellCall - работает!
 
 **Основные функции WellCall:**
@@ -55,6 +57,10 @@ layout: post
 5. Наслаждайтесь связью без ограничений!
 
 
+**Базовые требования**
+- Современный браузер с поддержкой WebRTC
+- Камера и микрофон
+- HTTPS или localhost (required for WebRTC).
 
 
-
+Source Code: [GitHub](https://github.com/TheStepashich/wellcalllite)
