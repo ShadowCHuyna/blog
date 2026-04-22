@@ -68,7 +68,7 @@ layout: post
 **Базовые требования**
 - Современный браузер с поддержкой WebRTC
 - Камера и микрофон
-- HTTPS или localhost (required for WebRTC).
+- HTTPS или localhost
 
 
 Source Code: [GitHub](https://github.com/TheStepashich/wellcalllite)
