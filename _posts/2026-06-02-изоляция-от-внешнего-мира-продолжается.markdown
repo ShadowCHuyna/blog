@@ -1,0 +1,11 @@
+---
+title: Изоляция от внешнего мира продолжается!
+date: 2026-06-02T16:26:00.000+07:00
+last_modified_at: 2026-06-02T16:26:00.000+07:00
+author:
+  - bork
+description: ы
+keywords: ы
+layout: post
+---
+ыы
