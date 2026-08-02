@@ -5,8 +5,9 @@ last_modified_at: 2026-08-02T18:10:00.000+07:00
 author:
   - bork
   - sch
-description: ы
-keywords: ы
+description: Pnet - p2p Network Manager. Создание p2p одноранговых сетей.
+keywords: p2p, pnet, potatom, network, Inthernet, РКН, wireguard, easytier,
+  zerotier, netbird, марк твен
 layout: post
 ---
 **Так уж вышло, что в наше неспокойное время лучше иметь под боком всякие запасные варианты... О них мы сегодня и поговорим.**
