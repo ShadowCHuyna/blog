@@ -12,6 +12,8 @@
         })();
     </script>
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    <link rel="alternate" type="application/rss+xml" title="{{ site.title }} — блог" href="{{ '/feed.xml' | absolute_url }}">
+    <link rel="alternate" type="application/rss+xml" title="{{ site.title }} — статьи" href="{{ '/articles.xml' | absolute_url }}">
     {% seo %}
 </head>
 
@@ -40,6 +42,10 @@
 <footer>
     <div class="container">
         POTATOM — разработка программного обеспечения
+        <span class="footer-links">
+            <a href="{{ '/feed.xml' | relative_url }}">rss · блог</a>
+            <a href="{{ '/articles.xml' | relative_url }}">rss · статьи</a>
+        </span>
     </div>
 </footer>
 

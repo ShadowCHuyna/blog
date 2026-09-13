@@ -1,0 +1,25 @@
+---
+layout: null
+permalink: /articles.xml
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>{{ site.title }} — статьи</title>
+        <link>{{ site.url }}</link>
+        <description>{{ site.description }}</description>
+        <language>ru-RU</language>
+        <atom:link href="{{ '/articles.xml' | absolute_url }}" rel="self" type="application/rss+xml" />
+        {% assign items = site.articles | sort: 'date' | reverse %}
+        {% for article in items %}
+        <item>
+            <title>{{ article.title }}</title>
+            <link>{{ article.url | absolute_url }}</link>
+            <guid>{{ article.url | absolute_url }}</guid>
+            <pubDate>{{ article.date | date_to_rfc822 }}</pubDate>
+            <description>{{ article.content | strip_html | truncatewords: 50 | xml_escape }}</description>
+            <author>{{ article.authors | join: ', ' }}</author>
+        </item>
+        {% endfor %}
+    </channel>
+</rss>

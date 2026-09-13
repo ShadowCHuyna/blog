@@ -252,6 +252,30 @@ pre code {
     margin: 0 auto;
 }
 
+.not-found {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.not-found h1 {
+    letter-spacing: -0.07em;
+    margin-bottom: 20px;
+}
+
+.not-found p,
+.not-found .lead {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.not-found .buttons {
+    justify-content: center;
+}
+
 .article h1 {
     font-size: clamp(50px, 8vw, 100px);
     margin-bottom: 25px;
@@ -285,6 +309,24 @@ footer {
     padding: 40px 0;
     color: var(--muted);
     font: 13px "DM Mono", monospace;
+}
+
+footer .container {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.footer-links a {
+    margin-left: 20px;
+}
+
+@media (max-width: 700px) {
+    .footer-links a {
+        margin-left: 0;
+        margin-right: 20px;
+    }
 }
 
 @media (max-width: 700px) {
