@@ -6,8 +6,30 @@
     --muted: #777;
     --line: #cfcfc8;
     --accent: #ff3b00;
+    --code-bg: #e9e9e3;
 
     --max-width: 1200px;
+
+    color-scheme: light;
+}
+
+[data-theme="dark"] {
+    --bg: #111;
+    --fg: #d6d6cf;
+    --muted: #8a8a83;
+    --line: #3a3a35;
+    --accent: #ff3b00;
+    --code-bg: #1b1b19;
+
+    color-scheme: dark;
+}
+
+[data-theme="dark"] .card:hover {
+    background: #1c1c1a;
+}
+
+[data-theme="dark"] .fake-image {
+    background: #1c1c1a;
 }
 
 * {
@@ -68,6 +90,21 @@ nav {
     display: flex;
     gap: 25px;
     font-size: 14px;
+}
+
+.theme-toggle {
+    border: 1px solid var(--fg);
+    background: none;
+    color: var(--fg);
+    cursor: pointer;
+    padding: 2px 10px;
+    font: 14px "DM Mono", monospace;
+    line-height: 1.6;
+}
+
+.theme-toggle:hover {
+    background: var(--fg);
+    color: var(--bg);
 }
 
 main {
@@ -182,6 +219,18 @@ p {
 .number {
     font: 13px "DM Mono", monospace;
     color: var(--muted);
+}
+
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    padding: 20px;
+    overflow-x: auto;
+}
+
+pre code {
+    background: none;
+    padding: 0;
 }
 
 .article {

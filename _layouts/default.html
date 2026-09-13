@@ -3,6 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            var saved = null;
+            try { saved = localStorage.getItem('theme'); } catch (e) {}
+            var dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        })();
+    </script>
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
     {% seo %}
 </head>
@@ -19,6 +27,7 @@
             <a href="{{ '/projects/' | relative_url }}">проекты</a>
             <a href="{{ '/services/' | relative_url }}">услуги</a>
             <a href="{{ '/' | relative_url }}#contact">контакты</a>
+            <button type="button" class="theme-toggle" aria-label="переключить тему"></button>
         </nav>
     </div>
 </header>
@@ -32,6 +41,41 @@
         POTATOM — разработка программного обеспечения
     </div>
 </footer>
+
+<script>
+    (function () {
+        var root = document.documentElement;
+        var toggle = document.querySelector('.theme-toggle');
+        var media = window.matchMedia('(prefers-color-scheme: dark)');
+
+        function current() {
+            return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        }
+
+        function render() {
+            toggle.textContent = current() === 'dark' ? '☀' : '☾';
+        }
+
+        function set(theme) {
+            root.setAttribute('data-theme', theme);
+            try { localStorage.setItem('theme', theme); } catch (e) {}
+            render();
+        }
+
+        toggle.addEventListener('click', function () {
+            set(current() === 'dark' ? 'light' : 'dark');
+        });
+
+        media.addEventListener('change', function (e) {
+            var saved = null;
+            try { saved = localStorage.getItem('theme'); } catch (err) {}
+            if (!saved) root.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+            render();
+        });
+
+        render();
+    })();
+</script>
 
 </body>
 </html>
