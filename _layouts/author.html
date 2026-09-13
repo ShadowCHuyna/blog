@@ -71,7 +71,7 @@ layout: default
 
         <div class="list">
 
-            {% assign author_posts = site.posts | where: "author", page.name | sort: 'date' | reverse %}
+            {% assign author_posts = site.posts | where_exp: "p", "p.authors contains page.name" | sort: 'date' | reverse %}
             {% for post in author_posts %}
             <a href="{{ post.url | relative_url }}" class="list-item">
                 <span class="meta">{{ post.date | date: "%d.%m.%y" }}</span>
