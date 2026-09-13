@@ -3,9 +3,20 @@ email: potatom@potatom.net
 description: >-
   Команда разработчиков программного обеспечения. Веб-приложения, сервисы, инфраструктура.
 baseurl: ""
-url: ""
+url: "https://potatom.net"
+lang: ru_RU
+author: POTATOM
 future: true
 permalink: /blog/:title/
+
+twitter:
+  card: summary_large_image
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: /assets/img/og.png
 
 collections:
   team:
@@ -23,7 +34,9 @@ exclude:
   - Gemfile.lock
   - README.md
   - vendor
+  - shell.nix
 
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
+  - jekyll-sitemap

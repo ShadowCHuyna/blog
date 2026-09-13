@@ -6,7 +6,7 @@ authors:
   - Bork
 category: frontend
 read_time: 8 min read
-image: изображение статьи / диаграмма
+image_placeholder: изображение статьи / диаграмма
 ---
 
 Это заглушка для статьи.

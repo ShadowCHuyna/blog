@@ -12,9 +12,9 @@ layout: default
         {{ page.authors | join: ", " }}{% if page.category %} · {{ page.category }}{% endif %}{% if page.read_time %} · {{ page.read_time }}{% endif %}
     </div>
 
-    {% if page.image %}
+    {% if page.image_placeholder %}
     <div class="fake-image">
-        [ {{ page.image }} ]
+        [ {{ page.image_placeholder }} ]
     </div>
     {% endif %}
 

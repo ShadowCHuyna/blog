@@ -6,7 +6,7 @@ authors:
   - Sch
 category: infrastructure
 read_time: 5 min read
-image: изображение статьи / терминал
+image_placeholder: изображение статьи / терминал
 ---
 
 Это заглушка для статьи.

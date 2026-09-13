@@ -7,7 +7,7 @@ authors:
   - Bork
 category: backend
 read_time: 12 min read
-image: изображение статьи / архитектура
+image_placeholder: изображение статьи / архитектура
 ---
 
 Это заглушка для статьи.

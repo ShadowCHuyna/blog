@@ -7,7 +7,7 @@ tags:
   - vpn
   - network
   - security
-image: скриншот pvpn
+image_placeholder: скриншот pvpn
 website: https://pvpn.potatom.net
 github: "#"
 ---
