@@ -293,18 +293,36 @@ footer {
     }
 
     .nav {
-        align-items: flex-start;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 16px 20px;
+        min-height: 0;
         padding: 20px 0;
     }
 
-    nav {
+    .nav nav {
+        grid-column: 1 / -1;
+        width: 100%;
+        justify-content: flex-start;
         flex-wrap: wrap;
         gap: 12px;
     }
 
+    .nav .logo {
+        grid-column: 1;
+        grid-row: 1;
+        justify-self: start;
+    }
+
+    .nav .theme-toggle {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: end;
+    }
+
     nav a {
-        padding: 10px 4px;
+        padding: 8px 4px;
         line-height: 1.2;
     }
 
@@ -353,7 +371,7 @@ footer {
     }
 
     .list-item {
-        grid-template-columns: 40px 1fr;
+        grid-template-columns: auto 1fr;
         gap: 16px;
         align-items: start;
     }
