@@ -2,7 +2,7 @@
 layout: article
 title: Go vs Python для бэкенда
 date: 2026-09-06
-author: Ivan
+author: Bork
 category: backend
 read_time: 4 min read
 ---

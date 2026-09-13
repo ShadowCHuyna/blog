@@ -3,7 +3,7 @@ layout: article
 title: Почему мы любим Linux
 date: 2026-09-08
 authors:
-  - Max
+  - Sch
 category: infrastructure
 read_time: 5 min read
 image: изображение статьи / терминал

@@ -3,7 +3,8 @@ layout: article
 title: Как устроен наш backend
 date: 2026-09-01
 authors:
-  - Ivan
+  - Sch
+  - Bork
 category: backend
 read_time: 12 min read
 image: изображение статьи / архитектура

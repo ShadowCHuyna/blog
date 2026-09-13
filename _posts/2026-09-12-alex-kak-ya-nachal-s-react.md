@@ -2,7 +2,7 @@
 layout: article
 title: Как я начал с React
 date: 2026-09-12
-author: Alex
+author: Bork
 category: frontend
 read_time: 3 min read
 ---

@@ -2,7 +2,7 @@
 layout: article
 title: Зачем self-host
 date: 2026-09-03
-author: Max
+author: Sch
 category: infrastructure
 read_time: 3 min read
 ---

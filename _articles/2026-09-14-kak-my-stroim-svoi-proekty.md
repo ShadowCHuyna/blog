@@ -3,8 +3,7 @@ layout: article
 title: Как мы строим свои проекты
 date: 2026-09-14
 authors:
-  - Alex
-  - Ivan
+  - Bork
 category: frontend
 read_time: 8 min read
 image: изображение статьи / диаграмма

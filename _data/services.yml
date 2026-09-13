@@ -2,13 +2,10 @@
   description: сайты / веб-приложения
 
 - name: РАЗРАБОТКА ПО
-  description: кастомный софт / backend / api
+  description: софт / backend / api
 
 - name: DEVOPS И ИНФРАСТРУКТУРА
   description: linux / docker / ci / мониторинг
-
-- name: КОНСАЛТИНГ
-  description: архитектура / code review / аудит
 
 - name: ПОДДЕРЖКА
   description: сопровождение / развитие
