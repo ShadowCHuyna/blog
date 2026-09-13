@@ -1,0 +1,262 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --bg: #f5f5f0;
+    --fg: #111;
+    --muted: #777;
+    --line: #cfcfc8;
+    --accent: #ff3b00;
+
+    --max-width: 1200px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: Inter, sans-serif;
+    line-height: 1.5;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--accent);
+}
+
+code,
+.mono,
+.meta,
+nav {
+    font-family: "DM Mono", monospace;
+}
+
+.container {
+    width: min(var(--max-width), calc(100% - 40px));
+    margin: 0 auto;
+}
+
+header {
+    border-bottom: 1px solid var(--line);
+}
+
+.nav {
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.logo {
+    font-family: "DM Mono", monospace;
+    font-weight: 500;
+}
+
+nav {
+    display: flex;
+    gap: 25px;
+    font-size: 14px;
+}
+
+main {
+    padding: 80px 0;
+}
+
+.hero {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.label {
+    font: 14px "DM Mono", monospace;
+    color: var(--muted);
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: clamp(60px, 10vw, 150px);
+    line-height: .9;
+    letter-spacing: -0.07em;
+    margin: 0 0 40px;
+    max-width: 1000px;
+}
+
+h2 {
+    font-size: clamp(32px, 5vw, 64px);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    margin: 0 0 30px;
+}
+
+h3 {
+    font-size: 22px;
+    margin: 0 0 10px;
+}
+
+p {
+    max-width: 700px;
+}
+
+.lead {
+    font-size: clamp(20px, 3vw, 32px);
+    max-width: 750px;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.button {
+    border: 1px solid var(--fg);
+    padding: 12px 18px;
+    font: 14px "DM Mono", monospace;
+}
+
+.button:hover {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.section {
+    padding: 100px 0;
+    border-top: 1px solid var(--line);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+}
+
+.card {
+    background: var(--bg);
+    padding: 30px;
+    min-height: 220px;
+}
+
+.card:hover {
+    background: #fff;
+}
+
+.list {
+    border-top: 1px solid var(--line);
+}
+
+.list-item {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: 30px;
+    align-items: center;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.list-item:hover {
+    color: var(--accent);
+}
+
+.meta {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.number {
+    font: 13px "DM Mono", monospace;
+    color: var(--muted);
+}
+
+.article {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.article h1 {
+    font-size: clamp(50px, 8vw, 100px);
+    margin-bottom: 25px;
+}
+
+.article h2 {
+    font-size: 40px;
+    margin-top: 80px;
+}
+
+.article p {
+    max-width: none;
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+.fake-image {
+    width: 100%;
+    height: 450px;
+    background: #ddd;
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 14px "DM Mono", monospace;
+    margin: 40px 0;
+}
+
+footer {
+    border-top: 1px solid var(--line);
+    padding: 40px 0;
+    color: var(--muted);
+    font: 13px "DM Mono", monospace;
+}
+
+@media (max-width: 700px) {
+    .container {
+        width: min(100% - 24px, var(--max-width));
+    }
+
+    .nav {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 20px 0;
+    }
+
+    nav {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    main {
+        padding: 50px 0;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .list-item {
+        grid-template-columns: 50px 1fr;
+    }
+
+    .list-item .arrow {
+        display: none;
+    }
+
+    .fake-image {
+        height: 250px;
+    }
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    {% seo %}
+</head>
+
+<body>
+
+<header>
+    <div class="container nav">
+        <a href="{{ '/' | relative_url }}" class="logo">POTATOM</a>
+
+        <nav>
+            <a href="{{ '/articles/' | relative_url }}">articles</a>
+            <a href="{{ '/blog/' | relative_url }}">blog</a>
+            <a href="{{ '/projects/' | relative_url }}">projects</a>
+            <a href="{{ '/services/' | relative_url }}">services</a>
+            <a href="{{ '/' | relative_url }}#contact">contact</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    {{ content }}
+</main>
+
+<footer>
+    <div class="container">
+        POTATOM — software development
+    </div>
+</footer>
+
+</body>
+</html>

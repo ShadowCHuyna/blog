@@ -1,0 +1,43 @@
+---
+layout: default
+permalink: /articles/
+---
+<section class="container hero">
+
+    <div class="label">// articles</div>
+
+    <h1>ALL<br>ARTICLES.</h1>
+
+</section>
+
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="list">
+
+            {% assign articles = site.articles | sort: 'date' | reverse %}
+
+            {% for article in articles %}
+
+            <a href="{{ article.url | relative_url }}" class="list-item">
+                <span class="meta">{{ article.date | date: "%d.%m.%y" }}</span>
+                <span>
+                    <strong>{{ article.title }}</strong>
+                    <br>
+                    <span class="meta">
+                        {{ article.authors | join: ", " }}
+                        {% if article.read_time %}· {{ article.read_time }}{% endif %}
+                    </span>
+                </span>
+                <span class="arrow">→</span>
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>

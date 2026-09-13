@@ -1,0 +1,14 @@
+- name: WEB DEVELOPMENT
+  description: websites / web applications
+
+- name: SOFTWARE DEVELOPMENT
+  description: custom software / backend / api
+
+- name: DEVOPS & INFRASTRUCTURE
+  description: linux / docker / ci / monitoring
+
+- name: CONSULTING
+  description: architecture / code review / audit
+
+- name: SUPPORT
+  description: maintenance / development

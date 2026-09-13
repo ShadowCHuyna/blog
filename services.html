@@ -1,0 +1,103 @@
+---
+layout: default
+permalink: /services/
+---
+<section class="container hero">
+
+    <div class="label">// services</div>
+
+    <h1>
+        WHAT<br>
+        WE DO.
+    </h1>
+
+    <p class="lead">
+        Разрабатываем программное обеспечение
+        от идеи до production.
+    </p>
+
+</section>
+
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="list">
+
+            {% for service in site.data.services %}
+
+            <div class="list-item">
+
+                <span class="number">{{ forloop.index | prepend: '0' }}</span>
+
+                <span>
+                    <strong>{{ service.name }}</strong>
+                    <br>
+                    <span class="meta">
+                        {{ service.description }}
+                    </span>
+                </span>
+
+                <span></span>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="label">// process</div>
+
+        <h2>
+            From idea<br>
+            to production.
+        </h2>
+
+        <div class="grid">
+
+            {% for step in site.data.process %}
+
+            <div class="card">
+                <div class="number">{{ forloop.index | prepend: '0' }}</div>
+                <h3>{{ step.name }}</h3>
+                <p>
+                    {{ step.description }}
+                </p>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="label">// contact</div>
+
+        <h2>
+            Have a project?
+        </h2>
+
+        <p class="lead">
+            email@example.com
+        </p>
+
+    </div>
+
+</section>

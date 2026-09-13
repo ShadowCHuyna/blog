@@ -1,0 +1,65 @@
+---
+layout: default
+---
+
+<section class="container hero">
+
+    <div class="label">// project</div>
+
+    <h1>{{ page.name }}.</h1>
+
+    <p class="lead">
+        {{ page.description }}
+    </p>
+
+    {% if page.website or page.github %}
+    <div class="buttons">
+        {% if page.website and page.website != "#" %}<a href="{{ page.website }}" class="button">website ↗</a>{% endif %}
+        {% if page.github and page.github != "#" %}<a href="{{ page.github }}" class="button">github ↗</a>{% endif %}
+    </div>
+    {% endif %}
+
+</section>
+
+
+<section class="section">
+
+    <div class="container">
+
+        {% if page.image %}
+        <div class="fake-image">
+            [ {{ page.image }} ]
+        </div>
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+{{ content }}
+
+
+{% if page.stack %}
+<section class="section">
+
+    <div class="container">
+
+        <div class="label">// stack</div>
+
+        <div class="grid">
+
+            {% for item in page.stack %}
+            <div class="card">
+                <div class="meta">{{ item.category }}</div>
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.desc }}</p>
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+{% endif %}

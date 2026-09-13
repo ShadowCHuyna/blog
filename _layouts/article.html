@@ -1,0 +1,64 @@
+---
+layout: default
+---
+
+<article class="article">
+
+    <div class="label">// article / {{ page.date | date: "%d.%m.%y" }}</div>
+
+    <h1>{{ page.title }}</h1>
+
+    <div class="meta">
+        {{ page.authors | join: ", " }}{% if page.category %} · {{ page.category }}{% endif %}{% if page.read_time %} · {{ page.read_time }}{% endif %}
+    </div>
+
+    {% if page.image %}
+    <div class="fake-image">
+        [ {{ page.image }} ]
+    </div>
+    {% endif %}
+
+    {{ content }}
+
+</article>
+
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="list">
+
+            {% if page.previous.url %}
+            <a class="list-item" href="{{ page.previous.url | relative_url }}">
+                <span>←</span>
+                <span>{{ page.previous.title }}</span>
+                <span></span>
+            </a>
+            {% else %}
+            <a class="list-item" href="#">
+                <span>←</span>
+                <span></span>
+                <span></span>
+            </a>
+            {% endif %}
+
+            {% if page.next.url %}
+            <a class="list-item" href="{{ page.next.url | relative_url }}">
+                <span></span>
+                <span>{{ page.next.title }}</span>
+                <span>→</span>
+            </a>
+            {% else %}
+            <a class="list-item" href="#">
+                <span></span>
+                <span></span>
+                <span>→</span>
+            </a>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>

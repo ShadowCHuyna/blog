@@ -1,0 +1,53 @@
+---
+layout: default
+permalink: /projects/
+---
+<section class="container hero">
+
+    <div class="label">// projects</div>
+
+    <h1>
+        THINGS<br>
+        WE BUILD.
+    </h1>
+
+    <p class="lead">
+        Некоторые проекты, которые мы
+        разработали, поддерживаем или
+        продолжаем развивать.
+    </p>
+
+</section>
+
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="list">
+
+            {% for project in site.projects %}
+
+            <a href="{{ project.url | relative_url }}" class="list-item">
+
+                <span class="number">{{ project.number }}</span>
+
+                <span>
+                    <strong>{{ project.title }}</strong>
+                    <br>
+                    <span class="meta">
+                        {{ project.tags | join: ' / ' }}
+                    </span>
+                </span>
+
+                <span class="arrow">→</span>
+
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>

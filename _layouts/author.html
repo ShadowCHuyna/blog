@@ -1,0 +1,87 @@
+---
+layout: default
+---
+
+<section class="container hero">
+
+    <div class="label">// team member</div>
+
+    <h1>{{ page.name }}.</h1>
+
+    <p class="lead">
+        {{ page.description }}
+    </p>
+
+    {% if page.github or page.telegram %}
+    <div class="buttons">
+        {% if page.github %}<a href="{{ page.github }}" class="button">github ↗</a>{% endif %}
+        {% if page.telegram %}<a href="{{ page.telegram }}" class="button">telegram ↗</a>{% endif %}
+    </div>
+    {% endif %}
+
+</section>
+
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="label">// about</div>
+
+        <h2>About me.</h2>
+
+        <p class="lead">
+            {{ page.about }}
+        </p>
+
+    </div>
+
+</section>
+
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="label">// articles</div>
+
+        <div class="list">
+
+            {% assign author_articles = site.articles | where_exp: "a", "a.authors contains page.name" | sort: 'date' | reverse %}
+            {% for post in author_articles %}
+            <a href="{{ post.url | relative_url }}" class="list-item">
+                <span class="meta">{{ post.date | date: "%d.%m.%y" }}</span>
+                <span>{{ post.title }}</span>
+                <span class="arrow">→</span>
+            </a>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="label">// posts</div>
+
+        <div class="list">
+
+            {% assign author_posts = site.posts | where: "author", page.name | sort: 'date' | reverse %}
+            {% for post in author_posts %}
+            <a href="{{ post.url | relative_url }}" class="list-item">
+                <span class="meta">{{ post.date | date: "%d.%m.%y" }}</span>
+                <span>{{ post.title }}</span>
+                <span class="arrow">→</span>
+            </a>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>

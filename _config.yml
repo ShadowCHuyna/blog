@@ -1,0 +1,29 @@
+title: POTATOM
+email: email@example.com
+description: >-
+  Software development team. Web applications, services, infrastructure.
+baseurl: ""
+url: ""
+future: true
+permalink: /blog/:title/
+
+collections:
+  team:
+    output: true
+    permalink: /team/:name/
+  projects:
+    output: true
+    permalink: /projects/:name/
+  articles:
+    output: true
+    permalink: /articles/:title/
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag

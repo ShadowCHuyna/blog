@@ -1,0 +1,66 @@
+---
+layout: default
+permalink: /blog/
+---
+<section class="container hero">
+
+    <div class="label">// blog</div>
+
+    <h1>THOUGHTS<br>FROM TEAM.</h1>
+
+    <p class="lead">
+        Технические статьи, эксперименты,
+        заметки и вещи, которые мы узнали
+        во время разработки.
+    </p>
+
+</section>
+
+
+<section class="section">
+    <div class="container">
+
+        <div class="label">// authors</div>
+
+        <div class="list">
+
+            {% for member in site.team %}
+            <a href="{{ member.url | relative_url }}" class="list-item">
+                <span class="number">{{ forloop.index | prepend: '0' }}</span>
+                <span>
+                    <strong>{{ member.name }}</strong><br>
+                    <span class="meta">{{ member.skills }}</span>
+                </span>
+                <span class="arrow">→</span>
+            </a>
+            {% endfor %}
+
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="container">
+
+        <div class="label">// latest posts</div>
+
+        <div class="list">
+
+            {% for post in site.posts %}
+            <a href="{{ post.url | relative_url }}" class="list-item">
+                <span class="meta">{{ post.date | date: "%d.%m.%y" }}</span>
+                <span>
+                    {{ post.title }}
+                    <br>
+                    <span class="meta">{{ post.author }}</span>
+                </span>
+                <span class="arrow">→</span>
+            </a>
+            {% endfor %}
+
+        </div>
+
+    </div>
+</section>
