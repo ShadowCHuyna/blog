@@ -6,7 +6,7 @@ description: Собственный DNS-сервер. Резолвинг и уп
 tags:
   - dns
   - infrastructure
-image: dns screenshot
+image: скриншот dns
 website: https://ns.potatom.net
 github: "#"
 ip: 62.109.24.138
@@ -15,7 +15,7 @@ ip: 62.109.24.138
 <section class="section">
     <div class="container">
 
-        <div class="label">// stack</div>
+        <div class="label">// стек</div>
 
         <div class="grid">
 

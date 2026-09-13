@@ -7,7 +7,7 @@ tags:
   - video
   - self-hosted
   - webrtc
-image: jitsi screenshot
+image: скриншот jitsi
 website: https://jitsi.potatom.net
 github: "#"
 ---
@@ -15,7 +15,7 @@ github: "#"
 <section class="section">
     <div class="container">
 
-        <div class="label">// stack</div>
+        <div class="label">// стек</div>
 
         <div class="grid">
 

@@ -7,7 +7,7 @@ tags:
   - network
   - tools
   - cli
-image: pnet screenshot
+image: скриншот pnet
 website: "#"
 github: https://github.com/TheStepashich/pnet
 ---
@@ -15,7 +15,7 @@ github: https://github.com/TheStepashich/pnet
 <section class="section">
     <div class="container">
 
-        <div class="label">// stack</div>
+        <div class="label">// стек</div>
 
         <div class="grid">
 

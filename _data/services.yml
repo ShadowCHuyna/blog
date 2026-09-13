@@ -1,14 +1,14 @@
-- name: WEB DEVELOPMENT
-  description: websites / web applications
+- name: ВЕБ-РАЗРАБОТКА
+  description: сайты / веб-приложения
 
-- name: SOFTWARE DEVELOPMENT
-  description: custom software / backend / api
+- name: РАЗРАБОТКА ПО
+  description: кастомный софт / backend / api
 
-- name: DEVOPS & INFRASTRUCTURE
-  description: linux / docker / ci / monitoring
+- name: DEVOPS И ИНФРАСТРУКТУРА
+  description: linux / docker / ci / мониторинг
 
-- name: CONSULTING
-  description: architecture / code review / audit
+- name: КОНСАЛТИНГ
+  description: архитектура / code review / аудит
 
-- name: SUPPORT
-  description: maintenance / development
+- name: ПОДДЕРЖКА
+  description: сопровождение / развитие

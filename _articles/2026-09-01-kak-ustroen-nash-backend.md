@@ -6,7 +6,7 @@ authors:
   - Ivan
 category: backend
 read_time: 12 min read
-image: article image / architecture
+image: изображение статьи / архитектура
 ---
 
 Это заглушка для статьи.

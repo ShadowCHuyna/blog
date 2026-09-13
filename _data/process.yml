@@ -1,11 +1,11 @@
-- name: Discuss
+- name: Обсуждение
   description: Разбираемся в задаче и требованиях.
 
-- name: Design
+- name: Проектирование
   description: Проектируем архитектуру и интерфейс.
 
-- name: Build
+- name: Разработка
   description: Пишем код и тестируем.
 
-- name: Deploy
+- name: Деплой
   description: Выводим проект в production.

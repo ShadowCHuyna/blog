@@ -6,7 +6,7 @@ authors:
   - Max
 category: infrastructure
 read_time: 5 min read
-image: article image / terminal
+image: изображение статьи / терминал
 ---
 
 Это заглушка для статьи.

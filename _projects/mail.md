@@ -7,7 +7,7 @@ tags:
   - email
   - self-hosted
   - infrastructure
-image: mail screenshot
+image: скриншот mail
 website: https://mail.potatom.net
 github: "#"
 ---
@@ -15,7 +15,7 @@ github: "#"
 <section class="section">
     <div class="container">
 
-        <div class="label">// stack</div>
+        <div class="label">// стек</div>
 
         <div class="grid">
 

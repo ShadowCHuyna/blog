@@ -7,7 +7,7 @@ authors:
   - Ivan
 category: frontend
 read_time: 8 min read
-image: article image / diagram
+image: изображение статьи / диаграмма
 ---
 
 Это заглушка для статьи.
