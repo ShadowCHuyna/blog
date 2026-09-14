@@ -2,102 +2,68 @@
 layout: default
 permalink: /services/
 ---
-<section class="container hero">
+<h1>Услуги.</h1>
 
-    <div class="label">// услуги</div>
+<p class="lead">
+    Разрабатываем программное обеспечение
+    от идеи до production.
+</p>
 
-    <h1>
-        ЧТО<br>
-        МЫ ДЕЛАЕМ.
-    </h1>
+
+<section class="section">
+    <h2 class="comment">что мы делаем — <span class="hlline">всё что угодно</span> <span class="tag">[01/03]</span></h2>
+
+    <div class="list">
+
+        {% for service in site.data.services %}
+
+        <div class="list-item">
+
+            <span class="number">{{ forloop.index | prepend: '0' }}</span>
+
+            <span>
+                <strong>{{ service.name }}</strong>
+                <br>
+                <span class="meta">
+                    {{ service.description }}
+                </span>
+            </span>
+
+            <span></span>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+</section>
+
+
+<section class="section">
+    <h2 class="comment">процесс — <span class="hlline">от идеи до продакшена за N шагов</span> <span class="tag">[02/03]</span></h2>
+
+    <div class="grid">
+
+        {% for step in site.data.process %}
+
+        <div class="card">
+            <div class="number">{{ forloop.index | prepend: '0' }}</div>
+            <h3>{{ step.name }}</h3>
+            <p>
+                {{ step.description }}
+            </p>
+        </div>
+
+        {% endfor %}
+
+    </div>
+</section>
+
+
+<section class="section" id="contact">
+    <h2 class="comment">контакты — <span class="hlline">пишите, ответим за ночь</span> <span class="tag">[03/03]</span></h2>
 
     <p class="lead">
-        Разрабатываем программное обеспечение
-        от идеи до production.
+        <a href="mailto:potatom@potatom.net">potatom@potatom.net</a>
     </p>
-
-</section>
-
-
-<section class="section">
-
-    <div class="container">
-
-        <div class="list">
-
-            {% for service in site.data.services %}
-
-            <div class="list-item">
-
-                <span class="number">{{ forloop.index | prepend: '0' }}</span>
-
-                <span>
-                    <strong>{{ service.name }}</strong>
-                    <br>
-                    <span class="meta">
-                        {{ service.description }}
-                    </span>
-                </span>
-
-                <span></span>
-
-            </div>
-
-            {% endfor %}
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<section class="section">
-
-    <div class="container">
-
-        <div class="label">// процесс</div>
-
-        <h2>
-            От идеи<br>
-            до продакшена.
-        </h2>
-
-        <div class="grid">
-
-            {% for step in site.data.process %}
-
-            <div class="card">
-                <div class="number">{{ forloop.index | prepend: '0' }}</div>
-                <h3>{{ step.name }}</h3>
-                <p>
-                    {{ step.description }}
-                </p>
-            </div>
-
-            {% endfor %}
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<section class="section">
-
-    <div class="container">
-
-        <div class="label">// контакты</div>
-
-        <h2>
-            Есть проект?
-        </h2>
-
-        <p class="lead">
-            <a href="mailto:potatom@potatom.net">potatom@potatom.net</a>
-        </p>
-
-    </div>
-
 </section>

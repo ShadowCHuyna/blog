@@ -4,13 +4,11 @@ layout: default
 
 <article class="article">
 
-    <div class="label">// статья / {{ page.date | date: "%d.%m.%y" }}</div>
-
     <h1>{{ page.title }}</h1>
 
-    <div class="meta">
+    <p class="meta">
         {{ page.authors | join: ", " }}{% if page.category %} · {{ page.category }}{% endif %}{% if page.read_time %} · {{ page.read_time }}{% endif %}
-    </div>
+    </p>
 
     {% if page.image_placeholder %}
     <div class="fake-image">
@@ -24,41 +22,37 @@ layout: default
 
 
 <section class="section">
+    <h2 class="comment">дальше — <span class="hlline">почитать рядом</span></h2>
 
-    <div class="container">
+    <div class="list">
 
-        <div class="list">
+        {% if page.previous.url %}
+        <a class="list-item" href="{{ page.previous.url | relative_url }}">
+            <span>←</span>
+            <span>{{ page.previous.title }}</span>
+            <span></span>
+        </a>
+        {% else %}
+        <a class="list-item" href="#">
+            <span>←</span>
+            <span></span>
+            <span></span>
+        </a>
+        {% endif %}
 
-            {% if page.previous.url %}
-            <a class="list-item" href="{{ page.previous.url | relative_url }}">
-                <span>←</span>
-                <span>{{ page.previous.title }}</span>
-                <span></span>
-            </a>
-            {% else %}
-            <a class="list-item" href="#">
-                <span>←</span>
-                <span></span>
-                <span></span>
-            </a>
-            {% endif %}
-
-            {% if page.next.url %}
-            <a class="list-item" href="{{ page.next.url | relative_url }}">
-                <span></span>
-                <span>{{ page.next.title }}</span>
-                <span>→</span>
-            </a>
-            {% else %}
-            <a class="list-item" href="#">
-                <span></span>
-                <span></span>
-                <span>→</span>
-            </a>
-            {% endif %}
-
-        </div>
+        {% if page.previous.url %}
+        <a class="list-item" href="{{ page.next.url | relative_url }}">
+            <span></span>
+            <span>{{ page.next.title }}</span>
+            <span class="arrow">→</span>
+        </a>
+        {% else %}
+        <a class="list-item" href="#">
+            <span></span>
+            <span></span>
+            <span class="arrow">→</span>
+        </a>
+        {% endif %}
 
     </div>
-
 </section>

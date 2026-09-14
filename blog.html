@@ -2,65 +2,60 @@
 layout: default
 permalink: /blog/
 ---
-<section class="container hero">
+<h1>Блог.</h1>
 
-    <div class="label">// блог</div>
+<p class="lead">
+    Технические статьи, эксперименты,
+    заметки и прочие буковки.
+</p>
 
-    <h1>МЫСЛИ<br>КОМАНДЫ.</h1>
+
+<section class="section">
+    <h2 class="comment">авторы — <span class="hlline">те, кто напечатал эти буковки</span> <span class="tag">[01/03]</span></h2>
+
+    <div class="list">
+
+        {% for member in site.team %}
+        <a href="{{ member.url | relative_url }}" class="list-item">
+            <span class="number">{{ forloop.index | prepend: '0' }}</span>
+            <span>
+                <strong>{{ member.name }}</strong><br>
+                <span class="meta">{{ member.skills }}</span>
+            </span>
+            <span class="arrow">→</span>
+        </a>
+        {% endfor %}
+
+    </div>
+</section>
+
+
+<section class="section">
+    <h2 class="comment">последние посты — <span class="hlline">свежее сверху</span> <span class="tag">[02/03]</span></h2>
+
+    <div class="list">
+
+        {% for post in site.posts %}
+        <a href="{{ post.url | relative_url }}" class="list-item">
+            <span class="meta">{{ post.date | date: "%d.%m.%y" }}</span>
+            <span>
+                {{ post.title }}
+                <br>
+                <span class="meta">{{ post.author }}</span>
+            </span>
+            <span class="arrow">→</span>
+        </a>
+        {% endfor %}
+
+    </div>
+</section>
+
+
+<section class="section">
+    <h2 class="comment">rss — <span class="hlline">для тех, кто ещё помнит</span> <span class="tag">[03/03]</span></h2>
 
     <p class="lead">
-        Технические статьи, эксперименты,
-        заметки и вещи, которые мы узнали
-        во время разработки.
+        <a href="{{ '/feed.xml' | absolute_url }}" class="button">rss · блог</a>
+        <a href="{{ '/articles.xml' | absolute_url }}" class="button ghost">rss · статьи</a>
     </p>
-
-</section>
-
-
-<section class="section">
-    <div class="container">
-
-        <div class="label">// авторы</div>
-
-        <div class="list">
-
-            {% for member in site.team %}
-            <a href="{{ member.url | relative_url }}" class="list-item">
-                <span class="number">{{ forloop.index | prepend: '0' }}</span>
-                <span>
-                    <strong>{{ member.name }}</strong><br>
-                    <span class="meta">{{ member.skills }}</span>
-                </span>
-                <span class="arrow">→</span>
-            </a>
-            {% endfor %}
-
-        </div>
-
-    </div>
-</section>
-
-
-<section class="section">
-    <div class="container">
-
-        <div class="label">// последние посты</div>
-
-        <div class="list">
-
-            {% for post in site.posts %}
-            <a href="{{ post.url | relative_url }}" class="list-item">
-                <span class="meta">{{ post.date | date: "%d.%m.%y" }}</span>
-                <span>
-                    {{ post.title }}
-                    <br>
-                    <span class="meta">{{ post.author }}</span>
-                </span>
-                <span class="arrow">→</span>
-            </a>
-            {% endfor %}
-
-        </div>
-
-    </div>
 </section>

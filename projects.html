@@ -2,52 +2,39 @@
 layout: default
 permalink: /projects/
 ---
-<section class="container hero">
+<h1>Проекты.</h1>
 
-    <div class="label">// проекты</div>
-
-    <h1>
-        ЧТО МЫ<br>
-        СТРОИМ.
-    </h1>
-
-    <p class="lead">
-        Некоторые проекты, которые мы
-        разработали, поддерживаем или
-        продолжаем развивать.
-    </p>
-
-</section>
+<p class="lead">
+    Некоторые проекты, которые мы
+    разработали, поддерживаем или
+    продолжаем развивать.
+</p>
 
 
 <section class="section">
+    <h2 class="comment">что мы сделали - <span class="hlline">всё, что еще не сломалось</span> <span class="tag">[01/01]</span></h2>
 
-    <div class="container">
+    <div class="list">
 
-        <div class="list">
+        {% for project in site.projects %}
 
-            {% for project in site.projects %}
+        <a href="{{ project.url | relative_url }}" class="list-item">
 
-            <a href="{{ project.url | relative_url }}" class="list-item">
+            <span class="number">{{ project.number }}</span>
 
-                <span class="number">{{ project.number }}</span>
-
-                <span>
-                    <strong>{{ project.title }}</strong>
-                    <br>
-                    <span class="meta">
-                        {{ project.tags | join: ' / ' }}
-                    </span>
+            <span>
+                <strong>{{ project.title }}</strong>
+                <br>
+                <span class="meta">
+                    {{ project.tags | join: ' / ' }}
                 </span>
+            </span>
 
-                <span class="arrow">→</span>
+            <span class="arrow">→</span>
 
-            </a>
+        </a>
 
-            {% endfor %}
-
-        </div>
+        {% endfor %}
 
     </div>
-
 </section>

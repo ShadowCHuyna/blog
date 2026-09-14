@@ -2,42 +2,36 @@
 layout: default
 permalink: /articles/
 ---
-<section class="container hero">
+<h1>Статьи.</h1>
 
-    <div class="label">// статьи</div>
-
-    <h1>ВСЕ<br>СТАТЬИ.</h1>
-
-</section>
+<p class="lead">
+    Все статьи команды. Отсортированы
+    по свежести.
+</p>
 
 
 <section class="section">
 
-    <div class="container">
+    <div class="list">
 
-        <div class="list">
+        {% assign articles = site.articles | sort: 'date' | reverse %}
 
-            {% assign articles = site.articles | sort: 'date' | reverse %}
+        {% for article in articles %}
 
-            {% for article in articles %}
-
-            <a href="{{ article.url | relative_url }}" class="list-item">
-                <span class="meta">{{ article.date | date: "%d.%m.%y" }}</span>
-                <span>
-                    <strong>{{ article.title }}</strong>
-                    <br>
-                    <span class="meta">
-                        {{ article.authors | join: ", " }}
-                        {% if article.read_time %}· {{ article.read_time }}{% endif %}
-                    </span>
+        <a href="{{ article.url | relative_url }}" class="list-item">
+            <span class="meta">{{ article.date | date: "%d.%m.%y" }}</span>
+            <span>
+                <strong>{{ article.title }}</strong>
+                <br>
+                <span class="meta">
+                    {{ article.authors | join: ", " }}
+                    {% if article.read_time %}· {{ article.read_time }}{% endif %}
                 </span>
-                <span class="arrow">→</span>
-            </a>
+            </span>
+            <span class="arrow">→</span>
+        </a>
 
-            {% endfor %}
-
-        </div>
+        {% endfor %}
 
     </div>
-
 </section>

@@ -1,85 +1,66 @@
 ---
 layout: page
 ---
-<section class="container hero">
+<h1>
+    МЫ СОЗДАЁМ<br>
+    ПРОГРАММЫ.
+</h1>
 
-    <div class="label">// команда разработчиков</div>
+<p class="lead">
+    Взаимодействие с другими людьми.
+</p>
 
-    <h1>
-        МЫ СОЗДАЁМ<br>
-        ПРОГРАММЫ.
-    </h1>
+<p class="buttons">
+    <a href="{{ '/projects/' | relative_url }}" class="button">смотреть проекты →</a>
+    <a href="#contact" class="button ghost">связаться</a>
+</p>
 
-    <p class="lead">
-        Взаимодействие с другими людьми.
+
+<section class="section">
+    <h2 class="comment">кто мы — <span class="hlline">серьёзно, кто мы</span> <span class="tag">[01/04]</span></h2>
+    <p>Мы делаем вещи, котрые никому не нужны. Оказываем IT услуги, начиная с вёрстки очередного лендинга, заканчивая разработкой и настройкой плагинов для Minecraft серверов</p>
+    <p class="quote">
+        Ребят, для того, чтобы делать дерьмо,
+        не всегда нужны ресурсы.
+        <span class="author">— l0cal8</span>
     </p>
-
-    <div class="buttons">
-        <a href="{{ '/projects/' | relative_url }}" class="button">смотреть проекты →</a>
-        <a href="#contact" class="button">связаться</a>
-    </div>
-
 </section>
 
 
 <section class="section">
-    <div class="container">
+    <h2 class="comment">команда — <span class="hlline">люди, за которых <span class="accent">СТЫДНО</span> <span class="tag">[02/04]</span></h2>
 
-        <div class="label">// кто мы</div>
+    <div class="list">
 
-        <h2>Несколько<br>разработчиков.</h2>
-
-        <p class="lead">
-            Ребят, для того, чтобы делать дерьмо,
-            не всегда нужны ресурсы.
-        </p>
+        {% for member in site.team %}
+        <a class="list-item" href="{{ member.url | relative_url }}">
+            <span class="number">{{ forloop.index | prepend: '0' }}</span>
+            <span>
+                <strong>{{ member.name }}</strong><br>
+                <span class="meta">{{ member.role }}</span>
+            </span>
+            <span class="arrow">→</span>
+        </a>
+        {% endfor %}
 
     </div>
 </section>
 
 
 <section class="section">
-    <div class="container">
+    <h2 class="comment">последнее — <span class="hlline">свежие посты</span> <span class="tag">[03/04]</span></h2>
 
-        <div class="label">// команда</div>
+    <div class="list">
 
-        <div class="list">
+        {% assign articles = site.articles | sort: 'date' | reverse %}
 
-            {% for member in site.team %}
-            <a class="list-item" href="{{ member.url | relative_url }}">
-                <span class="number">{{ forloop.index | prepend: '0' }}</span>
-                <span>
-                    <strong>{{ member.name }}</strong><br>
-                    <span class="meta">{{ member.role }}</span>
-                </span>
-                <span class="arrow">→</span>
-            </a>
-            {% endfor %}
-
-        </div>
-
-    </div>
-</section>
-
-
-<section class="section">
-    <div class="container">
-
-        <div class="label">// последнее</div>
-
-        <div class="list">
-
-            {% assign articles = site.articles | sort: 'date' | reverse %}
-
-            {% for post in articles limit:2 %}
-            <a class="list-item" href="{{ post.url | relative_url }}">
-                <span class="meta">{{ post.date | date: "%d.%m.%y" }}</span>
-                <span>{{ post.title }}</span>
-                <span class="arrow">→</span>
-            </a>
-            {% endfor %}
-
-        </div>
+        {% for post in articles limit:2 %}
+        <a class="list-item" href="{{ post.url | relative_url }}">
+            <span class="meta">{{ post.date | date: "%d.%m.%y" }}</span>
+            <span>{{ post.title }}</span>
+            <span class="arrow">→</span>
+        </a>
+        {% endfor %}
 
     </div>
 </section>

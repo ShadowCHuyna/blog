@@ -2,39 +2,25 @@
 layout: default
 ---
 
-<section class="container hero">
+<h1>{{ page.name }}.</h1>
 
-    <div class="label">// проект</div>
+<p class="lead">
+    {{ page.description }}
+</p>
 
-    <h1>{{ page.name }}.</h1>
-
-    <p class="lead">
-        {{ page.description }}
-    </p>
-
-    {% if page.website or page.github %}
-    <div class="buttons">
-        {% if page.website and page.website != "#" %}<a href="{{ page.website }}" class="button">сайт ↗</a>{% endif %}
-        {% if page.github and page.github != "#" %}<a href="{{ page.github }}" class="button">github ↗</a>{% endif %}
-    </div>
-    {% endif %}
-
-</section>
+{% if page.website or page.github %}
+<p class="buttons">
+    {% if page.website and page.website != "#" %}<a href="{{ page.website }}" class="button">сайт ↗</a>{% endif %}
+    {% if page.github and page.github != "#" %}<a href="{{ page.github }}" class="button">github ↗</a>{% endif %}
+</p>
+{% endif %}
 
 
-<section class="section">
-
-    <div class="container">
-
-        {% if page.image_placeholder %}
-        <div class="fake-image">
-            [ {{ page.image_placeholder }} ]
-        </div>
-        {% endif %}
-
-    </div>
-
-</section>
+{% if page.image_placeholder %}
+<div class="fake-image">
+    [ {{ page.image_placeholder }} ]
+</div>
+{% endif %}
 
 
 {{ content }}
@@ -42,24 +28,18 @@ layout: default
 
 {% if page.stack %}
 <section class="section">
+    <h2 class="comment">стек — <span class="hlline">из чего варим</span></h2>
 
-    <div class="container">
+    <div class="grid">
 
-        <div class="label">// стек</div>
-
-        <div class="grid">
-
-            {% for item in page.stack %}
-            <div class="card">
-                <div class="meta">{{ item.category }}</div>
-                <h3>{{ item.name }}</h3>
-                <p>{{ item.desc }}</p>
-            </div>
-            {% endfor %}
-
+        {% for item in page.stack %}
+        <div class="card">
+            <div class="meta">{{ item.category }}</div>
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.desc }}</p>
         </div>
+        {% endfor %}
 
     </div>
-
 </section>
 {% endif %}

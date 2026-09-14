@@ -7,8 +7,8 @@
         (function () {
             var saved = null;
             try { saved = localStorage.getItem('theme'); } catch (e) {}
-            var dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            var d = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light');
         })();
     </script>
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
@@ -19,58 +19,51 @@
 
 <body>
 
-<header>
-    <div class="container nav">
-        <a href="{{ '/' | relative_url }}" class="logo">POTATOM</a>
+<div class="nav">
+    <a href="{{ '/' | relative_url }}" class="logo">POTATOM</a>
 
-        <nav>
-            <a href="{{ '/articles/' | relative_url }}">статьи</a>
-            <a href="{{ '/blog/' | relative_url }}">блог</a>
-            <a href="{{ '/projects/' | relative_url }}">проекты</a>
-            <a href="{{ '/services/' | relative_url }}">услуги</a>
-            <a href="{{ '/' | relative_url }}#contact">контакты</a>
-        </nav>
+    <nav>
+        <a href="{{ '/articles/' | relative_url }}">статьи</a>
+        <a href="{{ '/blog/' | relative_url }}">блог</a>
+        <a href="{{ '/projects/' | relative_url }}">проекты</a>
+        <a href="{{ '/services/' | relative_url }}">услуги</a>
+        <a href="{{ '/' | relative_url }}#contact">контакты</a>
+    </nav>
 
-        <button type="button" class="theme-toggle" aria-label="переключить тему"></button>
-    </div>
-</header>
+    <button type="button" class="theme-toggle" aria-label="переключить тему"></button>
+</div>
 
 <main>
     {{ content }}
 </main>
 
 <footer>
-    <div class="container">
-        POTATOM — разработка программного обеспечения
-        <span class="footer-links">
-            <a href="{{ '/feed.xml' | relative_url }}">rss · блог</a>
-            <a href="{{ '/articles.xml' | relative_url }}">rss · статьи</a>
-        </span>
-    </div>
+    <span>POTATOM — разработка программного обеспечения</span>
+    <span class="footer-links">
+        <a href="{{ '/feed.xml' | relative_url }}">rss · блог</a>
+        <a href="{{ '/articles.xml' | relative_url }}">rss · статьи</a>
+    </span>
 </footer>
 
 <script>
     (function () {
         var root = document.documentElement;
-        var toggle = document.querySelector('.theme-toggle');
+        var t = document.querySelector('.theme-toggle');
         var media = window.matchMedia('(prefers-color-scheme: dark)');
 
-        function current() {
+        function cur() {
             return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
         }
 
         function render() {
-            toggle.textContent = current() === 'dark' ? '☀' : '☾';
+            t.textContent = cur() === 'dark' ? '☀' : '☾';
         }
 
-        function set(theme) {
-            root.setAttribute('data-theme', theme);
-            try { localStorage.setItem('theme', theme); } catch (e) {}
+        t.addEventListener('click', function () {
+            var next = cur() === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            try { localStorage.setItem('theme', next); } catch (e) {}
             render();
-        }
-
-        toggle.addEventListener('click', function () {
-            set(current() === 'dark' ? 'light' : 'dark');
         });
 
         media.addEventListener('change', function (e) {
@@ -81,6 +74,31 @@
         });
 
         render();
+    })();
+</script>
+
+<script>
+    (function () {
+        function flash(id) {
+            if (!id) return;
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('highlight-flash');
+            void el.offsetWidth;
+            el.classList.add('highlight-flash');
+        }
+
+        function fromHash() {
+            return decodeURIComponent(window.location.hash.replace('#', '')).replace(' ', '');
+        }
+
+        window.addEventListener('hashchange', function () {
+            flash(fromHash());
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.location.hash) flash(fromHash());
+        });
     })();
 </script>
 
