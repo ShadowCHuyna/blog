@@ -1,10 +1,10 @@
 ---
 name: Bork
-role: devops / linux
+role: devops / full-stack
 skills: linux / инфраструктура
-description: DevOps. Linux. Серверы, контейнеры, мониторинг.
-github: "https://github.com/"
-layout: author
+description: DevOps. Linux. Разработка. 1С.
+github: "https://github.com/thestepashich"
+layout: author_bork
+telegram: "https://t.me/thestepashich"
 ---
-
-Здесь находится небольшое описание разработчика, его опыта, интересов, технологий и всего остального.
+Многозадачный IT-специалист с опытом full-stack разработки и пониманием сетей и серверной инфраструктуры. 

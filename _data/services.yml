@@ -4,6 +4,9 @@
 - name: РАЗРАБОТКА ПО
   description: софт / backend / api
 
+- name: РАЗРАБОТКА ИГРОВЫХ СЕРВЕРОВ
+  description: софт / backend / api
+
 - name: DEVOPS И ИНФРАСТРУКТУРА
   description: linux / docker / ci / мониторинг
 

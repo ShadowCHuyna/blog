@@ -1,7 +1,7 @@
 ---
 layout: project
 title: JITSI
-number: "04"
+number: "03"
 description: Свой сервер видеоконференций. Без внешних провайдеров.
 tags:
   - video
@@ -11,7 +11,7 @@ image_placeholder: скриншот jitsi
 website: https://jitsi.potatom.net
 github: "#"
 ---
-
+---
 <section class="section">
     <div class="container">
 

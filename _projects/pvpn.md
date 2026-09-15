@@ -1,7 +1,7 @@
 ---
 layout: project
 title: pVPN
-number: "03"
+number: "07"
 description: Свой VPN-сервер. Быстрый и безопасный доступ из любого места.
 tags:
   - vpn

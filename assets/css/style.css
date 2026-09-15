@@ -189,7 +189,7 @@ main { padding: 0; }
 .lead {
     font-size: 1.05em;
     color: var(--fg);
-    margin-bottom: 1.4em;
+    margin-bottom: 0.4em;
 }
 
 .desc { color: var(--muted); }
@@ -228,7 +228,7 @@ main { padding: 0; }
 .list-item {
     display: grid;
     grid-template-columns: 64px 1fr auto;
-    gap: 16px;
+    /* gap: 16px; */
     align-items: baseline;
     padding: 10px 0;
     border-bottom: 1px solid var(--muted);
@@ -256,6 +256,18 @@ main { padding: 0; }
     gap: 12px;
     margin: 1.2em 0;
 }
+
+ul.grid {
+    list-style: none;
+    padding-left: 0;
+}
+
+ul.grid > li {
+    border: 1px solid var(--muted);
+    padding: 16px;
+}
+
+ul.grid > li:hover { border-color: var(--fg); }
 
 .card {
     border: 1px solid var(--muted);
@@ -346,6 +358,11 @@ li { margin-bottom: .4em; }
     height: auto;
     display: block;
     margin: 1.5em auto;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
 }
 
 .article video { background: #000; }

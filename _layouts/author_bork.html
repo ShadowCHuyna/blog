@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ page.name }} — POTATOM</title>
+<script>
+    (function () {
+        var saved = null;
+        try { saved = localStorage.getItem('theme'); } catch (e) {}
+        var dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;900&family=PT+Serif:ital@0;1&display=swap');
+
+:root {
+    --bg: #f5f5f0;
+    --fg: #111;
+    --muted: #777;
+    --line: #cfcfc8;
+    --accent: #ff3b00;
+    --code-bg: #e9e9e3;
+    --paper: #fff;
+
+    --max-width: 1200px;
+    --speed: .18s;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+
+    color-scheme: light;
+}
+
+[data-theme="dark"] {
+    --bg: #111;
+    --fg: #d6d6cf;
+    --muted: #8a8a83;
+    --line: #3a3a35;
+    --accent: #ff3b00;
+    --code-bg: #1b1b19;
+    --paper: #171714;
+
+    color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: Inter, sans-serif;
+    line-height: 1.55;
+    overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--accent); }
+
+::selection { background: var(--accent); color: var(--bg); }
+
+code, .mono, .meta, nav, .label, .number, .sg-var, .card .tag {
+    font-family: "DM Mono", monospace;
+}
+
+.container {
+    width: min(var(--max-width), calc(100% - 40px));
+    margin: 0 auto;
+}
+
+/* ----- header ----- */
+
+header {
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+}
+
+.nav {
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.logo {
+    font-family: "DM Mono", monospace;
+    font-weight: 500;
+    letter-spacing: .05em;
+}
+
+.logo .dot { color: var(--accent); animation: blink 1.2s steps(1) infinite; }
+
+nav { display: flex; gap: 25px; font-size: 14px; }
+
+nav a { position: relative; padding: 4px 0; }
+
+nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--speed) var(--ease);
+}
+
+nav a:hover { color: var(--fg); }
+nav a:hover::after { transform: scaleX(1); }
+
+.theme-toggle {
+    border: 1px solid var(--fg);
+    background: none;
+    color: var(--fg);
+    cursor: pointer;
+    width: 36px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font: 14px "DM Mono", monospace;
+    line-height: 1;
+    transition: background var(--speed) var(--ease), color var(--speed) var(--ease);
+}
+
+.theme-toggle:hover {
+    background: var(--fg);
+    color: var(--bg);
+    rotate: 90deg;
+}
+
+/* ----- main ----- */
+
+main { padding: 0 0 80px; }
+
+.section { padding: 100px 0; border-top: 1px solid var(--line); }
+
+/* ----- hero ----- */
+
+.hero {
+    min-height: 78vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.hero .label { margin-bottom: 10px; }
+
+.hero h1 {
+    font-size: clamp(60px, 12vw, 180px);
+    line-height: .86;
+    letter-spacing: -0.06em;
+    margin: 0 0 30px;
+    max-width: 1100px;
+    text-transform: uppercase;
+}
+
+.hero h1 .stroke {
+    color: transparent;
+    -webkit-text-stroke: 2px var(--fg);
+}
+
+.hero h1 .fill { color: var(--accent); }
+
+.hero .lead {
+    font-size: clamp(20px, 3vw, 32px);
+    max-width: 750px;
+}
+
+.hero .lead em {
+    font-style: normal;
+    background: var(--accent);
+    color: var(--bg);
+    padding: .08em .18em;
+}
+
+/* ----- marquee ----- */
+
+.marquee {
+    overflow: hidden;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 18px 0;
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.marquee.dark {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: transparent;
+}
+
+.marquee-track {
+    display: flex;
+    gap: 60px;
+    white-space: nowrap;
+    width: max-content;
+    font-family: "DM Mono", monospace;
+    font-size: 18px;
+    animation: marquee 22s linear infinite;
+}
+
+.marquee.dark .marquee-track { animation-duration: 16s; animation-direction: reverse; }
+
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+/* ----- labels & headings ----- */
+
+.label {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.label::after {
+    content: "";
+    flex: 0 0 30px;
+    height: 1px;
+    background: var(--line);
+}
+
+h2 {
+    font-size: clamp(34px, 5.5vw, 72px);
+    line-height: .95;
+    letter-spacing: -0.05em;
+    margin: 0 0 20px;
+}
+
+h2 .stroke { color: transparent; -webkit-text-stroke: 1.5px var(--fg); }
+
+h3 {
+    font-size: 22px;
+    margin: 0 0 10px;
+}
+
+p { max-width: 700px; }
+
+p .hl {
+    background: linear-gradient(transparent 55%, var(--accent) 55%, var(--accent) 100%);
+    padding: 0 .05em;
+}
+
+p .hl-solid {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 0 .2em;
+}
+
+.lead { font-size: clamp(20px, 3vw, 32px); max-width: 750px; }
+
+.lead .arrow { color: var(--accent); }
+
+.drop-cap::first-letter {
+    font-family: "PT Serif", serif;
+    font-size: 5.2em;
+    float: left;
+    line-height: .72;
+    padding: .06em .12em 0 0;
+    color: var(--accent);
+}
+
+/* ----- buttons ----- */
+
+.buttons { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 30px; }
+
+.button {
+    border: 1px solid var(--fg);
+    padding: 14px 22px;
+    font: 14px "DM Mono", monospace;
+    position: relative;
+    display: inline-block;
+    z-index: 0;
+    transition: color var(--speed) var(--ease);
+}
+
+.button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--fg);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--speed) var(--ease);
+}
+
+.button:hover { color: var(--bg); }
+.button:hover::before { transform: scaleX(1); }
+
+.button.active {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+/* ----- colour chips / swatches ----- */
+
+.sg-colors {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.sg-swatch {
+    border: 1px solid var(--line);
+    padding: 20px;
+    font: 13px "DM Mono", monospace;
+    background: var(--paper);
+    transition: transform var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+}
+
+.sg-swatch:hover {
+    transform: translateY(-3px) rotate(-.5deg);
+    box-shadow: 6px 6px 0 0 var(--line);
+}
+
+.sg-swatch .swatch {
+    height: 54px;
+    margin-bottom: 12px;
+    border: 1px solid var(--line);
+}
+
+.sg-var { color: var(--muted); }
+
+/* ----- typography samples ----- */
+
+.sg-typo > * { margin-bottom: 34px; }
+
+.sg-typo h1 { font-size: clamp(40px, 7vw, 110px); margin: 6px 0 4px; }
+.sg-typo h2 { font-size: clamp(28px, 5vw, 60px); margin: 6px 0 4px; }
+.sg-typo h3 { font-size: 22px; margin: 6px 0 4px; }
+
+.sg-typo .sample > .tag {
+    font: 12px "DM Mono", monospace;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 8px;
+}
+
+.sg-typo .tag .c {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    margin-right: 6px;
+}
+
+/* ----- grid & cards ----- */
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.card {
+    border: 1px solid var(--line);
+    background: var(--paper);
+    padding: 30px;
+    min-height: 220px;
+    position: relative;
+    transition: transform var(--speed) var(--ease);
+}
+
+.card:nth-child(even) { transform: rotate(0.4deg); }
+.card:nth-child(odd) { transform: rotate(-0.4deg); }
+
+.card:hover {
+    transform: rotate(0deg) translateY(-4px);
+    border-color: var(--accent);
+}
+
+.card .tag {
+    position: absolute;
+    top: -12px;
+    left: 16px;
+    font: 12px "DM Mono", monospace;
+    color: var(--bg);
+    background: var(--fg);
+    padding: 3px 10px;
+}
+
+.card .n {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    font: 20px "DM Mono", monospace;
+    color: var(--muted);
+}
+
+.jumble .card:nth-child(1) { transform: rotate(2deg); }
+.jumble .card:nth-child(2) { transform: rotate(-2.4deg) translateY(6px); }
+.jumble .card:nth-child(3) { transform: rotate(1.4deg) translateY(-5px); }
+.jumble .card:nth-child(4) { transform: rotate(-1.8deg) translateY(4px); }
+
+/* ----- lists ----- */
+
+.list { border-top: 1px solid var(--line); margin-top: 24px; }
+
+.list-item {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: 30px;
+    align-items: center;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    transition: padding var(--speed) var(--ease);
+}
+
+.list-item::after {
+    content: "→";
+    position: absolute;
+    right: -8px;
+    color: var(--accent);
+    font-family: "DM Mono", monospace;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: opacity var(--speed) var(--ease), transform var(--speed) var(--ease);
+}
+
+.list-item:hover {
+    color: var(--accent);
+    padding-left: 14px;
+}
+
+.list-item:hover::after {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.meta { font-size: 13px; color: var(--muted); }
+
+.number { font: 13px "DM Mono", monospace; color: var(--muted); }
+
+/* ----- code / terminals ----- */
+
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    padding: 20px;
+    overflow-x: auto;
+    margin: 24px 0 0;
+    font-size: 14px;
+}
+
+pre code { background: none; padding: 0; }
+
+pre .prompt { color: var(--accent); }
+pre .dim { color: var(--muted); }
+pre .ok { color: var(--accent); }
+
+/* ----- fake image ----- */
+
+.fake-image {
+    width: 100%;
+    height: 350px;
+    background:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px),
+        var(--code-bg);
+    background-size: 24px 24px;
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 14px "DM Mono", monospace;
+    color: var(--muted);
+    margin: 30px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.fake-image::before {
+    content: "☀";
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: var(--accent);
+    font-size: 28px;
+    animation: spin 14s linear infinite;
+}
+
+@keyframes spin { to { rotate: 360deg; } }
+
+/* ----- quote ----- */
+
+.quote {
+    margin: 40px 0 0;
+    border-left: 4px solid var(--accent);
+    padding-left: 28px;
+}
+
+.quote .q-mark {
+    font-family: "PT Serif", serif;
+    font-size: 60px;
+    line-height: 0;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 18px;
+}
+
+.quote p {
+    font-size: clamp(20px, 3vw, 32px);
+    font-style: italic;
+    max-width: 700px;
+}
+
+.quote cite {
+    display: block;
+    margin-top: 14px;
+    font: 13px "DM Mono", monospace;
+    color: var(--muted);
+    font-style: normal;
+}
+
+/* ----- stickers ----- */
+
+.sticker {
+    display: inline-block;
+    font: 500 13px "DM Mono", monospace;
+    border: 1px solid var(--fg);
+    background: var(--paper);
+    padding: 8px 14px;
+    rotate: -2deg;
+    position: relative;
+}
+
+.sticker::before,
+.sticker::after {
+    content: "";
+    position: absolute;
+    width: 46px;
+    height: 22px;
+    background: var(--accent);
+    opacity: .25;
+}
+
+.sticker::before { top: -9px; left: 30%; rotate: -8deg; }
+.sticker::after { bottom: -9px; right: 20%; rotate: 6deg; }
+
+/* ----- misc ----- */
+
+.sg-inline > div { margin-bottom: 40px; }
+
+.color-chip {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--line);
+    vertical-align: -1px;
+    margin-right: 6px;
+}
+
+.blink-cursor {
+    display: inline-block;
+    width: .6em;
+    background: var(--accent);
+    height: 1em;
+    vertical-align: -2px;
+    margin-left: 4px;
+    animation: blink 1.1s steps(1) infinite;
+}
+
+/* ----- footer ----- */
+
+footer {
+    border-top: 1px solid var(--line);
+    padding: 40px 0;
+    color: var(--muted);
+    font: 13px "DM Mono", monospace;
+}
+
+footer .container {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.footer-links a { margin-left: 20px; }
+footer .joke { color: var(--accent); }
+
+/* ----- animations ----- */
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.rise { animation: rise .7s var(--ease) both; }
+.rise-1 { animation-delay: .05s; }
+.rise-2 { animation-delay: .12s; }
+.rise-3 { animation-delay: .2s; }
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ----- responsive ----- */
+
+@media (max-width: 700px) {
+    .container { width: min(100% - 24px, var(--max-width)); }
+
+    .nav {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 16px 20px;
+        min-height: 0;
+        padding: 20px 0;
+    }
+
+    .nav nav {
+        grid-column: 1 / -1;
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .nav .logo { grid-column: 1; grid-row: 1; justify-self: start; }
+    .nav .theme-toggle { grid-column: 2; grid-row: 1; justify-self: end; }
+    .theme-toggle { width: 38px; height: 38px; }
+
+    .hero h1 {
+        font-size: clamp(44px, 19vw, 90px);
+        line-height: .9;
+        letter-spacing: -0.04em;
+    }
+
+    h2 { font-size: clamp(28px, 9vw, 52px); }
+
+    .section { padding: 60px 0; }
+    .hero { min-height: auto; padding: 40px 0 60px; }
+
+    .grid { grid-template-columns: 1fr; }
+
+    .card:nth-child(even),
+    .card:nth-child(odd) { transform: none; }
+
+    .card:hover { transform: translateY(-4px); }
+
+    .button { width: 100%; text-align: center; }
+
+    .list-item { grid-template-columns: auto 1fr; gap: 16px; }
+    .list-item > span:nth-child(3) { display: none; }
+    .list-item::after { display: none; }
+
+    .fake-image { height: 220px; }
+
+    .hero h1 .stroke { -webkit-text-stroke-width: 1.2px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="container nav">
+        <a href="{{ "/" | relative_url }}" class="logo">POTATOM<span class="dot">.</span></a>
+
+        <nav>
+            <a href="#about">обо мне</a>
+            <a href="#articles">статьи</a>
+            <a href="#posts">посты</a>
+            <a href="{{ "/#team" | relative_url }}">команда</a>
+            <a href="{{ "/#contact" | relative_url }}">контакты</a>
+        </nav>
+
+        <button type="button" class="theme-toggle" aria-label="переключить тему"></button>
+    </div>
+</header>
+
+<main>
+
+    <!-- HERO -->
+    <section class="container hero">
+        <div class="label rise">// это страница участника</div>
+        <h1 class="rise rise-1"><span class="fill">BORK</span></h1>
+        <h2 class="rise rise-1">
+            The<span class="stroke">Stepashich</span>.
+        </h1>
+        <p class="lead rise rise-2">
+            {{ page.description }} <br><em>{{ page.role }}</em> <span class="arrow">↓</span>
+        </p>
+        <div class="buttons rise rise-3">
+            {% if page.github %}<a href="{{ page.github }}" class="button">github ↗</a>{% endif %}
+            {% if page.telegram %}<a href="{{ page.telegram }}" class="button">telegram ↗</a>{% endif %}
+            <a href="{{ "/#contact" | relative_url }}" class="button">нанять меня →</a>
+        </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section" id="about">
+        <div class="container">
+            <div class="label">// обо мне</div>
+            <h2>Про<span class="stroke">филь</span>.</h2>
+            <div class="lead">
+                {{ content }}
+            </div>
+            <p class="drop-cap">DevOps — в этом что-то есть... Что-то приятное, когда все работает. А ты сидишь, пьешь чай и смотришь, как пусто и тихо в Zabbix... 
+                А когда что-то случается - все скрипты отрабатывают проблему идеально, и ты дальше сидишь и слушаешь спосойную музычку</p>
+            <div class="sticker" style="margin-top: 30px;">100% uptime</div>
+            <span class="sticker" style="rotate: 1.5deg; margin-left: 14px;">i use Arch, btw</span>
+        </div>
+    </section>
+
+    <!-- GRID -->
+    <section class="section" id="grid">
+        <div class="container">
+            <div class="label">// 01 / что я умею</div>
+            <h2>Скиллы.</h2>
+            <p>Вот мои навыки и что я <span class="hl">умею</span> — </p>
+
+            <div class="grid" id="theGrid">
+                <div class="card">
+                    <span class="tag">devops</span>
+                    <span class="n">01</span>
+                    <h3>Linux / Docker / Windows</h3>
+                    <p>Настройка и поддержка Linux-серверов, работа с Active
+Directory, знания сетевых технологий (DHCP, RDP, прокси, т.д.). Контейнеризация Docker, docker compose.</p>
+                </div>
+                <div class="card">
+                    <span class="tag">Development</span>
+                    <span class="n">02</span>
+                    <h3>Full-stack</h3>
+                    <p>Опыт разработки на Python (Flask), создания и интеграции REST API, работы с базами данных (MySQL, SQLite, PostgreSQL, MSSQL). 
+                    Написание клиентских и Web приложений на C# .NET (WinForms), Go, веб-разработка.</p>
+                </div>
+                <div class="card">
+                    <span class="tag">games</span>
+                    <span class="n">03</span>
+                    <h3>Разработка серверов Minecraft</h3>
+                    <p>С 2019 года занимаюсь разработкой и поддержкой крупных игровых серверов по игре Minecraft. Написание плагинов, датапаков, а также оптимизация и работа в команде с администрацией.</p>
+                </div>
+                <div class="card">
+                    <span class="tag">other</span>
+                    <span class="n">04</span>
+                    <h3>Автоматизация и работа с сетями</h3>
+                    <p>Автоматизирую всё, что можно. Руками - только то, что нельзя. 
+                    Знаю стек сетвых технологий. Умею создавать частные приватные сети, поддерживать работоспособность и настраивать системы мониторинга.</p>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button type="button" class="button" id="jumbleBtn">тык тык тык</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- LISTS -->
+    <section class="section" id="articles">
+        <div class="container">
+            <div class="label">// 02 / статьи</div>
+            <h2>Статьи.</h2>
+            <p>Все мои статьи в этом сообществе</p>
+
+            <div class="list">
+
+                {% assign author_articles = site.articles | where_exp: "a", "a.authors contains page.name" | sort: 'date' | reverse %}
+                {% if author_articles.size == 0 %}
+                <p class="meta">пока пусто — но это ненадолго.</p>
+                {% endif %}
+                {% for post in author_articles %}
+                <a href="{{ post.url | relative_url }}" class="list-item">
+                    <span class="number">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</span>
+                    <span>{{ post.title }}</span>
+                    <span class="arrow meta">→</span>
+                </a>
+                {% endfor %}
+
+            </div>
+        </div>
+    </section>
+
+    <!-- POSTS -->
+    <section class="section" id="posts">
+        <div class="container">
+            <div class="label">// 03 / посты</div>
+            <h2>Мысли вслух.</h2>
+            <p>Заметки о серверах, наработках и шизофрении</p>
+
+            <div class="list">
+
+                {% assign author_posts = site.posts | where_exp: "p", "p.authors contains page.name" | sort: 'date' | reverse %}
+                {% if author_posts.size == 0 %}
+                <p class="meta">пока пусто — но это ненадолго.</p>
+                {% endif %}
+                {% for post in author_posts %}
+                <a href="{{ post.url | relative_url }}" class="list-item">
+                    <span class="meta">{{ post.date | date: "%d.%m.%y" }}</span>
+                    <span>{{ post.title }}</span>
+                    <span class="arrow meta">→</span>
+                </a>
+                {% endfor %}
+
+            </div>
+        </div>
+    </section>
+
+    <!-- QUOTE -->
+    <section class="section" id="quote">
+        <div class="container">
+            <div class="label">// 04 / цитата</div>
+            <h2>БуКоВкИ.</h2>
+            <blockquote class="quote">
+                <span class="q-mark">«</span>
+                <p>Я не высокомерен - <br>я просто <span class="hl">лучше многих</span>!</p>
+                <cite>— {{ page.name }}, {{ page.role }}</cite>
+            </blockquote>
+        </div>
+    </section>
+
+        <!-- MEME -->
+    <section class="section" id="code">
+        <div class="container">
+            <div class="label">// 05 / мемные мемуары</div>
+            <h2>Meme.</h2>
+            <div style="margin-top: 40px;">
+            <img style="max-width: 100%; height: auto;" src="/assets/imgs/f586148904.jpg">
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <div class="container">
+        <span style="text-align: center;">POTATOM — страница {{ page.name }}</span>
+        <span class="footer-links">
+            <a href="{{ "/" | relative_url }}">на главную</a>
+            <a href="{{ "/#team" | relative_url }}">команда</a>
+            <a href="{{ "/#contact" | relative_url }}" class="joke">сделано с <3 </a>
+        </span>
+    </div>
+</footer>
+
+<script>
+    (function () {
+        var root = document.documentElement;
+        var toggles = document.querySelectorAll('.theme-toggle');
+
+        function current() {
+            return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        }
+
+        function render() {
+            for (var i = 0; i < toggles.length; i++) {
+                toggles[i].textContent = current() === 'dark' ? '☀' : '☾';
+            }
+        }
+
+        function set(theme) {
+            root.setAttribute('data-theme', theme);
+            try { localStorage.setItem('theme', theme); } catch (e) {}
+            render();
+        }
+
+        for (var j = 0; j < toggles.length; j++) {
+            toggles[j].addEventListener('click', function () {
+                set(current() === 'dark' ? 'light' : 'dark');
+            });
+        }
+
+        render();
+
+        var jumbleBtn = document.getElementById('jumbleBtn');
+        if (jumbleBtn) {
+            jumbleBtn.addEventListener('click', function () {
+                root.classList.toggle('jumble');
+                this.textContent = root.classList.contains('jumble') ? 'вернуть на место' : 'перемешать сетку';
+            });
+        }
+    })();
+</script>
+
+</body>
+</html>

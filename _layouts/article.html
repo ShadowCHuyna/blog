@@ -32,27 +32,19 @@ layout: default
             <span>{{ page.previous.title }}</span>
             <span></span>
         </a>
-        {% else %}
-        <a class="list-item" href="#">
-            <span>←</span>
-            <span></span>
-            <span></span>
-        </a>
         {% endif %}
 
-        {% if page.previous.url %}
+        {% if page.next.url %}
         <a class="list-item" href="{{ page.next.url | relative_url }}">
             <span></span>
             <span>{{ page.next.title }}</span>
             <span class="arrow">→</span>
         </a>
-        {% else %}
-        <a class="list-item" href="#">
-            <span></span>
-            <span></span>
-            <span class="arrow">→</span>
-        </a>
         {% endif %}
+
+        {% unless page.previous.url or page.next.url %}
+        <p class="lead">статей рядом больше нет. это край.</p>
+        {% endunless %}
 
     </div>
 </section>

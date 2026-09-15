@@ -2,7 +2,7 @@
 layout: default
 ---
 
-<h1>{{ page.name }}.</h1>
+<h1>{{ page.title }}.</h1>
 
 <p class="lead">
     {{ page.description }}
@@ -43,3 +43,48 @@ layout: default
     </div>
 </section>
 {% endif %}
+
+
+
+{% assign projects_op = site.projects | sort: 'number' %}
+{% assign current_op = null %}
+{% for p in projects_op %}
+    {% if p.url == page.url %}{% assign current_op = forloop.index0 %}{% endif %}
+{% endfor %}
+{% assign prev_op = null %}
+{% assign next_op = null %}
+{% if current_op != null %}
+    {% assign prev_idx = current_op | minus: 1 %}
+    {% assign next_idx = current_op | plus: 1 %}
+    {% if prev_idx >= 0 %}{% assign prev_op = projects_op[prev_idx] %}{% endif %}
+    {% if next_idx < projects_op.size %}{% assign next_op = projects_op[next_idx] %}{% endif %}
+{% endif %}
+
+
+<section class="section">
+    <h2 class="comment">дальше — <span class="hlline">почитать рядом</span></h2>
+
+    <div class="list">
+
+        {% if prev_op %}
+        <a class="list-item" href="{{ prev_op.url | relative_url }}">
+            <span>←</span>
+            <span>{{ prev_op.title }}</span>
+            <span></span>
+        </a>
+        {% endif %}
+
+        {% if next_op %}
+        <a class="list-item" href="{{ next_op.url | relative_url }}">
+            <span></span>
+            <span>{{ next_op.title }}</span>
+            <span class="arrow">→</span>
+        </a>
+        {% endif %}
+
+        {% unless prev_op or next_op %}
+        <p class="lead">проектов рядом больше нет. это край.</p>
+        {% endunless %}
+
+    </div>
+</section>

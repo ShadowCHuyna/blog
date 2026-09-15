@@ -21,7 +21,7 @@ defaults:
 collections:
   team:
     output: true
-    permalink: /team/:name/
+    permalink: /:name/
   projects:
     output: true
     permalink: /projects/:name/
