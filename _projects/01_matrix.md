@@ -7,7 +7,6 @@ tags:
   - self-hosted
   - federation
   - communication
-# image_placeholder: скриншот matrix
 website: https://matrix.potatom.net
 github: "#"
 ---

@@ -7,7 +7,6 @@ tags:
   - network
   - tools
   - cli
-# image_placeholder: скриншот pnet
 website: "#"
 github: https://github.com/TheStepashich/pnet
 ---

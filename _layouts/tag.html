@@ -1,0 +1,31 @@
+---
+layout: default
+---
+
+<h1>{{ page.tag }}.</h1>
+
+<p class="lead">
+    посты и статьи с этим тегом.
+</p>
+
+<section class="section">
+    <div class="list">
+
+        {% for item in page.tagged %}
+        <a href="{{ item.url | relative_url }}" class="list-item">
+            <span class="meta">{{ item.date | date: "%d.%m.%y" }}</span>
+            <span>
+                <strong>{{ item.title }}</strong>
+                <br>
+                <span class="meta">{{ item.authors | join: ", " }}</span>
+            </span>
+            <span class="arrow">→</span>
+        </a>
+        {% endfor %}
+
+    </div>
+</section>
+
+<p class="lead">
+    <a href="{{ '/tags/' | relative_url }}">все теги →</a>
+</p>

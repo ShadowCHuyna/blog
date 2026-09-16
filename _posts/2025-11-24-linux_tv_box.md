@@ -1,5 +1,6 @@
 ---
 layout: article
+tags: [linux, hardware, tv]
 title:  "linux на тв приставке."
 date:   2025-11-24
 author: Sch

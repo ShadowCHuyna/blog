@@ -6,6 +6,7 @@ authors: ["l0cal8"]
 description: ялюблюженскиепопочки
 keywords: борк нога рога кротофиля ушная сера
 layout: article
+tags: [community, moderation, rant]
 last_modified_at: "2026-01-4"
 ---
 авторедактура текста на сайте - мой ужас.

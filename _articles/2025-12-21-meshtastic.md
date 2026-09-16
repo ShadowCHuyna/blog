@@ -1,5 +1,6 @@
 ---
 layout: article
+tags: [meshtastic, radio, lora, iot]
 title:  "первый взгляд на meshtastic купил Heltec V3"
 date:   2025-12-21
 author: Sch

@@ -7,7 +7,6 @@ tags:
   - video
   - self-hosted
   - webrtc
-image_placeholder: скриншот jitsi
 website: https://jitsi.potatom.net
 github: "#"
 ---

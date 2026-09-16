@@ -7,7 +7,6 @@ tags:
   - email
   - self-hosted
   - infrastructure
-# image_placeholder: скриншот mail
 website: https://mail.potatom.net
 github: "#"
 ---

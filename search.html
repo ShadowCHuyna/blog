@@ -1,0 +1,90 @@
+---
+layout: default
+permalink: /search/
+---
+<h1>Поиск.</h1>
+
+<p class="lead">
+    ищем по заголовкам, тегам и содержимому.
+</p>
+
+<p>
+    <input type="search" id="sq" class="search-input" placeholder="например: matrix или yaml парсер">
+</p>
+
+<div class="list" id="results"></div>
+
+<script>
+    (function () {
+        var input = document.getElementById("sq");
+        var results = document.getElementById("results");
+        var index = null;
+
+        function norm(s) {
+            return s.toLowerCase();
+        }
+
+        function match(item, query) {
+            var q = norm(query).trim();
+            if (!q) return false;
+            var words = q.split(/\s+/).filter(Boolean);
+            var hay = norm(item.title + " " + item.author + " " + (item.tags || []).join(" ") + " " + item.content);
+            return words.every(function (w) {
+                if (w.slice(0, 5) === "tag:") {
+                    return norm((item.tags || []).join(" ")).indexOf(w.slice(5)) !== -1;
+                }
+                return hay.indexOf(w) !== -1;
+            });
+        }
+
+        function render(items) {
+            results.innerHTML = "";
+            if (!items.length) {
+                var empty = document.createElement("div");
+                empty.className = "list-item";
+                empty.innerHTML = "<span></span><span>ничего не нашлось :(</span><span></span>";
+                results.appendChild(empty);
+                return;
+            }
+            items.forEach(function (item) {
+                var a = document.createElement("a");
+                a.className = "list-item";
+                a.href = item.url;
+                var date = document.createElement("span");
+                date.className = "meta";
+                date.textContent = (item.date || "").slice(0, 10);
+                var mid = document.createElement("span");
+                mid.innerHTML = "<strong>" + item.title + "</strong><br><span class=\"meta\">"
+                    + (item.tags || []).join(" / ") + "</span>";
+                var arrow = document.createElement("span");
+                arrow.className = "arrow";
+                arrow.textContent = "→";
+                a.appendChild(date);
+                a.appendChild(mid);
+                a.appendChild(arrow);
+                results.appendChild(a);
+            });
+        }
+
+        function search() {
+            if (!index) return;
+            var q = input.value.trim();
+            var items = q
+                ? index.entries.filter(function (item) { return match(item, q); })
+                : [];
+            render(items);
+        }
+
+        fetch("{{ '/search.json' | relative_url }}")
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                index = data;
+                search();
+            })
+            .catch(function () {
+                results.innerHTML = "<div class=\"list-item\"><span></span><span>поиск недоступен :(</span><span></span></div>";
+            });
+
+        input.addEventListener("input", search);
+    })();
+</script>

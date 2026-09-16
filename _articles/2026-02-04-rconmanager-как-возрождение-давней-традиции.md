@@ -9,6 +9,7 @@ description: "Управление серверами через Telegram: до�
 keywords: rcon, server, admin, managment, ркон, minecraft, майнкрафт, сервера,
   потатом, potatom, барнаул
 layout: article
+tags: [minecraft, rcon, telegram, tool]
 ---
 Слабонервным не читать!!!
 

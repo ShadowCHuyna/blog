@@ -10,6 +10,12 @@ layout: default
         {{ page.authors | join: ", " }}{% if page.category %} · {{ page.category }}{% endif %}{% if page.read_time %} · {{ page.read_time }}{% endif %}
     </p>
 
+    {% if page.tags %}
+    <p class="tags">
+        {% for tag in page.tags %}<a href="{{ '/tag/' | relative_url }}{{ tag | downcase | replace: ' ', '-' }}/">#{{ tag }}</a>{% endfor %}
+    </p>
+    {% endif %}
+
     {% if page.image_placeholder %}
     <div class="fake-image">
         [ {{ page.image_placeholder }} ]

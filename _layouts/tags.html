@@ -1,0 +1,29 @@
+---
+layout: default
+---
+
+<h1>Теги.</h1>
+
+<p class="lead">
+    всё, что мы написали, по полочкам.
+</p>
+
+<section class="section">
+    <div class="list">
+
+        {% for pair in page.by_tag %}
+        {% assign tag = pair[0] %}
+        {% assign items = pair[1] %}
+        <a href="{{ '/tag/' | relative_url }}{{ tag | downcase | replace: ' ', '-' }}/" class="list-item">
+            <span class="number">{{ items.size | prepend: '0' | slice: -2, 2 }}</span>
+            <span>
+                <strong>{{ tag }}</strong>
+                <br>
+                <span class="meta">{{ items.first.date | date: "%d.%m.%y" }} … {{ items.last.date | date: "%d.%m.%y" }}</span>
+            </span>
+            <span class="arrow">→</span>
+        </a>
+        {% endfor %}
+
+    </div>
+</section>

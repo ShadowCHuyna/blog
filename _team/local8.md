@@ -3,7 +3,6 @@ name: l0cal8
 role: шиз
 skills: стенд
 description: будущий крипто репер.
-github: "https://github.com/"
 layout: author
 ---
 

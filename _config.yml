@@ -9,15 +9,6 @@ author: POTATOM
 future: true
 permalink: /blog/:title/
 
-twitter:
-  card: summary_large_image
-
-defaults:
-  - scope:
-      path: ""
-    values:
-      image: /assets/img/og.png
-
 collections:
   team:
     output: true

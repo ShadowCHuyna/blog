@@ -41,8 +41,6 @@ small { font-size: .8em; color: var(--muted); }
 
 .accent { color: var(--accent); }
 
-.strike { text-decoration: line-through; }
-
 code,
 pre,
 .mono,
@@ -119,17 +117,6 @@ h2.comment + * {
     padding-top: .3em;
 }
 
-.kicker {
-    border-top: 1px solid var(--muted);
-    border-bottom: 1px solid var(--muted);
-    padding: 6px 0;
-    font: 13px "Courier New", monospace;
-    color: var(--fg);
-    margin: 1.3em 0;
-}
-
-.kicker .tick { color: var(--accent); }
-
 /* --- навигация --- */
 
 .nav {
@@ -175,8 +162,6 @@ h2.comment + * {
 
 main { padding: 0; }
 
-.hero { padding: 1em 0 .5em; }
-
 .section { margin: 2.2em 0; }
 
 .label {
@@ -191,8 +176,6 @@ main { padding: 0; }
     color: var(--fg);
     margin-bottom: 0.4em;
 }
-
-.desc { color: var(--muted); }
 
 /* --- кнопки --- */
 
@@ -246,6 +229,35 @@ main { padding: 0; }
     display: block;
     font-size: 12px;
     color: var(--muted);
+}
+
+.tags {
+    font: 12px "Courier New", monospace;
+    color: var(--accent);
+}
+
+.tags a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.tags a:hover {
+    text-decoration: underline;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid var(--muted);
+    background: none;
+    color: var(--fg);
+    font: 14px "Courier New", monospace;
+    padding: 8px 12px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent);
 }
 
 /* --- карточки --- */
@@ -342,8 +354,7 @@ li { margin-bottom: .4em; }
 
 /* --- медиа --- */
 
-.fake-image,
-.img {
+.fake-image {
     border: 1px dashed var(--muted);
     color: var(--muted);
     text-align: center;
@@ -382,16 +393,6 @@ img {
     border: 0;
 }
 
-/* --- 404 --- */
-
-.not-found {
-    text-align: center;
-    padding: 2em 0;
-}
-
-.not-found .buttons,
-.not-found .buttons .button { margin-right: 0; }
-
 /* --- подсветка секции при переходе по якорю --- */
 
 section[id],
@@ -406,16 +407,6 @@ div[id] {
 @keyframes flash {
     0%   { box-shadow: 0 0 0 3px var(--accent); background: rgba(255, 59, 0, .08); }
     100% { box-shadow: 0 0 0 3px transparent; background: transparent; }
-}
-
-/* --- разделитель --- */
-
-.ruler {
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
-    margin: 3em 0;
-    letter-spacing: .4em;
 }
 
 /* --- подвал --- */
@@ -465,10 +456,22 @@ th {
 /* --- мобилки --- */
 
 @media (max-width: 560px) {
+    body { text-align: left; }
+
+    .nav {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 8px 16px;
+    }
+
     .nav nav {
-        width: 100%;
+        grid-column: 1 / -1;
+        order: 2;
         gap: 12px;
     }
+
+    .theme-toggle { justify-self: end; }
 
     .list-item {
         grid-template-columns: auto 1fr;
