@@ -18,9 +18,6 @@ module Jekyll
       end
 
       site.pages << TagIndexPage.new(site, by_tag)
-      by_tag.each do |tag, items|
-        site.pages << TagPage.new(site, tag, items)
-      end
     end
   end
 
@@ -37,27 +34,6 @@ module Jekyll
         "title" => "Теги",
         "by_tag" => by_tag
       }
-    end
-  end
-
-  class TagPage < Page
-    def initialize(site, tag, items)
-      @site = site
-      @base = site.source
-      @dir = "tag"
-      @name = "#{slug(tag)}/index.html"
-
-      self.process(@name)
-      self.data = {
-        "layout" => "tag",
-        "title" => tag,
-        "tag" => tag,
-        "tagged" => items
-      }
-    end
-
-    def slug(tag)
-      tag.downcase.gsub(%r{\s+}, "-")
     end
   end
 end

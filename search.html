@@ -9,10 +9,16 @@ permalink: /search/
 </p>
 
 <p>
-    <input type="search" id="sq" class="search-input" placeholder="например: matrix или yaml парсер">
+    <input type="search" id="sq" class="search-input" placeholder="например: yaml или #matrix">
 </p>
 
+<p class="comment">слова — полнотекстовый поиск · слово с «#» — поиск по тегу, например «#linux»</p>
+
 <div class="list" id="results"></div>
+
+<p class="lead">
+    <a href="{{ '/tags/' | relative_url }}">все теги →</a>
+</p>
 
 <script>
     (function () {
@@ -28,12 +34,13 @@ permalink: /search/
             var q = norm(query).trim();
             if (!q) return false;
             var words = q.split(/\s+/).filter(Boolean);
-            var hay = norm(item.title + " " + item.author + " " + (item.tags || []).join(" ") + " " + item.content);
+            var text = norm(item.title + " " + item.author + " " + item.content);
+            var tags = norm((item.tags || []).join(" "));
             return words.every(function (w) {
-                if (w.slice(0, 5) === "tag:") {
-                    return norm((item.tags || []).join(" ")).indexOf(w.slice(5)) !== -1;
+                if (w.charAt(0) === "#") {
+                    return tags.indexOf(w.slice(1)) !== -1;
                 }
-                return hay.indexOf(w) !== -1;
+                return text.indexOf(w) !== -1;
             });
         }
 
@@ -79,7 +86,14 @@ permalink: /search/
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 index = data;
-                search();
+                var t = new URLSearchParams(location.search).get("tag");
+                if (t) {
+                    input.value = "#" + t;
+                    search();
+                    history.replaceState(null, "", location.pathname);
+                } else {
+                    search();
+                }
             })
             .catch(function () {
                 results.innerHTML = "<div class=\"list-item\"><span></span><span>поиск недоступен :(</span><span></span></div>";

@@ -12,7 +12,7 @@ layout: default
 
     {% if page.tags %}
     <p class="tags">
-        {% for tag in page.tags %}<a href="{{ '/tag/' | relative_url }}{{ tag | downcase | replace: ' ', '-' }}/">#{{ tag }}</a>{% endfor %}
+        {% for tag in page.tags %}{% assign tag_slug = tag | downcase | replace: ' ', '-' %}<a href="{{ '/search?tag=' | append: tag_slug | relative_url }}">#{{ tag }}</a>{% endfor %}
     </p>
     {% endif %}
 

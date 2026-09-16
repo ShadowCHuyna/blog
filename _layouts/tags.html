@@ -14,7 +14,8 @@ layout: default
         {% for pair in page.by_tag %}
         {% assign tag = pair[0] %}
         {% assign items = pair[1] %}
-        <a href="{{ '/tag/' | relative_url }}{{ tag | downcase | replace: ' ', '-' }}/" class="list-item">
+        {% assign tag_slug = tag | downcase | replace: ' ', '-' %}
+        <a href="{{ '/search?tag=' | append: tag_slug | relative_url }}" class="list-item">
             <span class="number">{{ items.size | prepend: '0' | slice: -2, 2 }}</span>
             <span>
                 <strong>{{ tag }}</strong>
