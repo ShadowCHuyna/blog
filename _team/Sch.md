@@ -6,5 +6,3 @@ description: Backend developer. Инфраструктура, сервисы, б
 github: "https://github.com/ShadowCHuyna"
 layout: author
 ---
-
-Здесь находится небольшое описание разработчика, его опыта, интересов, технологий и всего остального.
