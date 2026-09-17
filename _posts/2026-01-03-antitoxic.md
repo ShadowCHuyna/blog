@@ -4,7 +4,6 @@ date: 2026-01-04T02:21:00.000+10:00
 author: l0cal8
 authors: ["l0cal8"]
 description: ялюблюженскиепопочки
-keywords: борк нога рога кротофиля ушная сера
 layout: article
 tags: [community, moderation, rant]
 last_modified_at: "2026-01-4"

@@ -1,9 +1,9 @@
 ---
 name: Sch
 role: backend / infrastructure
-skills: backend / golang
-description: Backend developer. Golang. Инфраструктура, сервисы, базы данных.
-github: "https://github.com/"
+skills: backend / Java / Python / C/C++ / JS/TS
+description: Backend developer. Инфраструктура, сервисы, базы данных.
+github: "https://github.com/ShadowCHuyna"
 layout: author
 ---
 

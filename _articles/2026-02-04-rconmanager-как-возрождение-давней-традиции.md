@@ -6,8 +6,6 @@ author: Bork
 authors: ["Bork"]
 description: "Управление серверами через Telegram: добавляйте RCON-серверы,
   настраивайте команды и запускайте их мгновенно."
-keywords: rcon, server, admin, managment, ркон, minecraft, майнкрафт, сервера,
-  потатом, potatom, барнаул
 layout: article
 tags: [minecraft, rcon, telegram, tool]
 ---

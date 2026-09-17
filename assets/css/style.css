@@ -182,13 +182,18 @@ h2.comment + * {
     border: 1px solid var(--fg);
     background: none;
     color: var(--fg);
-    font: 14px/1 "Courier New", monospace;
-    text-align: center;
     cursor: pointer;
     padding: 0;
+    align-items: center;
+    justify-content: center;
 }
 
-.nav-burger::before { content: "☰"; }
+.nav-burger::before {
+    font: 13px/1 "Courier New", monospace;
+    line-height: 1;
+    content: "☰";
+}
+
 .nav-toggle:checked ~ .nav .nav-burger::before { content: "✕"; }
 
 .nav-overlay { display: none; }
@@ -523,7 +528,7 @@ th {
 
     /* выдвижная панель сбоку */
 
-    .nav-burger { display: block; }
+    .nav-burger { display: flex; }
 
     .nav nav {
         position: fixed;
