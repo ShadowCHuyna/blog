@@ -7,7 +7,7 @@ layout: default
     <h1>{{ page.title }}</h1>
 
     <p class="meta">
-        {{ page.authors | join: ", " }}{% if page.category %} · {{ page.category }}{% endif %}{% if page.read_time %} · {{ page.read_time }}{% endif %}
+        {% if page.date %}<time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%d.%m.%y" }}</time> · {% endif %}{{ page.authors | join: ", " }}{% if page.category %} · {{ page.category }}{% endif %}{% if page.read_time %} · {{ page.read_time }}{% endif %}
     </p>
 
     {% if page.tags %}
@@ -17,7 +17,7 @@ layout: default
     {% endif %}
 
     {% if page.image_placeholder %}
-    <div class="fake-image">
+    <div class="fake-image" role="img" aria-hidden="true">
         [ {{ page.image_placeholder }} ]
     </div>
     {% endif %}

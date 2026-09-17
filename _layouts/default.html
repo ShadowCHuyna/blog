@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" prefix="og: http://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#111">
     <script>
         (function () {
             var saved = null;
             try { saved = localStorage.getItem('theme'); } catch (e) {}
             var d = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
             document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light');
+            var tc = document.querySelector('meta[name="theme-color"]');
+            if (tc) tc.content = d ? '#111' : '#f5f5f0';
         })();
     </script>
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
@@ -19,10 +22,14 @@
 
 <body>
 
-<div class="nav">
+<a class="skip-link" href="#main">к содержанию</a>
+
+<input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="меню">
+
+<header class="nav">
     <a href="{{ '/' | relative_url }}" class="logo">POTATOM</a>
 
-    <nav>
+    <nav id="site-nav" aria-label="основная навигация">
         <a href="{{ '/articles/' | relative_url }}">статьи</a>
         <a href="{{ '/blog/' | relative_url }}">блог</a>
         <a href="{{ '/projects/' | relative_url }}">проекты</a>
@@ -31,10 +38,15 @@
         <a href="{{ '/' | relative_url }}#contact">контакты</a>
     </nav>
 
-    <button type="button" class="theme-toggle" aria-label="переключить тему"></button>
-</div>
+    <div class="nav-side">
+        <button type="button" class="theme-toggle" aria-label="переключить тему"></button>
+        <label for="nav-toggle" class="nav-burger" aria-hidden="true"></label>
+    </div>
+</header>
 
-<main>
+<label class="nav-overlay" for="nav-toggle" aria-hidden="true"></label>
+
+<main id="main">
     {{ content }}
 </main>
 
@@ -58,6 +70,8 @@
 
         function render() {
             t.textContent = cur() === 'dark' ? '☀' : '☾';
+            var tc = document.querySelector('meta[name="theme-color"]');
+            if (tc) tc.content = cur() === 'dark' ? '#111' : '#f5f5f0';
         }
 
         t.addEventListener('click', function () {
@@ -75,6 +89,47 @@
         });
 
         render();
+    })();
+</script>
+
+<script>
+    (function () {
+        var toggle = document.getElementById('nav-toggle');
+        if (!toggle) return;
+
+        function setState() {
+            toggle.setAttribute('aria-expanded', toggle.checked ? 'true' : 'false');
+            document.body.classList.toggle('nav-open', toggle.checked);
+        }
+
+        toggle.addEventListener('change', setState);
+
+        toggle.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && toggle.checked) {
+                toggle.checked = false;
+                setState();
+            }
+        });
+
+        var links = document.querySelectorAll('#site-nav a');
+        for (var i = 0; i < links.length; i++) {
+            links[i].addEventListener('click', function () {
+                toggle.checked = false;
+                setState();
+            });
+        }
+
+        var mq = window.matchMedia('(min-width: 701px)');
+        if (mq.addEventListener) {
+            mq.addEventListener('change', function (e) {
+                if (e.matches && toggle.checked) {
+                    toggle.checked = false;
+                    setState();
+                }
+            });
+        }
+
+        setState();
     })();
 </script>
 
@@ -100,6 +155,18 @@
         document.addEventListener('DOMContentLoaded', function () {
             if (window.location.hash) flash(fromHash());
         });
+    })();
+</script>
+
+<script>
+    (function () {
+        var imgs = document.querySelectorAll('img');
+        for (var i = 0; i < imgs.length; i++) {
+            if (i > 0 && !imgs[i].hasAttribute('loading')) {
+                imgs[i].setAttribute('loading', 'lazy');
+            }
+            imgs[i].setAttribute('decoding', 'async');
+        }
     })();
 </script>
 
