@@ -14,11 +14,11 @@ permalink: /search/
 
 <p class="comment">слова — полнотекстовый поиск · слово с «#» — поиск по тегу, например «#linux»</p>
 
-<div class="list" id="results"></div>
-
 <p class="lead">
     <a href="{{ '/tags/' | relative_url }}">все теги →</a>
 </p>
+
+<div class="list" id="results"></div>
 
 <script>
     (function () {
@@ -78,7 +78,7 @@ permalink: /search/
             var q = input.value.trim();
             var items = q
                 ? index.entries.filter(function (item) { return match(item, q); })
-                : [];
+                : index.entries.slice();
             render(items);
         }
 

@@ -201,8 +201,6 @@ main { padding: 0; }
     color: var(--bg);
 }
 
-.button.ghost { border-color: var(--muted); color: var(--muted); }
-.button.ghost:hover { background: var(--muted); color: var(--bg); }
 
 /* --- списки --- */
 
