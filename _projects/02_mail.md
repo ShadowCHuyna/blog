@@ -12,7 +12,7 @@ github: "#"
 ---
 ---
 Развернул почтовый сервер [Mailcow](https://mailcow.email/). Особых сложностей нет — всё работает через Docker, так что почту можно поднять очень быстро.  
-Для удобства сделал простую [страничку регистрации](https://mail.potatom.ru/registration/), где можно создать себе ящик.  
+Для удобства сделал простую [страничку регистрации](https://mail.potatom.net/registration/), где можно создать себе ящик.  
 
 ![сидит и отправляет email bork`у](/assets/imgs/nekoarc_pc.png)
 <p style="text-align: center; color: gray; font-size: 0.9em;">лежит и отправляет email bork`у</p>
