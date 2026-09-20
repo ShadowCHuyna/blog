@@ -15,7 +15,7 @@ collections:
     folder: "_posts"
     create: true
     format: "frontmatter"
-    extension: "markdown"
+    extension: "md"
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - { label: "Layout", name: "layout", widget: "hidden", default: "article" }
@@ -33,7 +33,7 @@ collections:
     folder: "_articles"
     create: true
     format: "frontmatter"
-    extension: "markdown"
+    extension: "md"
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - { label: "Layout", name: "layout", widget: "hidden", default: "article" }
@@ -51,7 +51,7 @@ collections:
     folder: "_projects"
     create: true
     format: "frontmatter"
-    extension: "markdown"
+    extension: "md"
     slug: "{{slug}}"
     summary: "{{fields.number}} · {{fields.title}}"
     fields:
@@ -70,7 +70,7 @@ collections:
     folder: "_team"
     create: true
     format: "frontmatter"
-    extension: "markdown"
+    extension: "md"
     slug: "{{slug}}"
     summary: "{{fields.name}} — {{fields.role}}"
     fields:
