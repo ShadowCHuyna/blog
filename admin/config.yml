@@ -2,7 +2,7 @@ backend:
   name: github
   repo: ShadowCHuyna/blog
   branch: main
-  base_url: "https://auth.potatom.ru"
+  base_url: "https://auth.potatom.net"
 
 media_folder: "/assets/imgs"
 public_folder: "/assets/imgs"
