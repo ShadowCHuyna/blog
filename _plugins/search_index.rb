@@ -6,6 +6,8 @@ module Jekyll
     priority :low
 
     def generate(site)
+      return if site.config["disable_tags_and_search"]
+
       docs = (site.posts.docs + site.collections["articles"].docs)
              .sort_by { |d| d.data["date"].to_s }
              .reverse

@@ -9,6 +9,7 @@ layout: default
 </p>
 
 <section class="section">
+    {% unless site.disable_tags_and_search %}
     <div class="list">
 
         {% for pair in page.by_tag %}
@@ -27,4 +28,5 @@ layout: default
         {% endfor %}
 
     </div>
+    {% endunless %}
 </section>

@@ -31,3 +31,5 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-sitemap
+
+disable_tags_and_search: true

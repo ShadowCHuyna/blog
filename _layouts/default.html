@@ -34,7 +34,7 @@
         <a href="{{ '/blog/' | relative_url }}">блог</a>
         <a href="{{ '/projects/' | relative_url }}">проекты</a>
         <a href="{{ '/services/' | relative_url }}">услуги</a>
-        <a href="{{ '/search/' | relative_url }}">поиск</a>
+        {% unless site.disable_tags_and_search %}<a href="{{ '/search/' | relative_url }}">поиск</a>{% endunless %}
         <a href="{{ '/' | relative_url }}#contact">контакты</a>
     </nav>
 

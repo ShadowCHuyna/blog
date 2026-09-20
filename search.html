@@ -4,6 +4,9 @@ permalink: /search/
 ---
 <h1>Поиск.</h1>
 
+{% if site.disable_tags_and_search %}
+<p class="lead">поиск пока недоступен.</p>
+{% else %}
 <p class="lead">
     ищем по заголовкам, тегам и содержимому.
 </p>
@@ -102,3 +105,4 @@ permalink: /search/
         input.addEventListener("input", search);
     })();
 </script>
+{% endif %}

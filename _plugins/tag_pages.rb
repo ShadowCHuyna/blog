@@ -4,6 +4,8 @@ module Jekyll
     priority :low
 
     def generate(site)
+      return if site.config["disable_tags_and_search"]
+
       docs = site.posts.docs + site.collections["articles"].docs + site.collections["projects"].docs
       by_tag = Hash.new { |h, k| h[k] = [] }
       docs.each do |doc|

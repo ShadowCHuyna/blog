@@ -10,11 +10,13 @@ layout: default
         {% if page.date %}<time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%d.%m.%y" }}</time> · {% endif %}{{ page.authors | join: ", " }}{% if page.category %} · {{ page.category }}{% endif %}{% if page.read_time %} · {{ page.read_time }}{% endif %}
     </p>
 
+    {% unless site.disable_tags_and_search %}
     {% if page.tags %}
     <p class="tags">
         {% for tag in page.tags %}{% assign tag_slug = tag | downcase | replace: ' ', '-' %}<a href="{{ '/search?tag=' | append: tag_slug | relative_url }}">#{{ tag }}</a>{% endfor %}
     </p>
     {% endif %}
+    {% endunless %}
 
     {% if page.image_placeholder %}
     <div class="fake-image" role="img" aria-hidden="true">
