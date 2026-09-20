@@ -1,0 +1,92 @@
+backend:
+  name: github
+  repo: ShadowCHuyna/blog
+  branch: main
+  base_url: "https://auth.potatom.ru"
+
+media_folder: "/assets/imgs"
+public_folder: "/assets/imgs"
+
+publish_mode: editorial_workflow
+
+collections:
+  - name: "posts"
+    label: "Posts (Блог)"
+    folder: "_posts"
+    create: true
+    format: "frontmatter"
+    extension: "markdown"
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Layout", name: "layout", widget: "hidden", default: "article" }
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Publish Date", name: "date", widget: "datetime" }
+      - { label: "Last modified at", name: "last_modified_at", widget: "datetime", required: false }
+      - { label: "Author", name: "author", widget: "select", options: ["Sch", "l0cal8", "Bork"] }
+      - { label: "Authors", name: "authors", widget: "select", options: ["Sch", "l0cal8", "Bork"], multiple: true, required: false }
+      - { label: "Description", name: "description", widget: "text", required: false }
+      - { label: "Tags", name: "tags", widget: "list", required: false }
+      - { label: "Body", name: "body", widget: "markdown" }
+
+  - name: "articles"
+    label: "Articles (Статьи)"
+    folder: "_articles"
+    create: true
+    format: "frontmatter"
+    extension: "markdown"
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Layout", name: "layout", widget: "hidden", default: "article" }
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Publish Date", name: "date", widget: "datetime" }
+      - { label: "Last modified at", name: "last_modified_at", widget: "datetime", required: false }
+      - { label: "Author", name: "author", widget: "select", options: ["Sch", "l0cal8", "Bork"] }
+      - { label: "Authors", name: "authors", widget: "select", options: ["Sch", "l0cal8", "Bork"], multiple: true, required: false }
+      - { label: "Description", name: "description", widget: "text", required: false }
+      - { label: "Tags", name: "tags", widget: "list", required: false }
+      - { label: "Body", name: "body", widget: "markdown" }
+
+  - name: "projects"
+    label: "Projects (Проекты)"
+    folder: "_projects"
+    create: true
+    format: "frontmatter"
+    extension: "markdown"
+    slug: "{{slug}}"
+    summary: "{{fields.number}} · {{fields.title}}"
+    fields:
+      - { label: "Layout", name: "layout", widget: "hidden", default: "project" }
+      - { label: "Number", name: "number", widget: "string", hint: "Порядковый номер для сортировки, напр. 01, 02, ..." }
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Tags", name: "tags", widget: "list" }
+      - { label: "Website", name: "website", widget: "string", required: false }
+      - { label: "GitHub", name: "github", widget: "string", required: false }
+      - { label: "IP", name: "ip", widget: "string", required: false }
+      - { label: "Body", name: "body", widget: "markdown" }
+
+  - name: "team"
+    label: "Team (Команда)"
+    folder: "_team"
+    create: true
+    format: "frontmatter"
+    extension: "markdown"
+    slug: "{{slug}}"
+    summary: "{{fields.name}} — {{fields.role}}"
+    fields:
+      - { label: "Layout", name: "layout", widget: "hidden", default: "author" }
+      - { label: "Name", name: "name", widget: "string" }
+      - { label: "Role", name: "role", widget: "string" }
+      - { label: "Skills", name: "skills", widget: "string", required: false }
+      - { label: "Description", name: "description", widget: "text", required: false }
+      - { label: "GitHub", name: "github", widget: "string", required: false }
+      - { label: "Telegram", name: "telegram", widget: "string", required: false }
+      - label: "Links"
+        name: "links"
+        widget: "list"
+        required: false
+        summary: "{{fields.label}}"
+        fields:
+          - { label: "Label", name: "label", widget: "string" }
+          - { label: "URL", name: "url", widget: "string" }
+      - { label: "Body", name: "body", widget: "markdown" }
