@@ -11,26 +11,33 @@ website: https://jitsi.potatom.net
 github: "#"
 ---
 ---
-<section class="section">
-    <div class="container">
+## Jitsi как замена WellCall
+После попыток сделать WellCall работоспособным мне не пришло ничего лучше, чем развернуть собственный инстанс Jitsi сервера.
 
-        <div class="label">// стек</div>
 
-        <div class="grid">
+jisti выполняет все та же функции былого WellCall, только еще лучше и стабильнее! Его используют в больших компаниях для групповых созвонов и видеоконференций. Для использования не требуется обязательная авторизация, достаточно лишь указать никнейм при входе в комнату. 
 
-            <div class="card">
-                <div class="meta">webrtc</div>
-                <h3>Jitsi Meet</h3>
-                <p>Видеоконференции.</p>
-            </div>
 
-            <div class="card">
-                <div class="meta">infrastructure</div>
-                <h3>Prosody</h3>
-                <p>XMPP для Jitsi.</p>
-            </div>
+## Интересный факт
+Это второй конечный вариант и четвёртая попытка сделать сервис аудио, видео-конференций в экосистеме POTATOM'а! Первый - WellCall: собственная разработка WebRTC видео-чата. Второй - [CallMe](https://github.com/miroslavpejic85/call-me): развернутый open-source сервис для p2p звонков. Третий - [Element Call](https://github.com/element-hq/element-call): условно встроенная система звонков в Matrix.
 
-        </div>
 
-    </div>
-</section>
+![img](/assets/imgs/снимок-экрана_20260922_203715.png)
+
+
+## Мобильное приложение
+Также, неоспоримым плюсом Jitsi является готовое мобильное приложение, через которое можно подключатся к таким же self-hosted серверам.
+
+
+![img](/assets/imgs/photo_2026-09-22_20-47-56.jpg)
+
+
+## Стек
+{: .comment }
+
+
+- **Jitsi Docker**{: .meta }
+  Сервер видеоконференций.
+- **Coturn**{: .meta }
+  STUN/TURN сервер.
+{: .grid }
