@@ -1,0 +1,332 @@
+/* breakeven.css — калькулятор окупаемости игрового сервера.
+   Стиль приведён к общему стилю сайта: токены темы (--bg/--fg/--muted/--accent),
+   Georgia для текста, Courier New для подписей и меток, рамки как у .card. */
+
+.calc {
+    /* вспомогательные токены, наследуют тему сайта */
+    --faint: rgba(0, 0, 0, .12);
+    --hl: #9a3412;
+    --good: #1a7f37;
+    --bad: #cf222e;
+    --warn: #9a6700;
+}
+
+[data-theme="dark"] .calc {
+    --faint: rgba(255, 255, 255, .14);
+    --hl: #e8a04d;
+    --good: #3fb950;
+    --bad: #f85149;
+    --warn: #d29922;
+}
+
+.calc { margin: 1.6em 0 2.4em; }
+
+/* --- заголовки блоков: как .comment --- */
+
+.calc .card h2,
+.calc .charts-card > h2 {
+    font-family: "Courier New", monospace;
+    font-weight: normal;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin: 0 0 14px;
+}
+
+/* --- карточки и сетка (поверх общих .card/.grid с сайта) --- */
+
+.calc .grid { margin: 1.2em 0; }
+
+.calc .card p {
+    font-size: .95em;
+    color: var(--fg);
+    margin: 0 0 .6em;
+}
+
+.calc .card:hover { border-color: var(--muted); }
+
+/* --- кнопка «График»: как .button --- */
+
+.calc .chartbtn {
+    font: 13px "Courier New", monospace;
+    color: var(--fg);
+    border: 1px solid var(--fg);
+    background: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s, color .15s;
+}
+
+.calc .chartbtn:hover,
+.calc .chartbtn:focus-visible {
+    background: var(--fg);
+    color: var(--bg);
+    outline: none;
+}
+
+/* --- ползунки --- */
+
+.calc .slider-row { margin-bottom: 16px; }
+.calc .slider-row:last-child { margin-bottom: 0; }
+
+.calc .slider-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.calc .slider-head label { font-size: 15px; font-weight: 600; }
+
+.calc .slider-head .val {
+    font-variant-numeric: tabular-nums;
+    color: var(--hl);
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.calc .slider-desc { color: var(--muted); font-size: 12px; margin: 2px 0 8px; }
+
+.calc .slider-line { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+.calc input[type="range"] {
+    flex: 1;
+    min-width: 120px;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--faint);
+    outline: none;
+    cursor: pointer;
+}
+
+.calc input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 3px solid var(--hl);
+    cursor: grab;
+}
+
+.calc input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 3px solid var(--hl);
+    cursor: grab;
+}
+
+.calc input[type="number"] {
+    width: 96px;
+    background: none;
+    color: var(--fg);
+    border: 1px solid var(--muted);
+    border-radius: 0;
+    padding: 6px 9px;
+    font: 13px "Courier New", monospace;
+}
+
+.calc input[type="number"]:focus {
+    outline: none;
+    border-color: var(--hl);
+}
+
+/* --- блок результата --- */
+
+.calc .result-hero { text-align: center; padding: 6px 0 2px; }
+
+.calc .result-hero .tier {
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.calc .result-hero .big {
+    font-size: 40px;
+    font-weight: 800;
+    margin: 6px 0 2px;
+    color: var(--fg);
+}
+
+.calc .result-hero .big.plain { color: var(--fg); }
+
+.calc .result-hero .sub { color: var(--muted); font-size: 14px; }
+
+.calc .verdict {
+    margin: 16px auto 0;
+    padding: 10px 14px;
+    font-size: 15px;
+    font-weight: 700;
+    display: block;
+    text-align: center;
+}
+
+.calc .verdict.ok { color: var(--good); border: 1px solid var(--good); }
+.calc .verdict.no { color: var(--bad); border: 1px solid var(--bad); }
+
+/* --- полоса порога --- */
+
+.calc .bar {
+    height: 12px;
+    background: var(--faint);
+    border: 1px solid var(--muted);
+    border-radius: 8px;
+    margin-top: 16px;
+    position: relative;
+}
+
+.calc .bar-fill { height: 100%; background: var(--hl); border-radius: 6px; transition: width .2s; }
+
+.calc .bar-mark {
+    position: absolute;
+    top: -9px;
+    bottom: -9px;
+    width: 2px;
+    background: var(--fg);
+    left: 0;
+    border-radius: 2px;
+}
+
+.calc .bar-mark2 {
+    position: absolute;
+    top: -7px;
+    bottom: -7px;
+    width: 2px;
+    background: var(--warn);
+    left: 0;
+    border-radius: 2px;
+    opacity: .85;
+}
+
+.calc .bar-caps {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 6px;
+}
+
+.calc .bar-caps .cap-m { color: var(--warn); }
+
+/* --- статистика --- */
+
+.calc .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.calc .stat { border: 1px solid var(--muted); padding: 10px 12px; }
+
+.calc .stat .k {
+    color: var(--muted);
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.calc .stat .v { font-size: 18px; font-weight: 700; margin-top: 3px; }
+
+.calc .stat .v small { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+.calc .note {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-top: 18px;
+    border-top: 1px dashed var(--muted);
+    padding-top: 12px;
+    text-align: left;
+}
+
+/* --- мини-исследование --- */
+
+.calc .research { font-size: 13px; color: var(--muted); line-height: 1.65; margin-top: 18px; }
+
+.calc .research h3 {
+    color: var(--fg);
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.calc .research strong { color: var(--fg); }
+.calc .research li { margin-left: 18px; margin-bottom: 4px; }
+
+/* --- графики результата --- */
+
+.calc .charts-card { margin-top: 22px; }
+
+.calc .charts-title { font-size: 15px; font-weight: 700; }
+.calc .charts-sub { color: var(--muted); font-size: 12.5px; margin-top: 4px; line-height: 1.5; text-align: left; }
+
+.calc .charts-chip {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: left;
+}
+
+.calc .charts-chip b { color: var(--hl); font-weight: 700; }
+.calc .charts-chip code { font-size: .9em; }
+
+.calc .charts-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 14px; }
+
+.calc .chart-tile {
+    border: 1px solid var(--muted);
+    padding: 12px 14px 6px;
+    width: 100%;
+}
+
+.calc .tile-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.calc .tile-name { font-size: 13px; font-weight: 600; }
+.calc .tile-note { color: var(--muted); font-size: 11px; white-space: nowrap; }
+
+.calc .chart-tile svg { width: 100%; height: auto; display: block; }
+
+/* --- подпись-формула внизу --- */
+
+.calc footer {
+    border-top: 1px dashed var(--muted);
+    margin: 22px 0 0;
+    padding: 10px 0 0;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* --- мобилки --- */
+
+/* У калькулятора колонки узкие — складываем в одну раньше, чем на остальном сайте */
+@media (max-width: 860px) {
+    .calc .grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+    .calc .stats { grid-template-columns: 1fr; }
+    .calc .slider-line { flex-direction: column; align-items: stretch; }
+    .calc .slider-line input[type="range"] { min-width: 0; }
+}

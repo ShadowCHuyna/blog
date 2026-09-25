@@ -1,0 +1,89 @@
+---
+layout: default
+permalink: /services/minecraft-calc/
+extra_css: /assets/css/minecraft-calc.css
+extra_js:
+  - /assets/js/minecraft-calc/model.js
+  - /assets/js/minecraft-calc/ui.js
+  - /assets/js/minecraft-calc/charts.js
+  - /assets/js/minecraft-calc/main.js
+---
+
+<p class="meta"><a href="{{ '/services/' | relative_url }}">← услуги</a></p>
+
+<h1>Окупаемость игрового сервера.</h1>
+
+<p class="lead">
+    Модель: <code>Выручка/мес = П × F × КП × ЧД / КУ</code> — блогер рекламирует сервер
+    в <code>F</code> роликах в месяц (реклама «0» = бартер), сервер стоит <code>С</code> ₽/мес.
+    Нужен минимальный размер блогера, при котором сервер выходит в ноль, и оценка, сколько месяцев
+    займёт выход в плюс с учётом раскрутки. У каждого параметра есть кнопка
+    «График» — как меняется результат от этой переменной.
+</p>
+
+<div class="calc">
+
+    <div class="grid">
+
+        <section class="card">
+            <h2>Параметры</h2>
+            <div id="sliders"></div>
+        </section>
+
+        <section class="card">
+            <h2>Результат</h2>
+            <div class="result-hero">
+                <div class="tier" id="tier"></div>
+                <div class="big" id="subsBig">&mdash;</div>
+                <div class="sub" id="subsSub"></div>
+                <div class="sub" id="pvSub"></div>
+            </div>
+
+            <div class="verdict" id="verdict"></div>
+
+            <div class="bar" id="barWrap">
+                <div class="bar-fill" id="barFill"></div>
+                <div class="bar-mark" style="left:0%" id="barMark"></div>
+                <div class="bar-mark2" style="left:0%" id="barMark2"></div>
+            </div>
+            <div class="bar-caps"><span class="cap-a" id="capA"></span><span class="cap-m" id="capM"></span><span class="cap-b" id="capB"></span></div>
+
+            <div class="stats">
+                <div class="stat"><div class="k">Приход игроков / мес</div><div class="v" id="stInflow"></div></div>
+                <div class="stat"><div class="k">Активных (стабильно)</div><div class="v" id="stActive"></div></div>
+                <div class="stat"><div class="k">LTV игрока</div><div class="v" id="stLtv"></div></div>
+                <div class="stat"><div class="k">Выручка / мес (стабл.)</div><div class="v" id="stRevenue"></div></div>
+                <div class="stat"><div class="k">Прибыль / мес (стабл.)</div><div class="v" id="stProfit"></div></div>
+                <div class="stat"><div class="k">Затраты / мес</div><div class="v" id="stCost"></div></div>
+                <div class="stat"><div class="k">Выход на стабильность</div><div class="v" id="stRamp"></div></div>
+                <div class="stat"><div class="k">Выход в плюс со старта</div><div class="v" id="stPayback"></div></div>
+            </div>
+
+            <div class="note" id="transition"></div>
+            <div class="note" id="oneShot"></div>
+        </section>
+    </div>
+
+    <section class="card research">
+        <h3>Откуда цифры (мини-исследование, сент 2026)</h3>
+        <ul>
+            <li><strong>Стоимость сервера:</strong> российские майнкрафт-хостинги — от ~149₽/мес (Craft-Hosting, тариф Minecraft PC), ~449₽/мес за VDS, ~500–700₽ (fly-serv, minecraft-hosting, reg.ru), ~850₽ за 8 ГБ (Timeweb). Для эксперимента закладываем <strong>1000₽/мес</strong> (с запасом на DDoS/бэкапы и рост тарифа с онлайном).</li>
+            <li><strong>Конверсия КП:</strong> CTR видеорекламы обычно &lt;1% (ppc.world), у нишевого майнкрафт-канала с прямым призывом «заходи на сервер» реалистично <strong>0,5–5%</strong>, база 1%. Это самый «хрупкий» параметр: он измеряется только на реальных интеграциях (UTM-метки, отслеживание переходов на сервер).</li>
+            <li><strong>ЧД (ARPU):</strong> серверы с ~1000 онлайна дают ~750 000₽/мес (FrameDev), сервер 100–300 в пике — $500–2000/мес (MineGuard). Донатят обычно 2–10% игроков, средний донат 200–600₽ → ARPU по всем игрокам <strong>≈10–50₽/мес</strong>, база 20₽. Внимание: ARPU сильно зависит от того, как считать «игрока» (кто заходил за месяц).</li>
+            <li><strong>Уход КУ:</strong> бенчмарки ретеншена GameAnalytics 2026 (мобильные установки): медиана D1 ~22%, D7 ~4%, D30 ~0,7–0,8%; топ-1% D30 = 13–15%. Это «вернулся ровно на день N» и про установки, поэтому прямо в КУ не переводится — для комьюнити-сервера реалистичен месячный уход <strong>20–50%</strong>, база 30% (средний игрок живёт 1/КУ = 2–5 мес). Лучший источник КУ — свои логи сервера.</li>
+            <li><strong>Просмотры от подписчиков:</strong> по базе из 118 каналов медиана отношения «средние просмотры на ролик / подписчики» ≈ <strong>230%</strong>, в диапазон 5–20% попадают только ~8% каналов (короткие видео раздувают просмотры). Поэтому «10% от подписчиков» — верхняя (осторожная) оценка требуемого размера канала: реально достаточно меньшего блогера. Для точности берите фактическое значение <code>просмотры за 30 дней</code> или <code>view_count / video_count</code> канала.</li>
+            <li><strong>Достоверность модели:</strong> расчёт — steady-state: выход на стабильный актив занимает ~1/КУ×2–3 месяца, первые месяцы сервер в минусе; повторные ролики одной аудитории со временем снижают КП (насыщение). Итог — нижняя граница; для решения прибавляйте запас.</li>
+        </ul>
+    </section>
+
+    <section class="card charts-card" id="chartsCard" hidden>
+        <h2>Графики результата</h2>
+        <div class="charts-title" id="chartsTitle"></div>
+        <div class="charts-sub" id="chartsSub"></div>
+        <div class="charts-chip" id="chartsChip"></div>
+        <div class="charts-grid" id="chartsGrid"></div>
+    </section>
+
+    <footer>Формулы: приток = П×КП×F; актив = приток/КУ; выручка = актив×ЧД; окупаемость (стабл.) — на каждый ролик: П<sub>мин</sub> = С×КУ/(КП×ЧД×F), суммарно П<sub>мин</sub>×F просмотров/мес; переходный процесс — помесячная симуляция из 24 мес.</footer>
+
+</div>
