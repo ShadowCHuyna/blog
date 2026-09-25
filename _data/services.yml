@@ -6,7 +6,7 @@
 
 - name: РАЗРАБОТКА ИГРОВЫХ СЕРВЕРОВ
   description: софт / backend / api
-  url: /services/minecraft-calc/
+  url: /minecraft/calc/
 
 - name: DEVOPS И ИНФРАСТРУКТУРА
   description: linux / docker / ci / мониторинг
