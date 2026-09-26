@@ -122,8 +122,11 @@ description: >-
     </div>
 
     <!--
-        Telegram не обязателен: подписка уже работает и без него. Виджет —
-        основной путь, бот — запасной, на случай если виджет не грузится.
+        Telegram необязателен: подписка уже работает и без него.
+        Основной путь — переход в бота с токеном заказа: он покажет,
+        к чему идёт привязка, и попросит подтвердить её кнопкой.
+        Виджет остаётся в details: он требует /setdomain у BotFather
+        и не работает в браузере без авторизации в Telegram.
     -->
     <div id="bind" hidden>
         <h3>привяжите Telegram</h3>
@@ -132,7 +135,13 @@ description: >-
             чтобы продлевать одной командой и не искать ссылку в истории чатов
         </p>
 
-        <div id="bind-widget"></div>
+        <p class="buttons" id="bind-link-wrap">
+            <a class="button" id="bind-link" href="{{ site.data.pvpn.bot_url }}" rel="noopener noreferrer">привязать в Telegram</a>
+        </p>
+
+        <p class="comment">
+            откроется бот, он покажет вашу подписку и спросит подтверждение
+        </p>
 
         <p class="notice-error" id="bind-error" hidden></p>
 
@@ -143,17 +152,19 @@ description: >-
         </p>
 
         <details id="bind-fallback">
-            <summary>привязать без виджета</summary>
-            <p class="lead">
-                Откройте
-                <a href="{{ site.data.pvpn.bot_url }}" rel="noopener noreferrer">@{{ site.data.pvpn.bot_username }}</a>
-                и отправьте ему ссылку подписки из поля выше — он узнает вас
-                и привяжет аккаунт.
-            </p>
+            <summary>привязать без перехода в Telegram</summary>
+
             <p class="comment">
-                Виджет не работает, если <code>potatom.net</code> не прописан
-                в BotFather через <code>/setdomain</code>, и если Telegram открыт
-                в браузере без авторизации.
+                Виджет Telegram: подойдёт, если вы уже вошли в Telegram в этом
+                браузере. Он требует, чтобы домен <code>potatom.net</code> был
+                прописан в BotFather через <code>/setdomain</code>.
+            </p>
+
+            <div id="bind-widget"></div>
+
+            <p class="comment">
+                Виджет не загружается при блокировке AdBlock — тогда просто
+                нажмите «привязать в Telegram» выше.
             </p>
         </details>
     </div>
@@ -208,6 +219,8 @@ description: >-
             subscriptionExpiry: pick("subscription-expiry"),
 
             bind: pick("bind"),
+            bindLink: pick("bind-link"),
+            bindLinkWrap: pick("bind-link-wrap"),
             bindWidget: pick("bind-widget"),
             bindError: pick("bind-error"),
             bindDone: pick("bind-done"),
@@ -369,7 +382,18 @@ description: >-
         }
 
         function renderBind(bound) {
+            // Ссылка всегда несёт токен заказа: бот по нему поймёт, к чему
+            // привязывать, и попросит подтвердить кнопкой. Без токена бот
+            // увидит просто /start и покажет меню.
+            if (el.bindLink && token) {
+                el.bindLink.href = "https://t.me/" + CFG.bot + "?start=" + encodeURIComponent(token);
+            }
+
             if (bound) {
+                // Прячем обёртку, а не саму ссылку: .buttons задаёт
+                // font-size:0 и display-контекст, где hidden на вложенной
+                // кнопке отображается ненадёжно.
+                show(el.bindLinkWrap, false);
                 show(el.bindWidget, false);
                 show(el.bindFallback, false);
                 show(el.bindDone, true);
@@ -377,10 +401,12 @@ description: >-
                 return;
             }
             show(el.bindDone, false);
-            show(el.bindWidget, true);
+            show(el.bindLinkWrap, true);
             show(el.bindFallback, true);
             setError(el.bindError, "");
-            mountWidget();
+            // Виджет грузим только если человек его раскрыл: незакрытый
+            // скрипт с Telegram — лишний запрос на каждой странице.
+            if (el.bindFallback && el.bindFallback.open) mountWidget();
         }
 
         // --- опрос ---
@@ -598,8 +624,13 @@ description: >-
             el.nickname.focus();
         });
 
-        el.subscriptionCopy.addEventListener("click", function () {
-            var url = el.subscriptionUrl.value;
+        // Виджет подгружается в момент раскрытия блока: пока человек его
+        // не открыл, скрипт Telegram на странице не нужен.
+        el.bindFallback.addEventListener("toggle", function () {
+            if (el.bindFallback.open) mountWidget();
+        });
+
+        el.subscriptionCopy.addEventListener("click", function () {            var url = el.subscriptionUrl.value;
             if (!url) return;
             var copied = function () {
                 el.subscriptionCopy.textContent = "скопировано";
