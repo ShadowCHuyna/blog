@@ -323,6 +323,14 @@ description: >-
 
         // --- состояния заказа ---
 
+        // Выдача и пропуск — конечные состояния: сервер больше ничего не
+        // изменит, поэтому опрос можно прекращать. «failed» конечным не
+        // считаем: платёж настоящий, выдачу сверяльщик повторит сам,
+        // поэтому ждём и не предлагаем оплатить заново.
+        function isFinal(fulfillment) {
+            return fulfillment === "done" || fulfillment === "skipped";
+        }
+
         function showState(title, note, mark) {
             el.orderState.innerHTML = "<strong>" + title + "</strong><br>"
                 + '<span class="meta">' + note + "</span>";
@@ -332,7 +340,17 @@ description: >-
         function render(view) {
             setText(el.orderAmount, view.amount + " " + CFG.plan.currency);
 
-            if (view.status === "succeeded" && view.fulfillment === "done") {
+            if (view.fulfillment === "skipped") {
+                // Сервер отвечает так на тестовый платёж: товар по условию
+                // не выдаём, и он не изменится — ни вебхуком, ни сверяльщик.
+                // Показывать «готовим подписку» здесь нельзя: её никогда не
+                // будет, и человек будет ждать до конца суток.
+                showState(
+                    "оплачено, подписку не выдали",
+                    view.error || "это был тестовый платёж, товар по нему не выдаётся",
+                    "!"
+                );
+            } else if (view.status === "succeeded" && view.fulfillment === "done") {
                 showState("оплачено, подписка готова", "действует до " + (humanDate(view.vpn_expire_at) || "—"), "✓");
             } else if (view.status === "succeeded") {
                 showState("оплачено", "готовим подписку, обычно пара секунд", "···");
@@ -378,7 +396,7 @@ description: >-
                 setError(el.orderError, "");
             }
 
-            if (view.fulfillment === "done") stopPolling();
+            if (isFinal(view.fulfillment)) stopPolling();
         }
 
         function renderBind(bound) {
@@ -433,7 +451,7 @@ description: >-
                     }
                     return readJson(response).then(function (view) {
                         render(view);
-                        if (view.fulfillment !== "done") schedulePoll();
+                        if (!isFinal(view.fulfillment)) schedulePoll();
                     });
                 })
                 .catch(function () {
