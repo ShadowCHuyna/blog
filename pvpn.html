@@ -1,0 +1,587 @@
+---
+layout: default
+permalink: /pvpn/
+title: pVPN — купить подписку
+description: >-
+  Свой VPN на WireGuard. 5 устройств, безлимитный трафик, {{ site.data.pvpn.plan.amount }}{{ site.data.pvpn.plan.currency }} за {{ site.data.pvpn.plan.days }} дней.
+---
+
+{%- comment -%}
+Адрес API можно переопределить на сборке — так страница проверяется
+локально, без обращения к боевому сервису:
+
+    jekyll build --config _config.yml,_config.dev.yml
+{%- endcomment -%}
+{%- assign api_base = site.pvpn_api_base | default: site.data.pvpn.api_base -%}
+{%- assign plan = site.data.pvpn.plan %}
+
+<h1>pVPN.</h1>
+
+<p class="lead">
+    Свой VPN-сервер на WireGuard.
+    {{ plan.amount }}{{ plan.currency }} за {{ plan.days }} дней, оплата картой.
+</p>
+
+<section class="section" id="landing">
+    <h2 class="comment">что входит<span class="tag">[01/01]</span></h2>
+
+    <div class="grid">
+        {% for feature in site.data.pvpn.features %}
+        <div class="card">
+            <div class="meta">{{ feature.meta }}</div>
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.text }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="list">
+        <div class="list-item">
+            <span class="number">{{ plan.days }}</span>
+            <span>
+                <strong>дней доступа</strong>
+                <br><span class="meta">продление на столько же</span>
+            </span>
+            <span class="arrow">{{ plan.amount }}{{ plan.currency }}</span>
+        </div>
+        <div class="list-item">
+            <span class="number">{{ plan.hwid_device_limit }}</span>
+            <span>
+                <strong>устройств одновременно</strong>
+                <br><span class="meta">привязка по аппаратной подписи</span>
+            </span>
+            <span class="arrow">hwID</span>
+        </div>
+        <div class="list-item">
+            <span class="number">&infin;</span>
+            <span>
+                <strong>трафик</strong>
+                <br><span class="meta">без счётчиков и ограничений</span>
+            </span>
+            <span class="arrow">&infin;</span>
+        </div>
+    </div>
+
+    <p>
+        <label class="label" for="nickname">// как вас зовут в панели</label>
+        <input
+            type="text"
+            id="nickname"
+            class="search-input"
+            maxlength="64"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="например: bork">
+    </p>
+
+    <p class="buttons">
+        <button type="button" id="buy-button" class="button">купить {{ plan.amount }}{{ plan.currency }}</button>
+    </p>
+
+    <p class="comment">
+        оплата картой через защищённый шлюз · данные карты у нас не остаются
+    </p>
+
+    <p class="notice-error" id="landing-error" hidden></p>
+</section>
+
+<!--
+    Блок заказа есть в разметке всегда, чтобы при возврате с платёжной
+    страницы не было прыжка вёрстки: меняется только видимость.
+-->
+<section class="section" id="order" hidden>
+    <h2 class="comment">ваш заказ<span class="tag">[02/02]</span></h2>
+
+    <div class="list">
+        <div class="list-item">
+            <span class="number" id="order-amount">···</span>
+            <span id="order-state"><strong>создаём заказ</strong></span>
+            <span class="arrow" id="order-mark">···</span>
+        </div>
+    </div>
+
+    <p class="buttons" id="order-retry-wrap" hidden>
+        <button type="button" id="order-retry" class="button">попробовать снова</button>
+    </p>
+
+    <p class="notice-error" id="order-error" hidden></p>
+
+    <div id="subscription" hidden>
+        <p class="label">// ссылка подписки</p>
+
+        <p>
+            <input type="text" id="subscription-url" class="search-input" readonly>
+        </p>
+
+        <p class="buttons">
+            <button type="button" id="subscription-copy" class="button">скопировать</button>
+            <a class="button" id="subscription-open" href="#" rel="noopener noreferrer">открыть</a>
+        </p>
+
+        <p class="comment" id="subscription-expiry"></p>
+    </div>
+
+    <!--
+        Telegram необязателен: подписка уже работает и без него.
+        Единственный путь привязки — переход в бота с токеном заказа:
+        он покажет, к чему идёт привязка, и попросит подтвердить её кнопкой.
+        Если Telegram не открывается, бот всё равно доступен напрямую:
+        команда /link и ссылка подписки.
+    -->
+    <div id="bind" hidden>
+        <h3>привяжите Telegram</h3>
+
+        <p class="comment">
+            чтобы продлевать одной командой и не искать ссылку в истории чатов
+        </p>
+
+        <p class="buttons" id="bind-link-wrap">
+            <a class="button" id="bind-link" href="{{ site.data.pvpn.bot_url }}" rel="noopener noreferrer">привязать в Telegram</a>
+        </p>
+
+        <p class="comment">
+            откроется бот, он покажет вашу подписку и спросит подтверждение
+        </p>
+
+        <p class="notice-error" id="bind-error" hidden></p>
+
+        <p id="bind-done" hidden>
+            <strong>Telegram привязан.</strong>
+            Продление — командой <code>/renew</code> в
+            <a href="{{ site.data.pvpn.bot_url }}" rel="noopener noreferrer">@{{ site.data.pvpn.bot_username }}</a>.
+        </p>
+
+        <details id="bind-fallback">
+            <summary>если Telegram не открывается</summary>
+
+            <p class="comment">
+                Ссылка выше — обычный deep-link, он работает всегда. Если
+                Telegram на этом устройстве не открывается, откройте
+                <a href="{{ site.data.pvpn.bot_url }}" rel="noopener noreferrer">@{{ site.data.pvpn.bot_username }}</a>
+                вручную и отправьте команду <code>/link</code>, а затем
+                скопируйте туда ссылку подписки из блока выше — бот привяжет
+                её к вашему аккаунту.
+            </p>
+
+            <p class="comment">
+                Виджет Telegram мы убрали: он требовал домен, прописанный в
+                BotFather через <code>/setdomain</code>, и работал хуже, чем
+                обычная ссылка.
+            </p>
+        </details>
+    </div>
+
+    <p class="comment" id="order-lost" hidden>
+        <button type="button" id="order-restart" class="linkbutton">начать новый заказ</button>
+        · ссылка восстановления живёт 24 часа
+    </p>
+</section>
+
+<script>
+    (function () {
+        "use strict";
+
+        var CFG = {
+            api: {{ api_base | jsonify }},
+            bot: {{ site.data.pvpn.bot_username | jsonify }},
+            plan: {
+                amount: {{ plan.amount | jsonify }},
+                currency: {{ plan.currency | jsonify }},
+                days: {{ plan.days }}
+            }
+        };
+
+        var STORE_KEY = "pvpn_order_token";
+        var POLL_MS = 3000;
+
+        function pick(id) {
+            return document.getElementById(id);
+        }
+
+        var el = {
+            landing: pick("landing"),
+            buyButton: pick("buy-button"),
+            nickname: pick("nickname"),
+            landingError: pick("landing-error"),
+
+            order: pick("order"),
+            orderAmount: pick("order-amount"),
+            orderState: pick("order-state"),
+            orderMark: pick("order-mark"),
+            orderRetryWrap: pick("order-retry-wrap"),
+            orderRetry: pick("order-retry"),
+            orderError: pick("order-error"),
+            orderLost: pick("order-lost"),
+            orderRestart: pick("order-restart"),
+
+            subscription: pick("subscription"),
+            subscriptionUrl: pick("subscription-url"),
+            subscriptionOpen: pick("subscription-open"),
+            subscriptionCopy: pick("subscription-copy"),
+            subscriptionExpiry: pick("subscription-expiry"),
+
+            bind: pick("bind"),
+            bindLink: pick("bind-link"),
+            bindLinkWrap: pick("bind-link-wrap"),
+            bindError: pick("bind-error"),
+            bindDone: pick("bind-done"),
+            bindFallback: pick("bind-fallback")
+        };
+
+        var token = null;
+        var pollTimer = null;
+        var inFlight = false;
+
+        // --- мелкие помощники ---
+
+        function show(node, visible) {
+            if (node) node.hidden = !visible;
+        }
+
+        function setText(node, value) {
+            if (node) node.textContent = value;
+        }
+
+        // Сообщение об ошибке: пустая строка прячет блок.
+        function setError(node, message) {
+            setText(node, message || "");
+            show(node, !!message);
+        }
+
+        function queryParam(name) {
+            return new URLSearchParams(location.search).get(name);
+        }
+
+        function readStoredToken() {
+            try {
+                return localStorage.getItem(STORE_KEY) || "";
+            } catch (e) {
+                // Приватный режим: страница не переживёт перезагрузку, но
+                // купить всё равно можно.
+                return "";
+            }
+        }
+
+        function storeToken(value) {
+            try {
+                if (value) localStorage.setItem(STORE_KEY, value);
+                else localStorage.removeItem(STORE_KEY);
+            } catch (e) {
+                // см. выше
+            }
+        }
+
+        function humanDate(value) {
+            if (!value) return "";
+            var parsed = new Date(value);
+            if (isNaN(parsed.getTime())) return "";
+            var options = { day: "numeric", month: "long" };
+            if (parsed.getFullYear() !== new Date().getFullYear()) options.year = "numeric";
+            return parsed.toLocaleDateString("ru-RU", options);
+        }
+
+        function readJson(response) {
+            return response.json().catch(function () { return {}; });
+        }
+
+        function describeError(status, payload) {
+            if (payload && payload.error) return payload.error;
+            if (status === 429) return "слишком много попыток, попробуйте через час";
+            if (status === 404) return "заказ не найден";
+            if (status === 410) return "ссылка восстановления истекла";
+            if (status >= 500) return "сервис временно недоступен, попробуйте через минуту";
+            return "что-то пошло не так, попробуйте ещё раз";
+        }
+
+        // Ключ идемпотентности держим на время жизни заказа: пока пользователь
+        // ждёт ответа, повторный клик или ретрай сети должны вернуть тот же
+        // заказ, а не создать второй.
+        function newIdempotencyKey() {
+            if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+            return "k" + Date.now() + Math.random().toString(36).slice(2);
+        }
+
+        function orderPath(value) {
+            return "/orders/" + encodeURIComponent(value);
+        }
+
+        // --- обращения к API ---
+
+        function api(path, options) {
+            var settings = options || {};
+            var init = { method: settings.method || "GET", cache: "no-store" };
+            if (settings.body !== undefined) {
+                init.headers = { "Content-Type": "application/json" };
+                init.body = JSON.stringify(settings.body);
+            }
+            if (settings.idempotencyKey) {
+                init.headers = init.headers || {};
+                init.headers["Idempotency-Key"] = settings.idempotencyKey;
+            }
+            return fetch(CFG.api + path, init);
+        }
+
+        // --- состояния заказа ---
+
+        function showState(title, note, mark) {
+            el.orderState.innerHTML = "<strong>" + title + "</strong><br>"
+                + '<span class="meta">' + note + "</span>";
+            el.orderMark.textContent = mark;
+        }
+
+        function render(view) {
+            setText(el.orderAmount, view.amount + " " + CFG.plan.currency);
+
+            if (view.status === "succeeded" && view.fulfillment === "done") {
+                showState("оплачено, подписка готова", "действует до " + (humanDate(view.vpn_expire_at) || "—"), "✓");
+            } else if (view.status === "succeeded") {
+                showState("оплачено", "готовим подписку, обычно пара секунд", "···");
+            } else if (view.status === "declined") {
+                showState("платёж отклонён", "можно попробовать другой картой", "!");
+            } else if (view.status === "expired") {
+                showState("время платежа вышло", "ссылка на оплату больше не работает", "×");
+            } else {
+                showState(
+                    "ждём оплату",
+                    view.expires_at
+                        ? "ссылка действует до " + humanDate(view.expires_at)
+                        : "мы не закрываем вкладку",
+                    "···"
+                );
+            }
+
+            var canRetry = view.status === "declined" || view.status === "expired";
+            show(el.orderRetryWrap, canRetry);
+            show(el.orderLost, false);
+
+            if (view.fulfillment === "done" && view.subscription_url) {
+                el.subscriptionUrl.value = view.subscription_url;
+                el.subscriptionOpen.href = view.subscription_url;
+                setText(el.subscriptionExpiry, "подписка действует до " + (humanDate(view.vpn_expire_at) || "—"));
+                show(el.subscription, true);
+            }
+
+            // Привязка имеет смысл только у выданной подписки: раньше токен
+            // в боте всё равно не узнает.
+            show(el.bind, view.fulfillment === "done");
+            if (view.fulfillment === "done") {
+                renderBind(view.telegram_bound);
+            }
+
+            if (view.fulfillment === "failed" && view.error) {
+                // Деньги списаны, а товар не выдан. Вторую оплату не
+                // предлагаем: сверяльщик доведёт первый платёж сам.
+                setError(el.orderError,
+                    "Оплата прошла, но выдача не удалась: " + view.error + " Напишите нам, "
+                    + "ссылка уже готовится.");
+            } else {
+                setError(el.orderError, "");
+            }
+
+            if (view.fulfillment === "done") stopPolling();
+        }
+
+        function renderBind(bound) {
+            // Ссылка всегда несёт токен заказа: бот по нему поймёт, к чему
+            // привязывать, и попросит подтвердить кнопкой. Без токена бот
+            // увидит просто /start и покажет меню.
+            if (el.bindLink && token) {
+                el.bindLink.href = "https://t.me/" + CFG.bot + "?start=" + encodeURIComponent(token);
+            }
+
+            if (bound) {
+                // Прячем обёртку, а не саму ссылку: .buttons задаёт
+                // font-size:0 и display-контекст, где hidden на вложенной
+                // кнопке отображается ненадёжно.
+                show(el.bindLinkWrap, false);
+                show(el.bindFallback, false);
+                show(el.bindDone, true);
+                setError(el.bindError, "");
+                return;
+            }
+            show(el.bindDone, false);
+            show(el.bindLinkWrap, true);
+            show(el.bindFallback, true);
+            setError(el.bindError, "");
+        }
+
+        // --- опрос ---
+
+        function stopPolling() {
+            if (pollTimer) {
+                clearTimeout(pollTimer);
+                pollTimer = null;
+            }
+        }
+
+        function schedulePoll() {
+            stopPolling();
+            pollTimer = setTimeout(poll, POLL_MS);
+        }
+
+        function poll() {
+            if (!token || inFlight) return;
+            inFlight = true;
+
+            api(orderPath(token))
+                .then(function (response) {
+                    // 410 — секрет восстановления истёк, 404 — заказа нет.
+                    // В обоих случаях опрос прекращён.
+                    if (response.status === 410 || response.status === 404) {
+                        recoveryExpired();
+                        return null;
+                    }
+                    return readJson(response).then(function (view) {
+                        render(view);
+                        if (view.fulfillment !== "done") schedulePoll();
+                    });
+                })
+                .catch(function () {
+                    // Сеть моргнула — это не повод терять заказ.
+                    schedulePoll();
+                })
+                .then(function () {
+                    inFlight = false;
+                });
+        }
+
+        function recoveryExpired() {
+            stopPolling();
+            token = null;
+            storeToken(null);
+            show(el.order, false);
+            show(el.landing, true);
+            setError(el.landingError,
+                "Ссылка восстановления истекла. Подписка никуда не делась — найдите её в боте @"
+                + CFG.bot + " или купите заново.");
+        }
+
+        function openOrder(value) {
+            token = value;
+            storeToken(value);
+            show(el.landing, false);
+            show(el.order, true);
+            setError(el.landingError, "");
+            poll();
+        }
+
+        // --- события ---
+
+        function busyButton(button, idleText) {
+            button.disabled = true;
+            button.textContent = "создаём заказ…";
+            return function done() {
+                button.disabled = false;
+                button.textContent = idleText;
+            };
+        }
+
+        el.buyButton.addEventListener("click", function () {
+            var nickname = el.nickname.value.trim();
+            if (!nickname) {
+                setError(el.landingError, "Введите никнейм — он понадобится в панели.");
+                el.nickname.focus();
+                return;
+            }
+            setError(el.landingError, "");
+
+            var idle = busyButton(el.buyButton, "купить " + CFG.plan.amount + CFG.plan.currency);
+            var key = newIdempotencyKey();
+
+            api("/orders", { method: "POST", body: { nickname: nickname }, idempotencyKey: key })
+                .then(function (response) {
+                    return readJson(response).then(function (payload) {
+                        return { status: response.status, payload: payload };
+                    });
+                })
+                .then(function (result) {
+                    idle();
+                    if (result.status !== 200) {
+                        setError(el.landingError, describeError(result.status, result.payload));
+                        return;
+                    }
+                    openOrder(result.payload.token);
+                    // На оплату уходим только после того, как заказ точно
+                    // существует: иначе возврат приведёт в пустую страницу.
+                    location.assign(result.payload.checkout_url);
+                })
+                .catch(function () {
+                    idle();
+                    setError(el.landingError, "Не удалось связаться с сервисом. Проверьте соединение.");
+                });
+        });
+
+        el.nickname.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") el.buyButton.click();
+        });
+
+        el.orderRetry.addEventListener("click", function () {
+            if (!token) return;
+            var idle = busyButton(el.orderRetry, "попробовать снова");
+            setError(el.orderError, "");
+
+            api(orderPath(token) + "/retry", { method: "POST" })
+                .then(function (response) {
+                    return readJson(response).then(function (payload) {
+                        if (response.status !== 200) {
+                            idle();
+                            setError(el.orderError, describeError(response.status, payload));
+                            return;
+                        }
+                        location.assign(payload.checkout_url);
+                    });
+                })
+                .catch(function () {
+                    idle();
+                    setError(el.orderError, "Не удалось связаться с сервисом.");
+                });
+        });
+
+        el.orderRestart.addEventListener("click", function () {
+            stopPolling();
+            token = null;
+            storeToken(null);
+            show(el.order, false);
+            show(el.landing, true);
+            setError(el.landingError, "");
+            el.nickname.focus();
+        });
+
+        el.subscriptionCopy.addEventListener("click", function () {            var url = el.subscriptionUrl.value;
+            if (!url) return;
+            var copied = function () {
+                el.subscriptionCopy.textContent = "скопировано";
+                setTimeout(function () {
+                    el.subscriptionCopy.textContent = "скопировать";
+                }, 2000);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(copied, function () {
+                    el.subscriptionUrl.select();
+                    document.execCommand("copy");
+                    copied();
+                });
+            } else {
+                el.subscriptionUrl.select();
+                document.execCommand("copy");
+                copied();
+            }
+        });
+
+        // --- старт ---
+
+        (function start() {
+            var restored = queryParam("o") || readStoredToken();
+
+            if (queryParam("tg")) {
+                // Метка результата нужна была один раз, в адресе она только
+                // мешает — но токен из ?o= при этом сохраняем.
+                var kept = restored ? "?o=" + encodeURIComponent(restored) : "";
+                history.replaceState(null, "", location.pathname + kept);
+            }
+
+            if (!restored) return;
+            openOrder(restored);
+        })();
+    })();
+</script>

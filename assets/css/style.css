@@ -319,6 +319,55 @@ main { padding: 0; }
     border-color: var(--accent);
 }
 
+/* --- страница покупки --- */
+
+/* Ошибки и подсказки: цвет рамки читается и на светлом, и на тёмном. */
+.notice-error {
+    border-left: 2px solid var(--accent);
+    padding: 2px 0 2px 12px;
+    margin: 1.2em 0;
+    font: 13px/1.5 "Courier New", monospace;
+    color: var(--fg);
+    text-align: left;
+}
+
+#subscription-url {
+    /* Ссылка длиннее строки, но ломать перенос в input нельзя. */
+    text-overflow: ellipsis;
+}
+
+.linkbutton {
+    border: 0;
+    background: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.linkbutton:hover { color: var(--accent); }
+
+.button[disabled] {
+    opacity: .5;
+    cursor: default;
+}
+
+.button[disabled]:hover {
+    background: none;
+    color: var(--fg);
+}
+
+details summary {
+    cursor: pointer;
+    font: 13px "Courier New", monospace;
+    color: var(--muted);
+}
+
+details summary:hover { color: var(--accent); }
+
+details[open] summary { margin-bottom: .6em; }
+
 /* --- карточки --- */
 
 .grid {
@@ -596,4 +645,18 @@ th {
     }
 
     .button { display: block; width: 100%; text-align: center; }
+}
+/* Страница покупки: приглушённый текст заметно темнее.
+   У --muted: #777 на светлом фоне контраст 4.09:1 — ниже AA (4.5:1)
+   для обычного текста. Переопределяем только здесь, чтобы не трогать
+   оформление остальных страниц. */
+#landing,
+#order {
+    --muted: #5c5c57;
+}
+
+/* В тёмной теме приглушённый текст должен остаться светлым. */
+[data-theme="dark"] #landing,
+[data-theme="dark"] #order {
+    --muted: #8f8f88;
 }
