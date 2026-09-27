@@ -123,10 +123,10 @@ description: >-
 
     <!--
         Telegram необязателен: подписка уже работает и без него.
-        Основной путь — переход в бота с токеном заказа: он покажет,
-        к чему идёт привязка, и попросит подтвердить её кнопкой.
-        Виджет остаётся в details: он требует /setdomain у BotFather
-        и не работает в браузере без авторизации в Telegram.
+        Единственный путь привязки — переход в бота с токеном заказа:
+        он покажет, к чему идёт привязка, и попросит подтвердить её кнопкой.
+        Если Telegram не открывается, бот всё равно доступен напрямую:
+        команда /link и ссылка подписки.
     -->
     <div id="bind" hidden>
         <h3>привяжите Telegram</h3>
@@ -152,19 +152,21 @@ description: >-
         </p>
 
         <details id="bind-fallback">
-            <summary>привязать без перехода в Telegram</summary>
+            <summary>если Telegram не открывается</summary>
 
             <p class="comment">
-                Виджет Telegram: подойдёт, если вы уже вошли в Telegram в этом
-                браузере. Он требует, чтобы домен <code>potatom.net</code> был
-                прописан в BotFather через <code>/setdomain</code>.
+                Ссылка выше — обычный deep-link, он работает всегда. Если
+                Telegram на этом устройстве не открывается, откройте
+                <a href="{{ site.data.pvpn.bot_url }}" rel="noopener noreferrer">@{{ site.data.pvpn.bot_username }}</a>
+                вручную и отправьте команду <code>/link</code>, а затем
+                скопируйте туда ссылку подписки из блока выше — бот привяжет
+                её к вашему аккаунту.
             </p>
 
-            <div id="bind-widget"></div>
-
             <p class="comment">
-                Виджет не загружается при блокировке AdBlock — тогда просто
-                нажмите «привязать в Telegram» выше.
+                Виджет Telegram мы убрали: он требовал домен, прописанный в
+                BotFather через <code>/setdomain</code>, и работал хуже, чем
+                обычная ссылка.
             </p>
         </details>
     </div>
@@ -221,7 +223,6 @@ description: >-
             bind: pick("bind"),
             bindLink: pick("bind-link"),
             bindLinkWrap: pick("bind-link-wrap"),
-            bindWidget: pick("bind-widget"),
             bindError: pick("bind-error"),
             bindDone: pick("bind-done"),
             bindFallback: pick("bind-fallback")
@@ -230,7 +231,6 @@ description: >-
         var token = null;
         var pollTimer = null;
         var inFlight = false;
-        var widgetReady = false;
 
         // --- мелкие помощники ---
 
@@ -394,7 +394,6 @@ description: >-
                 // font-size:0 и display-контекст, где hidden на вложенной
                 // кнопке отображается ненадёжно.
                 show(el.bindLinkWrap, false);
-                show(el.bindWidget, false);
                 show(el.bindFallback, false);
                 show(el.bindDone, true);
                 setError(el.bindError, "");
@@ -404,9 +403,6 @@ description: >-
             show(el.bindLinkWrap, true);
             show(el.bindFallback, true);
             setError(el.bindError, "");
-            // Виджет грузим только если человек его раскрыл: незакрытый
-            // скрипт с Telegram — лишний запрос на каждой странице.
-            if (el.bindFallback && el.bindFallback.open) mountWidget();
         }
 
         // --- опрос ---
@@ -467,79 +463,6 @@ description: >-
             show(el.order, true);
             setError(el.landingError, "");
             poll();
-        }
-
-        // --- Telegram Login Widget ---
-
-        // Виджет вызывает функцию по имени из глобальной области, поэтому
-        // обработчик приходится выставлять на window.
-        window.onTelegramAuth = function (user) {
-            if (!token) return;
-            var body = new URLSearchParams();
-            Object.keys(user || {}).forEach(function (key) {
-                var value = user[key];
-                if (value !== undefined && value !== null && value !== "") {
-                    body.append(key, String(value));
-                }
-            });
-
-            // Токен заказа едет в query, данные виджета — в form: так их
-            // видит и проверка подписи, и выбор заказа на сервере.
-            fetch(CFG.api + "/auth/telegram?o=" + encodeURIComponent(token), {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    // Просим JSON, а не редирект: за cross-origin редиректом
-                    // браузер требует CORS-заголовки на финальном ответе, а их
-                    // на странице potatom.net нет и быть не может.
-                    "Accept": "application/json"
-                },
-                body: body.toString(),
-                cache: "no-store"
-            })
-                .then(function (response) {
-                    if (!response.ok) throw new Error("http " + response.status);
-                    return response.json();
-                })
-                .then(function (payload) {
-                    var result = payload && payload.result;
-                    if (result === "ok") {
-                        renderBind(true);
-                        return;
-                    }
-                    var reasons = {
-                        bad: "Telegram не подтвердил вход. Попробуйте ещё раз.",
-                        stale: "Виджет был открыт давно. Обновите страницу и войдите заново.",
-                        err: "Эта подписка уже привязана к другому Telegram.",
-                        noorder: "Заказ не найден, обновите страницу."
-                    };
-                    setError(el.bindError, reasons[result] || "Не получилось привязать Telegram.");
-                })
-                .catch(function () {
-                    setError(el.bindError, "Не получилось связаться с сервисом. Проверьте соединение.");
-                });
-        };
-
-        function mountWidget() {
-            if (widgetReady || !el.bindWidget) return;
-            widgetReady = true;
-
-            var script = document.createElement("script");
-            script.async = true;
-            script.src = "https://telegram.org/js/telegram-widget.js?22";
-            script.setAttribute("data-telegram-login", CFG.bot);
-            script.setAttribute("data-size", "large");
-            script.setAttribute("data-radius", "0");
-            script.setAttribute("data-userpic", "false");
-            script.setAttribute("data-request-access", "write");
-            script.setAttribute("data-onauth", "onTelegramAuth");
-            script.onerror = function () {
-                widgetReady = false;
-                setError(el.bindError,
-                    "Виджет Telegram не загрузился — возможно, его блокирует AdBlock. "
-                    + "Привяжите подписку через бота, это работает всегда.");
-            };
-            el.bindWidget.appendChild(script);
         }
 
         // --- события ---
@@ -622,12 +545,6 @@ description: >-
             show(el.landing, true);
             setError(el.landingError, "");
             el.nickname.focus();
-        });
-
-        // Виджет подгружается в момент раскрытия блока: пока человек его
-        // не открыл, скрипт Telegram на странице не нужен.
-        el.bindFallback.addEventListener("toggle", function () {
-            if (el.bindFallback.open) mountWidget();
         });
 
         el.subscriptionCopy.addEventListener("click", function () {            var url = el.subscriptionUrl.value;
