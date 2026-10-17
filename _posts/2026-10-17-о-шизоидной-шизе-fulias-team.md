@@ -5,7 +5,7 @@ title: "О шизоидной шизе Fulias Team"
 date: 2026-10-17
 author: newoxu
 authors: ["newoxu"]
-description: О проектах Fulias Team: Funtys Messenger, Funtys Music и Funtys Moderator Bot. Немного о разработке, экспериментах и жизни собственных продуктов.
+description: "О проектах Fulias Team: Funtys Messenger, Funtys Music и Funtys Moderator Bot. Немного о разработке, экспериментах и жизни собственных продуктов."
 ---
 
 # О шизоидной шизе Fulias Team
