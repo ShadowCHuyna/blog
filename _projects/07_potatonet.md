@@ -52,7 +52,7 @@ github: "https://github.com/TheStepashich/PotatoNet"
 
 ## 🖥 Интерфейс
 
-![i](assets/imgs/screen.webp)
+![i](/assets/imgs/screen.webp)
 
 Всё максимально просто, никаких лишних настроек, которые сбивают с толку:
 
