@@ -128,8 +128,8 @@ make installer PLATFORM=windows  # Результат: build/PotatoNet-setup-x64
 ## Стек
 {: .comment }
 
-- **Jitsi Docker**{: .meta }
-  Сервер видеоконференций.
-- **Coturn**{: .meta }
-  STUN/TURN сервер.
+- **pnet**{: .meta }
+  Сделано на основе.
+- **Wails v2**{: .meta }
+  Фреймворк в основе приложения.
 {: .grid }
