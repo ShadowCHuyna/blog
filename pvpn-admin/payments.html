@@ -104,12 +104,14 @@
 
     function refreshList() {
         PAdmin.flash("");
-        var filters = state.filters;
-        var query = "?limit=50&offset=" + state.offset;
-        if (filters.status) query += "&status=" + encodeURIComponent(filters.status);
-        if (filters.client_uuid) query += "&client_uuid=" + encodeURIComponent(filters.client_uuid);
-        if (filters.label) query += "&label=" + encodeURIComponent(filters.label);
-        if (filters.contact) query += "&contact=" + encodeURIComponent(filters.contact);
+        var query = PAdmin.buildQuery({
+            limit: 50,
+            offset: state.offset,
+            status: state.filters.status,
+            client_uuid: state.filters.client_uuid,
+            label: state.filters.label,
+            contact: state.filters.contact
+        });
         PAdmin.request("/api/v1/admin/payments" + query).then(function (payload) {
             renderTable(payload);
         }).catch(errorHandler());

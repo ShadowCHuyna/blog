@@ -4,7 +4,7 @@
 # живых систем в репозитории не хранятся.
 
 # Адрес платёжного сервиса. Он же и есть origin для CORS.
-api_base: "https://api.potatom.net"
+api_base: "http://localhost:8000"
 
 # Бот, которому привязывается Telegram.
 bot_username: "potatom_vpn_bot"

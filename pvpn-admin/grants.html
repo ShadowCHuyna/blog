@@ -96,11 +96,13 @@
 
     function refreshList() {
         PAdmin.flash("");
-        var filters = state.filters;
-        var query = "?limit=50&offset=" + state.offset;
-        if (filters.status) query += "&status=" + encodeURIComponent(filters.status);
-        if (filters.action) query += "&action=" + encodeURIComponent(filters.action);
-        if (filters.payment_id) query += "&payment_id=" + encodeURIComponent(filters.payment_id);
+        var query = PAdmin.buildQuery({
+            limit: 50,
+            offset: state.offset,
+            status: state.filters.status,
+            action: state.filters.action,
+            payment_id: state.filters.payment_id
+        });
         PAdmin.request("/api/v1/admin/grants" + query).then(function (payload) {
             renderTable(payload);
         }).catch(errorHandler());

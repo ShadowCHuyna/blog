@@ -8,6 +8,10 @@
   description: софт / backend / api
   url: /minecraft/calc/
 
+- name: VPN
+  description: vless / быстрый и безопасный vpn
+  url: /pvpn/
+
 - name: DEVOPS И ИНФРАСТРУКТУРА
   description: linux / docker / ci / мониторинг
 

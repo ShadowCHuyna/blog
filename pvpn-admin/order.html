@@ -39,9 +39,8 @@
 
     /*
      * Оформление заказа в точности как у клиента (docs/api-endpoints.md §5, §6):
-     *   1. POST /api/v1/verify/{email}/request  — только для e-mail;
-     *      код для telegram пользователь получает в боте.
-     *   2. POST /api/v1/verify/{user}           — код → verification_token;
+     *   1. POST /api/v1/verify/{email}/request  — код подтверждения на e-mail;
+     *   2. POST /api/v1/verify/{email}          — код → verification_token;
      *   3. POST /api/v1/payments                — заказ с Idempotency-Key.
      * Тарифы берём из публичного каталога /api/v1/plans.
      */
@@ -93,51 +92,33 @@
                 " · " + esc(plan.duration_days) + " дн.</option>";
         }).join("");
         pick("page").innerHTML =
-            '<div class="page-head"><h1>Заказ</h1><span class="muted">шаг 1: контакт и код</span></div>' +
+            '<div class="page-head"><h1>Заказ</h1><span class="muted">шаг 1: e-mail и код</span></div>' +
             '<div class="card"><form id="order-form" class="stack">' +
             '<label><span>тариф</span><select id="o-plan" required>' + options + "</select></label>" +
-            '<div class="radio-row">' +
-            '<label><input type="radio" name="o-type" value="email" checked><span>e-mail</span></label>' +
-            '<label><input type="radio" name="o-type" value="telegram"><span>telegram id</span></label>' +
-            "</div>" +
-            '<label><span>контакт</span>' +
-            '<input type="text" id="o-contact" required autocomplete="off" spellcheck="false">' +
-            '<span class="hint" id="o-contact-hint"></span></label>' +
+            '<label><span>e-mail клиента</span>' +
+            '<input type="email" id="o-contact" required autocomplete="off" spellcheck="false" placeholder="user@example.com">' +
+            '<span class="hint">на этот адрес придёт 4-значный код подтверждения</span></label>' +
             '<p class="field-error" id="o-error"></p>' +
             '<div class="form-actions">' +
             '<button type="submit" class="button primary">получить код</button>' +
             "</div></form></div>";
-        updateHint();
-        pick("page").querySelectorAll('input[name="o-type"]').forEach(function (radio) {
-            radio.addEventListener("change", updateHint);
-        });
+
         pick("order-form").addEventListener("submit", function (event) {
             event.preventDefault();
             setError("");
             ctx.planId = pick("o-plan").value;
-            ctx.contactType = document.querySelector('input[name="o-type"]:checked').value;
+            ctx.contactType = "email";
             ctx.contactValue = pick("o-contact").value.trim();
             if (!ctx.contactValue) {
-                setError("Укажите контакт");
+                setError("Укажите e-mail");
                 return;
             }
-            if (ctx.contactType === "email" && ctx.contactValue.indexOf("@") < 1) {
+            if (ctx.contactValue.indexOf("@") < 1) {
                 setError("Укажите корректный e-mail");
-                return;
-            }
-            if (ctx.contactType === "telegram" && !/^\d{4,15}$/.test(ctx.contactValue)) {
-                setError("Telegram id — 4–15 цифр");
                 return;
             }
             requestCode();
         });
-
-        function updateHint() {
-            var type = document.querySelector('input[name="o-type"]:checked').value;
-            pick("o-contact-hint").textContent = type === "email"
-                ? "на этот адрес придёт 4-значный код"
-                : "пользователь получает код в боте; здесь нужен его числовой id";
-        }
 
         function setError(text) {
             var el = pick("o-error");
@@ -151,10 +132,6 @@
             PAdmin.flash(info, "success");
             renderCodeStep();
         };
-        if (ctx.contactType === "telegram") {
-            done("Код пользователь получает в боте. Введите его на следующем шаге.");
-            return;
-        }
         PAdmin.request(
             "/api/v1/verify/" + encodeURIComponent(ctx.contactValue) + "/request",
             { method: "POST", body: { type: "email" } }
@@ -254,6 +231,9 @@
     // ------------------------------------------------------------- результат
     function renderCreated(order) {
         var instructions = order.payment_instructions || {};
+        if (instructions.payment_url) {
+            window.open(instructions.payment_url, "_blank", "noopener");
+        }
         var url = instructions.payment_url
             ? '<a href="' + esc(instructions.payment_url) + '" target="_blank" rel="noopener noreferrer">открыть оплату</a>'
             : "—";
@@ -261,14 +241,11 @@
             '<div class="page-head"><h1>Заказ создан</h1>' + PAdmin.statusBadge(order.status) + "</div>" +
             '<div class="card">' + PAdmin.kvTable([
                 ["payment_id", "<code>" + esc(order.payment_id) + "</code>"],
-                ["label", "<code>" + esc(instructions.label) + "</code>"],
                 ["тариф", esc(order.plan_id) + " · " + esc(order.duration_days) + " дн."],
                 ["сумма", PAdmin.fmtMoney(order.amount, order.currency)],
-                ["кошелёк", "<code>" + esc(instructions.wallet_id) + "</code>"],
                 ["ссылка оплаты", url],
                 ["оплата действует до", PAdmin.fmtDate(order.expires_at)]
             ]) +
-            '<p class="hint">' + esc(instructions.manual_instructions) + "</p>" +
             '<div class="form-actions">' +
             '<a class="button" href="payments.html?payment=' + encodeURIComponent(order.payment_id) + '">карточка платежа</a>' +
             '<button type="button" id="o-again" class="button">создать ещё</button>' +

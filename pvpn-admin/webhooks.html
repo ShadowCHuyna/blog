@@ -103,13 +103,16 @@
     function refreshList() {
         PAdmin.flash("");
         var filters = state.filters;
-        var query = "?limit=50&offset=" + state.offset;
-        if (filters.operation_id) query += "&operation_id=" + encodeURIComponent(filters.operation_id);
-        if (filters.label) query += "&label=" + encodeURIComponent(filters.label);
-        if (filters.signature_valid) query += "&signature_valid=" + filters.signature_valid;
-        if (filters.processed) query += "&processed=" + filters.processed;
-        if (filters.from) query += "&received_from=" + encodeURIComponent(toIso(filters.from));
-        if (filters.to) query += "&received_to=" + encodeURIComponent(toIso(filters.to));
+        var query = PAdmin.buildQuery({
+            limit: 50,
+            offset: state.offset,
+            operation_id: filters.operation_id,
+            label: filters.label,
+            signature_valid: filters.signature_valid,
+            processed: filters.processed,
+            received_from: toIso(filters.from),
+            received_to: toIso(filters.to)
+        });
         PAdmin.request("/api/v1/admin/webhook-events" + query).then(function (payload) {
             renderTable(payload);
         }).catch(errorHandler());

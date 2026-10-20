@@ -41,8 +41,29 @@
         }
     }
 
+    function defaultApi() {
+        if (typeof window !== "undefined" && window.location) {
+            var origin = window.location.origin;
+            if (origin && origin !== "null" && /^https?:\/\//i.test(origin)) {
+                if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+                    return origin;
+                }
+            }
+        }
+        return DEFAULT_API;
+    }
+
     function getApi() {
-        return normalizeApi(load(API_KEY) || DEFAULT_API);
+        var params = new URLSearchParams(window.location.search);
+        var fromQuery = params.get("api");
+        if (fromQuery) {
+            var normalized = normalizeApi(fromQuery);
+            if (normalized) {
+                store(API_KEY, normalized);
+                return normalized;
+            }
+        }
+        return load(API_KEY) || defaultApi();
     }
 
     function getToken() {
@@ -56,7 +77,10 @@
     function normalizeApi(raw) {
         var value = String(raw || "").trim();
         if (!value) return "";
-        if (!/^https?:\/\//i.test(value)) value = "https://" + value;
+        if (!/^https?:\/\//i.test(value)) {
+            var isLocal = /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(value);
+            value = (isLocal ? "http://" : "https://") + value;
+        }
         // Хост без базового пути — API живёт на /api/v1/... от корня.
         try {
             var url = new URL(value);
@@ -64,6 +88,20 @@
         } catch (e) {
             return "";
         }
+    }
+
+    function buildQuery(params) {
+        if (!params) return "";
+        var search = new URLSearchParams();
+        for (var key in params) {
+            if (!Object.prototype.hasOwnProperty.call(params, key)) continue;
+            var val = params[key];
+            if (val !== undefined && val !== null && val !== "") {
+                search.set(key, String(val));
+            }
+        }
+        var qs = search.toString();
+        return qs ? "?" + qs : "";
     }
 
     // ------------------------------------------------------------------ API
@@ -235,7 +273,12 @@
         if (token) {
             if (info) {
                 info.hidden = false;
-                info.textContent = "API: " + (new URL(getApi()).host) + " · токен установлен";
+                try {
+                    info.textContent = "API: " + (new URL(getApi()).host);
+                } catch (e) {
+                    info.textContent = "API: " + getApi();
+                }
+                info.title = "Подключено к " + getApi();
             }
             if (button) {
                 button.hidden = false;
@@ -254,36 +297,39 @@
         onPageOpen = onOpen;
         var page = pick("page");
         if (!page) return;
+        var currentApi = getApi();
         page.innerHTML =
             '<div class="card card-narrow"><h1>Вход в панель</h1>' +
             '<form id="login-form" class="stack">' +
             '<label><span>Адрес API</span>' +
-            '<input type="text" id="login-api" required spellcheck="false"></label>' +
-            '<label><span>X-Admin-Token</span>' +
-            '<input type="password" id="login-token" required autocomplete="off" spellcheck="false"></label>' +
-            '<p class="hint">Токен хранится только в этом браузере и уходит в заголовке ' +
-            "X-Admin-Token. «Выйти» в шапке стирает его.</p>" +
+            '<input type="text" id="login-api" spellcheck="false" placeholder="http://127.0.0.1:8000" value="' + esc(currentApi) + '">' +
+            '<span class="hint">Базовый адрес API сервиса. Локально: <code>http://127.0.0.1:8000</code></span></label>' +
+            '<label><span>Токен администратора</span>' +
+            '<input type="password" id="login-token" required autocomplete="current-password" spellcheck="false" placeholder="ADMIN_API_TOKEN"></label>' +
+            '<p class="hint">Токен из переменной <code>ADMIN_API_TOKEN</code> (.env на сервере). ' +
+            "Хранится только в вашем браузере.</p>" +
             '<p class="field-error" id="login-note"></p>' +
             '<div class="form-actions"><button type="submit" class="button primary">войти</button></div>' +
             "</form></div>";
-        pick("login-api").value = load(API_KEY) || DEFAULT_API;
         pick("login-token").value = "";
         setNote(note);
 
         pick("login-form").addEventListener("submit", function (event) {
             event.preventDefault();
             var rawApi = pick("login-api").value.trim();
+            if (rawApi) {
+                var normalized = normalizeApi(rawApi);
+                if (!normalized) {
+                    setNote("Укажите корректный адрес API (например, http://127.0.0.1:8000)");
+                    return;
+                }
+                store(API_KEY, normalized);
+            }
             var token = pick("login-token").value.trim();
-            var host = normalizeApi(rawApi);
-            if (!rawApi || !host) {
-                setNote("Укажите корректный адрес API (например, https://api.example.com)");
-                return;
-            }
             if (!token) {
-                setNote("Введите X-Admin-Token");
+                setNote("Введите токен администратора");
                 return;
             }
-            store(API_KEY, rawApi);
             setToken(token);
             var submit = pick("login-form").querySelector("button");
             submit.disabled = true;
@@ -295,11 +341,15 @@
                     return;
                 }
                 setToken(null);
-                setNote(describe(result).message);
+                if (result.status === 401) {
+                    setNote("Неверный токен. Проверьте значение ADMIN_API_TOKEN в файле .env на сервере.");
+                } else {
+                    setNote(describe(result).message);
+                }
                 submit.disabled = false;
             }).catch(function () {
                 setToken(null);
-                setNote("Не удалось связаться с API " + host + ". Проверьте адрес и доступность сервиса.");
+                setNote("Не удалось связаться с API по адресу " + getApi() + ". Проверьте, запущен ли сервер.");
                 submit.disabled = false;
             });
         });
@@ -342,6 +392,7 @@
         kvTable: kvTable,
         detailsJson: detailsJson,
         renderPagination: renderPagination,
+        buildQuery: buildQuery,
         getApi: getApi
     };
 })();

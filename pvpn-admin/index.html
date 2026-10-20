@@ -81,10 +81,12 @@
         pick("new-plan").addEventListener("click", function () { openEditor(null); });
 
         PAdmin.flash("");
-        PAdmin.request(
-            "/api/v1/admin/plans?active=" + (activeFilter === "all" ? "" : activeFilter) +
-            "&limit=50&offset=" + offset
-        ).then(function (payload) {
+        var query = PAdmin.buildQuery({
+            active: activeFilter === "all" ? "" : activeFilter,
+            limit: 50,
+            offset: offset
+        });
+        PAdmin.request("/api/v1/admin/plans" + query).then(function (payload) {
             renderTable(payload);
         }).catch(errorHandler(reload));
     }

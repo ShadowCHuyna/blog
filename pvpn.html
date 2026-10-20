@@ -54,24 +54,15 @@ description: >-
     </div>
 
     <p>
-        <label class="label">// куда выдать подписку</label>
-        <span class="radio row">
-            <input type="radio" name="contact-type" id="contact-email" value="email" checked>
-            <label for="contact-email">e-mail</label>
-            <input type="radio" name="contact-type" id="contact-telegram" value="telegram">
-            <label for="contact-telegram">telegram id</label>
-        </span>
-    </p>
-
-    <p>
+        <label class="label" for="contact">// e-mail для подписки</label>
         <input
-            type="text"
+            type="email"
             id="contact"
             class="search-input"
             autocomplete="email"
             spellcheck="false"
             placeholder="ваш e-mail">
-        <span class="meta" id="contact-hint"></span>
+        <span class="meta" id="contact-hint">на этот адрес придёт 4-значный код подтверждения</span>
     </p>
 
     <p class="buttons">
@@ -79,7 +70,7 @@ description: >-
     </p>
 
     <p id="code-row" hidden>
-        <label class="label">// код подтверждения</label>
+        <label class="label" for="code">// код подтверждения из письма</label>
         <input
             type="text"
             id="code"
@@ -95,7 +86,7 @@ description: >-
     </p>
 
     <p class="comment" id="order-note">
-        подписка выдаётся на указанный контакт после подтверждения оплаты
+        подписка выдаётся на указанный e-mail после подтверждения оплаты
     </p>
 
     <p class="notice-error" id="landing-error" hidden></p>
@@ -123,17 +114,8 @@ description: >-
             <button type="button" id="order-cancel" class="linkbutton">отменить заказ</button>
         </p>
         <p class="comment">
-            переведите сумму на кошелёк и обязательно укажите метку — по ней
-            сервис сопоставит перевод с заказом; безопаснее переходить по
-            кнопке выше, там всё заполнено заранее
-        </p>
-        <p>
-            <label class="label">// кошелёк</label>
-            <input type="text" id="pay-wallet" class="search-input" readonly>
-        </p>
-        <p>
-            <label class="label">// метка (label)</label>
-            <input type="text" id="pay-label" class="search-input" readonly>
+            страница оплаты открылась в новой вкладке. Если она закрылась — нажмите кнопку выше.
+            После подтверждения перевода подписка появится здесь автоматически.
         </p>
     </div>
 
@@ -168,9 +150,11 @@ description: >-
         "use strict";
 
         var CFG = {
-            api: {{ api_base | jsonify }},
-            bot: {{ site.data.pvpn.bot_username | jsonify }},
-            botUrl: {{ site.data.pvpn.bot_url | jsonify }}
+            api: (function () {
+                var queryApi = new URLSearchParams(window.location.search).get("api");
+                var base = queryApi || {{ api_base | jsonify }} || window.location.origin || "";
+                return base.replace(/\/+$/, "");
+            })()
         };
 
         // Что переживает перезагрузку таба:
@@ -189,8 +173,6 @@ description: >-
         var el = {
             landing: pick("landing"),
             plans: pick("plans"),
-            contactEmail: pick("contact-email"),
-            contactType: pick("contact-telegram"),
             contact: pick("contact"),
             contactHint: pick("contact-hint"),
             codeButton: pick("code-button"),
@@ -389,43 +371,17 @@ description: >-
             return null;
         }
 
-        // --- подтверждение контакта ---
-
-        function contactType() {
-            return el.contactType.checked ? "telegram" : "email";
-        }
+        // --- подтверждение контакта (только e-mail) ---
 
         function contactValue() {
             return el.contact.value.trim();
         }
 
         function validateContact() {
-            var type = contactType();
             var value = contactValue();
-            if (!value) return "Укажите контакт — на него выдаётся и восстанавливается подписка.";
-            if (type === "email" && value.indexOf("@") < 1) return "Похоже на некорректный e-mail.";
-            if (type === "telegram" && !/^\d{4,15}$/.test(value)) {
-                return "Telegram id — только цифры (4–15), узнать его можно в боте.";
-            }
+            if (!value) return "Укажите e-mail — на него придёт ссылка на подписку.";
+            if (value.indexOf("@") < 1 || value.indexOf(".") < 0) return "Похоже на некорректный e-mail.";
             return "";
-        }
-
-        function refreshContactHint() {
-            if (contactType() === "telegram") {
-                el.contactHint.innerHTML = '<a href="' + CFG.botUrl + '">' + CFG.bot + "</a> покажет ваш id и пришлёт код; id тоже вводится здесь";
-                el.contact.setAttribute("placeholder", "числовой telegram id");
-                el.contact.setAttribute("autocomplete", "off");
-                show(el.codeButton, false);
-                show(el.codeRow, true);
-                el.orderNote.textContent = "код придёт в боте; он же подскажет ваш id";
-            } else {
-                el.contactHint.textContent = "код подтвердит адрес";
-                el.contact.setAttribute("placeholder", "ваш e-mail");
-                el.contact.setAttribute("autocomplete", "email");
-                show(el.codeButton, true);
-                show(el.codeRow, false);
-                el.orderNote.textContent = "подписка выдаётся на указанный контакт после подтверждения оплаты";
-            }
         }
 
         function requestCode() {
@@ -498,14 +454,13 @@ description: >-
             setError(el.landingError, "");
 
             var idle = busyBuy();
-            var type = contactType();
             var value = contactValue();
             var key = idempotencyKey();
 
             // Код подтверждения обмениваем на verification_token.
             api("/api/v1/verify/" + encodeURIComponent(value), {
                 method: "POST",
-                body: { code: parseInt(code, 10), type: type }
+                body: { code: parseInt(code, 10), type: "email" }
             })
                 .then(function (response) {
                     return readJsonResponse(response).then(function (payload) {
@@ -528,7 +483,7 @@ description: >-
                         body: {
                             client_uuid: clientUuid(),
                             plan_id: selectedPlan,
-                            contact: { type: type, value: value },
+                            contact: { type: "email", value: value },
                             verification_token: result.payload.verification_token
                         }
                     }).then(function (response) {
@@ -566,6 +521,9 @@ description: >-
                 plan_id: order.plan_id,
                 expires_at: order.expires_at
             }));
+            if (instructions.payment_url) {
+                window.open(instructions.payment_url, "_blank", "noopener");
+            }
             openOrder(order.payment_id);
         }
 
@@ -607,6 +565,10 @@ description: >-
         }
 
         function render(view) {
+            if (el.orderAmount && view.amount) {
+                var symbol = view.currency === "RUB" ? "₽" : (view.currency || "");
+                el.orderAmount.textContent = view.amount + (symbol ? " " + symbol : "");
+            }
             show(el.payDetails, view.status === "pending");
             show(el.orderRetryWrap, view.status === "expired" || view.status === "cancelled");
             show(el.orderLost, false);
@@ -703,8 +665,8 @@ description: >-
 
         function renderPayDetails(view) {
             var instructions = view.payment_instructions || {};
-            el.payWallet.value = instructions.wallet_id || "";
-            el.payLabel.value = instructions.label || "";
+            if (el.payWallet) el.payWallet.value = instructions.wallet_id || "";
+            if (el.payLabel) el.payLabel.value = instructions.label || "";
             if (instructions.payment_url) {
                 el.payOpen.setAttribute("data-payment-url", instructions.payment_url);
                 el.payOpen.disabled = false;
@@ -755,8 +717,7 @@ description: >-
         el.contact.addEventListener("keydown", function (event) {
             if (event.key === "Enter") {
                 event.preventDefault();
-                if (contactType() === "email") requestCode();
-                else el.buyButton.click();
+                requestCode();
             }
         });
         el.code.addEventListener("keydown", function (event) {
@@ -765,8 +726,6 @@ description: >-
                 el.buyButton.click();
             }
         });
-        el.contactEmail.addEventListener("change", refreshContactHint);
-        el.contactType.addEventListener("change", refreshContactHint);
 
         el.buyButton.addEventListener("click", createOrder);
 
@@ -838,7 +797,6 @@ description: >-
         // --- старт ---
 
         (function start() {
-            refreshContactHint();
             loadPlans();
 
             var savedOrder = readJson(readStore(ORDER_KEY), null);
