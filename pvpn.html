@@ -32,7 +32,7 @@ extra_css: /assets/css/pvpn.css
 </p>
 
 <section class="section" id="landing">
-    <h2 class="comment">что входит<span class="tag">[01/03]</span></h2>
+    <h2 class="comment">что входит<span class="tag">[01/02]</span></h2>
 
     <div class="grid">
         {% for feature in site.data.pvpn.features %}
@@ -44,7 +44,7 @@ extra_css: /assets/css/pvpn.css
         {% endfor %}
     </div>
 
-    <h2 class="comment">тариф<span class="tag">[02/03]</span></h2>
+    <h2 class="comment">тариф<span class="tag">[02/02]</span></h2>
 
     <p class="comment">
         Нажмите на подходящий тариф, чтобы перейти к оформлению.
@@ -70,8 +70,8 @@ extra_css: /assets/css/pvpn.css
 
         <!-- Шаг 1: ввод почты -->
         <div id="step-email">
+            <label class="label" for="contact">// e-mail для подписки</label>
             <p>
-                <label class="label" for="contact">// e-mail для подписки</label>
                 <input
                     type="email"
                     id="contact"
@@ -89,8 +89,8 @@ extra_css: /assets/css/pvpn.css
 
         <!-- Шаг 2: ввод кода -->
         <div id="step-code" hidden>
+            <label class="label" for="code">// код подтверждения из письма</label>
             <p>
-                <label class="label" for="code">// код подтверждения из письма</label>
                 <input
                     type="text"
                     id="code"

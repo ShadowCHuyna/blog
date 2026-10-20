@@ -4,7 +4,7 @@
 # живых систем в репозитории не хранятся.
 
 # Адрес платёжного сервиса. Он же и есть origin для CORS.
-api_base: "http://localhost:8000"
+api_base: "https://pvpn-api.potatom.net"
 
 # Бот, которому привязывается Telegram.
 bot_username: "potatom_vpn_bot"
@@ -13,15 +13,6 @@ bot_url: "https://t.me/potatom_vpn_bot"
 # Тот же домен, что и у сайта: Login Widget требует, чтобы он был
 # прописан в BotFather через /setdomain.
 site_origin: "https://potatom.net"
-
-plan:
-  id: "pvpn_1m"
-  name: "1 месяц"
-  amount: "250"
-  currency: "₽"
-  days: 30
-  hwid_device_limit: 5
-  traffic: "безлимит"
 
 # Что показываем до покупки.
 features:
