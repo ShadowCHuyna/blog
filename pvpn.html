@@ -3,7 +3,7 @@ layout: default
 permalink: /pvpn/
 title: pVPN — купить подписку
 description: >-
-  Свой VPN на WireGuard. 5 устройств, безлимитный трафик, {{ site.data.pvpn.plan.amount }}{{ site.data.pvpn.plan.currency }} за {{ site.data.pvpn.plan.days }} дней.
+  VPN. 5 устройств, безлимитный трафик, {{ site.data.pvpn.plan.amount }}{{ site.data.pvpn.plan.currency }} за {{ site.data.pvpn.plan.days }} дней.
 ---
 
 {%- comment -%}
@@ -11,6 +11,14 @@ description: >-
 локально, без обращения к боевому сервису:
 
     jekyll build --config _config.yml,_config.dev.yml
+
+Поток покупки повторяет контракт сервиса (docs/api-endpoints.md):
+
+    GET  /api/v1/plans              — каталог активных тарифов
+    POST /api/v1/verify/{user}/request — код на e-mail (для telegram — код из бота)
+    POST /api/v1/verify/{user}      — код → verification_token
+    POST /api/v1/payments           — заказ (Idempotency-Key, client_uuid)
+    GET  /api/v1/payments/{id}      — статус заказа и выдачи (опрос)
 {%- endcomment -%}
 {%- assign api_base = site.pvpn_api_base | default: site.data.pvpn.api_base -%}
 {%- assign plan = site.data.pvpn.plan %}
@@ -18,12 +26,12 @@ description: >-
 <h1>pVPN.</h1>
 
 <p class="lead">
-    Свой VPN-сервер на WireGuard.
-    {{ plan.amount }}{{ plan.currency }} за {{ plan.days }} дней, оплата картой.
+    Свой VPN-сервер.
+    {{ plan.amount }}{{ plan.currency }} за {{ plan.days }} дней.
 </p>
 
 <section class="section" id="landing">
-    <h2 class="comment">что входит<span class="tag">[01/01]</span></h2>
+    <h2 class="comment">что входит<span class="tag">[01/03]</span></h2>
 
     <div class="grid">
         {% for feature in site.data.pvpn.features %}
@@ -35,51 +43,59 @@ description: >-
         {% endfor %}
     </div>
 
-    <div class="list">
-        <div class="list-item">
-            <span class="number">{{ plan.days }}</span>
-            <span>
-                <strong>дней доступа</strong>
-                <br><span class="meta">продление на столько же</span>
-            </span>
-            <span class="arrow">{{ plan.amount }}{{ plan.currency }}</span>
-        </div>
-        <div class="list-item">
-            <span class="number">{{ plan.hwid_device_limit }}</span>
-            <span>
-                <strong>устройств одновременно</strong>
-                <br><span class="meta">привязка по аппаратной подписи</span>
-            </span>
-            <span class="arrow">hwID</span>
-        </div>
-        <div class="list-item">
-            <span class="number">&infin;</span>
-            <span>
-                <strong>трафик</strong>
-                <br><span class="meta">без счётчиков и ограничений</span>
-            </span>
-            <span class="arrow">&infin;</span>
-        </div>
+    <h2 class="comment">тариф<span class="tag">[02/03]</span></h2>
+
+    <p class="comment">
+        Список загружается из сервиса, поэтому цены всегда актуальные.
+    </p>
+
+    <div class="list" id="plans" aria-label="выбор тарифа">
+        <div class="list-item"><span class="meta">загружаем тарифы…</span></div>
     </div>
 
     <p>
-        <label class="label" for="nickname">// как вас зовут в панели</label>
+        <label class="label">// куда выдать подписку</label>
+        <span class="radio row">
+            <input type="radio" name="contact-type" id="contact-email" value="email" checked>
+            <label for="contact-email">e-mail</label>
+            <input type="radio" name="contact-type" id="contact-telegram" value="telegram">
+            <label for="contact-telegram">telegram id</label>
+        </span>
+    </p>
+
+    <p>
         <input
             type="text"
-            id="nickname"
+            id="contact"
             class="search-input"
-            maxlength="64"
-            autocomplete="off"
+            autocomplete="email"
             spellcheck="false"
-            placeholder="например: bork">
+            placeholder="ваш e-mail">
+        <span class="meta" id="contact-hint"></span>
     </p>
 
     <p class="buttons">
-        <button type="button" id="buy-button" class="button">купить {{ plan.amount }}{{ plan.currency }}</button>
+        <button type="button" id="code-button" class="button">получить код</button>
     </p>
 
-    <p class="comment">
-        оплата картой через защищённый шлюз · данные карты у нас не остаются
+    <p id="code-row" hidden>
+        <label class="label">// код подтверждения</label>
+        <input
+            type="text"
+            id="code"
+            class="search-input"
+            maxlength="4"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            placeholder="0000">
+    </p>
+
+    <p class="buttons">
+        <button type="button" id="buy-button" class="button" disabled>оформить заказ</button>
+    </p>
+
+    <p class="comment" id="order-note">
+        подписка выдаётся на указанный контакт после подтверждения оплаты
     </p>
 
     <p class="notice-error" id="landing-error" hidden></p>
@@ -90,7 +106,7 @@ description: >-
     страницы не было прыжка вёрстки: меняется только видимость.
 -->
 <section class="section" id="order" hidden>
-    <h2 class="comment">ваш заказ<span class="tag">[02/02]</span></h2>
+    <h2 class="comment">ваш заказ<span class="tag">[03/03]</span></h2>
 
     <div class="list">
         <div class="list-item">
@@ -100,8 +116,29 @@ description: >-
         </div>
     </div>
 
+    <!-- реквизиты перевода: показываем, пока платёж не оплачен -->
+    <div id="pay-details" hidden>
+        <p>
+            <button type="button" id="pay-open" class="button">открыть страницу оплаты</button>
+            <button type="button" id="order-cancel" class="linkbutton">отменить заказ</button>
+        </p>
+        <p class="comment">
+            переведите сумму на кошелёк и обязательно укажите метку — по ней
+            сервис сопоставит перевод с заказом; безопаснее переходить по
+            кнопке выше, там всё заполнено заранее
+        </p>
+        <p>
+            <label class="label">// кошелёк</label>
+            <input type="text" id="pay-wallet" class="search-input" readonly>
+        </p>
+        <p>
+            <label class="label">// метка (label)</label>
+            <input type="text" id="pay-label" class="search-input" readonly>
+        </p>
+    </div>
+
     <p class="buttons" id="order-retry-wrap" hidden>
-        <button type="button" id="order-retry" class="button">попробовать снова</button>
+        <button type="button" id="order-retry" class="button">создать заказ заново</button>
     </p>
 
     <p class="notice-error" id="order-error" hidden></p>
@@ -121,59 +158,8 @@ description: >-
         <p class="comment" id="subscription-expiry"></p>
     </div>
 
-    <!--
-        Telegram необязателен: подписка уже работает и без него.
-        Единственный путь привязки — переход в бота с токеном заказа:
-        он покажет, к чему идёт привязка, и попросит подтвердить её кнопкой.
-        Если Telegram не открывается, бот всё равно доступен напрямую:
-        команда /link и ссылка подписки.
-    -->
-    <div id="bind" hidden>
-        <h3>привяжите Telegram</h3>
-
-        <p class="comment">
-            чтобы продлевать одной командой и не искать ссылку в истории чатов
-        </p>
-
-        <p class="buttons" id="bind-link-wrap">
-            <a class="button" id="bind-link" href="{{ site.data.pvpn.bot_url }}" rel="noopener noreferrer">привязать в Telegram</a>
-        </p>
-
-        <p class="comment">
-            откроется бот, он покажет вашу подписку и спросит подтверждение
-        </p>
-
-        <p class="notice-error" id="bind-error" hidden></p>
-
-        <p id="bind-done" hidden>
-            <strong>Telegram привязан.</strong>
-            Продление — командой <code>/renew</code> в
-            <a href="{{ site.data.pvpn.bot_url }}" rel="noopener noreferrer">@{{ site.data.pvpn.bot_username }}</a>.
-        </p>
-
-        <details id="bind-fallback">
-            <summary>если Telegram не открывается</summary>
-
-            <p class="comment">
-                Ссылка выше — обычный deep-link, он работает всегда. Если
-                Telegram на этом устройстве не открывается, откройте
-                <a href="{{ site.data.pvpn.bot_url }}" rel="noopener noreferrer">@{{ site.data.pvpn.bot_username }}</a>
-                вручную и отправьте команду <code>/link</code>, а затем
-                скопируйте туда ссылку подписки из блока выше — бот привяжет
-                её к вашему аккаунту.
-            </p>
-
-            <p class="comment">
-                Виджет Telegram мы убрали: он требовал домен, прописанный в
-                BotFather через <code>/setdomain</code>, и работал хуже, чем
-                обычная ссылка.
-            </p>
-        </details>
-    </div>
-
     <p class="comment" id="order-lost" hidden>
         <button type="button" id="order-restart" class="linkbutton">начать новый заказ</button>
-        · ссылка восстановления живёт 24 часа
     </p>
 </section>
 
@@ -184,14 +170,16 @@ description: >-
         var CFG = {
             api: {{ api_base | jsonify }},
             bot: {{ site.data.pvpn.bot_username | jsonify }},
-            plan: {
-                amount: {{ plan.amount | jsonify }},
-                currency: {{ plan.currency | jsonify }},
-                days: {{ plan.days }}
-            }
+            botUrl: {{ site.data.pvpn.bot_url | jsonify }}
         };
 
-        var STORE_KEY = "pvpn_order_token";
+        // Что переживает перезагрузку таба:
+        //   client uuid  — один на устройство (внутренний id клиента),
+        //   pending key  — ключ идемпотентности, пока заказ ещё не создан,
+        //   order        — созданный заказ ( payment_id, метка, срок ).
+        var CLIENT_KEY = "pvpn_client_uuid";
+        var PENDING_KEY = "pvpn_pending_idempotency";
+        var ORDER_KEY = "pvpn_order";
         var POLL_MS = 3000;
 
         function pick(id) {
@@ -200,14 +188,29 @@ description: >-
 
         var el = {
             landing: pick("landing"),
+            plans: pick("plans"),
+            contactEmail: pick("contact-email"),
+            contactType: pick("contact-telegram"),
+            contact: pick("contact"),
+            contactHint: pick("contact-hint"),
+            codeButton: pick("code-button"),
+            codeRow: pick("code-row"),
+            code: pick("code"),
             buyButton: pick("buy-button"),
-            nickname: pick("nickname"),
+            orderNote: pick("order-note"),
             landingError: pick("landing-error"),
 
             order: pick("order"),
             orderAmount: pick("order-amount"),
             orderState: pick("order-state"),
             orderMark: pick("order-mark"),
+
+            payDetails: pick("pay-details"),
+            payOpen: pick("pay-open"),
+            payWallet: pick("pay-wallet"),
+            payLabel: pick("pay-label"),
+            orderCancel: pick("order-cancel"),
+
             orderRetryWrap: pick("order-retry-wrap"),
             orderRetry: pick("order-retry"),
             orderError: pick("order-error"),
@@ -218,17 +221,12 @@ description: >-
             subscriptionUrl: pick("subscription-url"),
             subscriptionOpen: pick("subscription-open"),
             subscriptionCopy: pick("subscription-copy"),
-            subscriptionExpiry: pick("subscription-expiry"),
-
-            bind: pick("bind"),
-            bindLink: pick("bind-link"),
-            bindLinkWrap: pick("bind-link-wrap"),
-            bindError: pick("bind-error"),
-            bindDone: pick("bind-done"),
-            bindFallback: pick("bind-fallback")
+            subscriptionExpiry: pick("subscription-expiry")
         };
 
-        var token = null;
+        var plans = [];
+        var selectedPlan = null;
+        var paymentId = null;
         var pollTimer = null;
         var inFlight = false;
 
@@ -238,37 +236,57 @@ description: >-
             if (node) node.hidden = !visible;
         }
 
-        function setText(node, value) {
-            if (node) node.textContent = value;
-        }
-
-        // Сообщение об ошибке: пустая строка прячет блок.
         function setError(node, message) {
-            setText(node, message || "");
+            if (!node) return;
+            node.textContent = message || "";
             show(node, !!message);
         }
 
-        function queryParam(name) {
-            return new URLSearchParams(location.search).get(name);
+        function store(key, value) {
+            try {
+                if (value === null) localStorage.removeItem(key);
+                else localStorage.setItem(key, value);
+            } catch (e) {
+                // приватный режим: просто переживаем без восстановления
+            }
         }
 
-        function readStoredToken() {
+        function readStore(key) {
             try {
-                return localStorage.getItem(STORE_KEY) || "";
+                return localStorage.getItem(key) || "";
             } catch (e) {
-                // Приватный режим: страница не переживёт перезагрузку, но
-                // купить всё равно можно.
                 return "";
             }
         }
 
-        function storeToken(value) {
+        function readJson(value, fallback) {
             try {
-                if (value) localStorage.setItem(STORE_KEY, value);
-                else localStorage.removeItem(STORE_KEY);
+                return JSON.parse(value);
             } catch (e) {
-                // см. выше
+                return fallback;
             }
+        }
+
+        function clientUuid() {
+            var saved = readStore(CLIENT_KEY);
+            if (saved) return saved;
+            var fresh = (window.crypto && window.crypto.randomUUID)
+                ? window.crypto.randomUUID()
+                : "c" + Date.now() + Math.random().toString(16).slice(2) + "-restored";
+            store(CLIENT_KEY, fresh);
+            return fresh;
+        }
+
+        function idempotencyKey() {
+            // Одно значение на всё время оформления: пока ключ в хранилище,
+            // повторный запрос вернёт уже созданный заказ, а не второй.
+            var saved = readStore(PENDING_KEY);
+            if (saved) return saved;
+            var fresh = (window.crypto && window.crypto.randomUUID)
+                ? window.crypto.randomUUID()
+                : "k" + Date.now() + Math.random().toString(36).slice(2);
+            store(PENDING_KEY, fresh);
+            return fresh;
         }
 
         function humanDate(value) {
@@ -280,150 +298,444 @@ description: >-
             return parsed.toLocaleDateString("ru-RU", options);
         }
 
-        function readJson(response) {
+        function readJsonResponse(response) {
             return response.json().catch(function () { return {}; });
         }
 
         function describeError(status, payload) {
-            if (payload && payload.error) return payload.error;
-            if (status === 429) return "слишком много попыток, попробуйте через час";
+            var error = payload && payload.error;
+            if (error && error.message) return error.message;
+            if (status === 429) return "слишком часто, попробуйте позже";
             if (status === 404) return "заказ не найден";
-            if (status === 410) return "ссылка восстановления истекла";
             if (status >= 500) return "сервис временно недоступен, попробуйте через минуту";
             return "что-то пошло не так, попробуйте ещё раз";
         }
 
-        // Ключ идемпотентности держим на время жизни заказа: пока пользователь
-        // ждёт ответа, повторный клик или ретрай сети должны вернуть тот же
-        // заказ, а не создать второй.
-        function newIdempotencyKey() {
-            if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
-            return "k" + Date.now() + Math.random().toString(36).slice(2);
-        }
-
-        function orderPath(value) {
-            return "/orders/" + encodeURIComponent(value);
-        }
-
-        // --- обращения к API ---
-
         function api(path, options) {
             var settings = options || {};
             var init = { method: settings.method || "GET", cache: "no-store" };
+            var headers = {};
             if (settings.body !== undefined) {
-                init.headers = { "Content-Type": "application/json" };
+                headers["Content-Type"] = "application/json";
                 init.body = JSON.stringify(settings.body);
             }
-            if (settings.idempotencyKey) {
-                init.headers = init.headers || {};
-                init.headers["Idempotency-Key"] = settings.idempotencyKey;
-            }
+            if (settings.idempotencyKey) headers["Idempotency-Key"] = settings.idempotencyKey;
+            if (Object.keys(headers).length > 0) init.headers = headers;
             return fetch(CFG.api + path, init);
         }
 
-        // --- состояния заказа ---
+        // --- каталог тарифов ---
 
-        // Выдача и пропуск — конечные состояния: сервер больше ничего не
-        // изменит, поэтому опрос можно прекращать. «failed» конечным не
-        // считаем: платёж настоящий, выдачу сверяльщик повторит сам,
-        // поэтому ждём и не предлагаем оплатить заново.
-        function isFinal(fulfillment) {
-            return fulfillment === "done" || fulfillment === "skipped";
+        function loadPlans() {
+            api("/api/v1/plans")
+                .then(function (response) {
+                    return readJsonResponse(response).then(function (payload) {
+                        if (response.status !== 200) {
+                            throw new Error(describeError(response.status, payload));
+                        }
+                        return payload;
+                    });
+                })
+                .then(function (payload) {
+                    plans = (payload.items || []).filter(function (item) {
+                        return item.active !== false;
+                    });
+                    renderPlans();
+                    setError(el.landingError, plans.length ? "" : "Каталог пуст: тарифов нет.");
+                    el.buyButton.disabled = plans.length === 0;
+                })
+                .catch(function (error) {
+                    setError(el.landingError,
+                        "Не удалось загрузить тарифы: " + error.message +
+                        ". Попробуйте обновить страницу.");
+                });
         }
 
+        function money(item) {
+            var symbol = item.currency === "RUB" ? "₽" : item.currency;
+            return item.amount + symbol;
+        }
+
+        function renderPlans() {
+            if (plans.length === 0) {
+                el.plans.innerHTML = '<div class="list-item"><span class="meta">тарифы недоступны</span></div>';
+                return;
+            }
+            el.plans.innerHTML = plans.map(function (item, index) {
+                return '<div class="list-item" data-plan-id="' + item.plan_id + '">' +
+                    '<input type="radio" name="plan" id="plan-' + index + '"' +
+                    (selectedPlan === item.plan_id ? " checked" : "") + '>' +
+                    '<label for="plan-' + index + '">' +
+                    '<strong>' + item.title + "</strong>" +
+                    '<br><span class="meta">' + item.duration_days + " дн. · продление на тот же срок</span>" +
+                    "</label>" +
+                    '<span class="arrow">' + money(item) + "</span></div>";
+            }).join("");
+
+            if (!selectedPlan || plans.every(function (item) { return item.plan_id !== selectedPlan; })) {
+                selectedPlan = plans[0].plan_id;
+            }
+            el.plans.querySelectorAll('input[name="plan"]').forEach(function (radio) {
+                radio.addEventListener("change", function () {
+                    selectedPlan = radio.closest(".list-item").getAttribute("data-plan-id");
+                });
+            });
+        }
+
+        function currentPlan() {
+            for (var i = 0; i < plans.length; i++) {
+                if (plans[i].plan_id === selectedPlan) return plans[i];
+            }
+            return null;
+        }
+
+        // --- подтверждение контакта ---
+
+        function contactType() {
+            return el.contactType.checked ? "telegram" : "email";
+        }
+
+        function contactValue() {
+            return el.contact.value.trim();
+        }
+
+        function validateContact() {
+            var type = contactType();
+            var value = contactValue();
+            if (!value) return "Укажите контакт — на него выдаётся и восстанавливается подписка.";
+            if (type === "email" && value.indexOf("@") < 1) return "Похоже на некорректный e-mail.";
+            if (type === "telegram" && !/^\d{4,15}$/.test(value)) {
+                return "Telegram id — только цифры (4–15), узнать его можно в боте.";
+            }
+            return "";
+        }
+
+        function refreshContactHint() {
+            if (contactType() === "telegram") {
+                el.contactHint.innerHTML = '<a href="' + CFG.botUrl + '">' + CFG.bot + "</a> покажет ваш id и пришлёт код; id тоже вводится здесь";
+                el.contact.setAttribute("placeholder", "числовой telegram id");
+                el.contact.setAttribute("autocomplete", "off");
+                show(el.codeButton, false);
+                show(el.codeRow, true);
+                el.orderNote.textContent = "код придёт в боте; он же подскажет ваш id";
+            } else {
+                el.contactHint.textContent = "код подтвердит адрес";
+                el.contact.setAttribute("placeholder", "ваш e-mail");
+                el.contact.setAttribute("autocomplete", "email");
+                show(el.codeButton, true);
+                show(el.codeRow, false);
+                el.orderNote.textContent = "подписка выдаётся на указанный контакт после подтверждения оплаты";
+            }
+        }
+
+        function requestCode() {
+            var problem = validateContact();
+            if (problem) {
+                setError(el.landingError, problem);
+                el.contact.focus();
+                return;
+            }
+            setError(el.landingError, "");
+
+            el.codeButton.disabled = true;
+            el.codeButton.textContent = "отправляем…";
+            api("/api/v1/verify/" + encodeURIComponent(contactValue()) + "/request", {
+                method: "POST",
+                body: { type: "email" }
+            })
+                .then(function (response) {
+                    return readJsonResponse(response).then(function (payload) {
+                        return { status: response.status, payload: payload };
+                    });
+                })
+                .then(function (result) {
+                    el.codeButton.disabled = false;
+                    el.codeButton.textContent = "получить код";
+                    if (result.status !== 200) {
+                        setError(el.landingError, describeError(result.status, result.payload));
+                        return;
+                    }
+                    var expires = result.payload.expires_in
+                        ? " Код действует " + result.payload.expires_in + " сек."
+                        : "";
+                    setError(el.landingError, "");
+                    el.orderNote.textContent = "код отправлен на " + contactValue() + "." + expires;
+                    show(el.codeRow, true);
+                    el.code.focus();
+                })
+                .catch(function () {
+                    el.codeButton.disabled = false;
+                    el.codeButton.textContent = "получить код";
+                    setError(el.landingError, "Не удалось отправить код. Проверьте соединение.");
+                });
+        }
+
+        function busyBuy() {
+            var plan = currentPlan();
+            var idleTitle = plan ? "оформить заказ на " + money(plan) : "оформить заказ";
+            el.buyButton.disabled = true;
+            return function () {
+                el.buyButton.textContent = idleTitle;
+                if (plans.length > 0) el.buyButton.disabled = false;
+            };
+        }
+
+        // --- создание заказа ---
+
+        function createOrder() {
+            var problem = validateContact();
+            if (problem) {
+                setError(el.landingError, problem);
+                el.contact.focus();
+                return;
+            }
+            var code = el.code.value.trim();
+            if (!/^\d{4}$/.test(code)) {
+                setError(el.landingError, "Введите 4-значный код подтверждения.");
+                el.code.focus();
+                return;
+            }
+            setError(el.landingError, "");
+
+            var idle = busyBuy();
+            var type = contactType();
+            var value = contactValue();
+            var key = idempotencyKey();
+
+            // Код подтверждения обмениваем на verification_token.
+            api("/api/v1/verify/" + encodeURIComponent(value), {
+                method: "POST",
+                body: { code: parseInt(code, 10), type: type }
+            })
+                .then(function (response) {
+                    return readJsonResponse(response).then(function (payload) {
+                        return { status: response.status, payload: payload };
+                    });
+                })
+                .then(function (result) {
+                    if (result.status !== 200) {
+                        idle();
+                        var reason = result.payload && result.payload.reason;
+                        setError(el.landingError, reason === "expired"
+                            ? "Код устарел — запросите новый."
+                            : describeError(result.status, result.payload));
+                        return null;
+                    }
+                    // Заказ с ключом идемпотентности: повтор вернёт тот же заказ.
+                    return api("/api/v1/payments", {
+                        method: "POST",
+                        idempotencyKey: key,
+                        body: {
+                            client_uuid: clientUuid(),
+                            plan_id: selectedPlan,
+                            contact: { type: type, value: value },
+                            verification_token: result.payload.verification_token
+                        }
+                    }).then(function (response) {
+                        return readJsonResponse(response).then(function (payload) {
+                            return { status: response.status, payload: payload };
+                        });
+                    });
+                })
+                .then(function (result) {
+                    if (!result) return;
+                    idle();
+                    if (result.status !== 200 && result.status !== 201) {
+                        // Заказ не создан — ключ не закрепляем, следующая
+                        // попытка получит свежий.
+                        store(PENDING_KEY, null);
+                        setError(el.landingError, describeError(result.status, result.payload));
+                        return;
+                    }
+                    acceptedOrder(result.payload);
+                })
+                .catch(function () {
+                    idle();
+                    setError(el.landingError, "Не удалось связаться с сервисом. Заказ мог не создаться — просто нажмите кнопку снова.");
+                });
+        }
+
+        function acceptedOrder(order) {
+            var instructions = order.payment_instructions || {};
+            store(PENDING_KEY, null);
+            store(ORDER_KEY, JSON.stringify({
+                payment_id: order.payment_id,
+                label: instructions.label || order.label,
+                amount: order.amount,
+                currency: order.currency,
+                plan_id: order.plan_id,
+                expires_at: order.expires_at
+            }));
+            openOrder(order.payment_id);
+        }
+
+        // --- экран заказа и опрос статуса ---
+
         function showState(title, note, mark) {
-            el.orderState.innerHTML = "<strong>" + title + "</strong><br>"
-                + '<span class="meta">' + note + "</span>";
+            el.orderState.innerHTML = "<strong>" + title + "</strong><br>" +
+                '<span class="meta">' + note + "</span>";
             el.orderMark.textContent = mark;
         }
 
-        function render(view) {
-            setText(el.orderAmount, view.amount + " " + CFG.plan.currency);
-
-            if (view.fulfillment === "skipped") {
-                // Сервер отвечает так на тестовый платёж: товар по условию
-                // не выдаём, и он не изменится — ни вебхуком, ни сверяльщик.
-                // Показывать «готовим подписку» здесь нельзя: её никогда не
-                // будет, и человек будет ждать до конца суток.
-                showState(
-                    "оплачено, подписку не выдали",
-                    view.error || "это был тестовый платёж, товар по нему не выдаётся",
-                    "!"
-                );
-            } else if (view.status === "succeeded" && view.fulfillment === "done") {
-                showState("оплачено, подписка готова", "действует до " + (humanDate(view.vpn_expire_at) || "—"), "✓");
-            } else if (view.status === "succeeded") {
-                showState("оплачено", "готовим подписку, обычно пара секунд", "···");
-            } else if (view.status === "declined") {
-                showState("платёж отклонён", "можно попробовать другой картой", "!");
-            } else if (view.status === "expired") {
-                showState("время платежа вышло", "ссылка на оплату больше не работает", "×");
-            } else {
-                showState(
-                    "ждём оплату",
-                    view.expires_at
-                        ? "ссылка действует до " + humanDate(view.expires_at)
-                        : "мы не закрываем вкладку",
-                    "···"
-                );
-            }
-
-            var canRetry = view.status === "declined" || view.status === "expired";
-            show(el.orderRetryWrap, canRetry);
-            show(el.orderLost, false);
-
-            if (view.fulfillment === "done" && view.subscription_url) {
-                el.subscriptionUrl.value = view.subscription_url;
-                el.subscriptionOpen.href = view.subscription_url;
-                setText(el.subscriptionExpiry, "подписка действует до " + (humanDate(view.vpn_expire_at) || "—"));
-                show(el.subscription, true);
-            }
-
-            // Привязка имеет смысл только у выданной подписки: раньше токен
-            // в боте всё равно не узнает.
-            show(el.bind, view.fulfillment === "done");
-            if (view.fulfillment === "done") {
-                renderBind(view.telegram_bound);
-            }
-
-            if (view.fulfillment === "failed" && view.error) {
-                // Деньги списаны, а товар не выдан. Вторую оплату не
-                // предлагаем: сверяльщик доведёт первый платёж сам.
-                setError(el.orderError,
-                    "Оплата прошла, но выдача не удалась: " + view.error + " Напишите нам, "
-                    + "ссылка уже готовится.");
-            } else {
-                setError(el.orderError, "");
-            }
-
-            if (isFinal(view.fulfillment)) stopPolling();
+        function openOrder(id) {
+            paymentId = id;
+            show(el.landing, false);
+            show(el.order, true);
+            setError(el.landingError, "");
+            poll();
         }
 
-        function renderBind(bound) {
-            // Ссылка всегда несёт токен заказа: бот по нему поймёт, к чему
-            // привязывать, и попросит подтвердить кнопкой. Без токена бот
-            // увидит просто /start и покажет меню.
-            if (el.bindLink && token) {
-                el.bindLink.href = "https://t.me/" + CFG.bot + "?start=" + encodeURIComponent(token);
-            }
+        function backToLanding(message) {
+            stopPolling();
+            paymentId = null;
+            store(ORDER_KEY, null);
+            show(el.order, false);
+            show(el.landing, true);
+            setError(el.landingError, message || "");
+        }
 
-            if (bound) {
-                // Прячем обёртку, а не саму ссылку: .buttons задаёт
-                // font-size:0 и display-контекст, где hidden на вложенной
-                // кнопке отображается ненадёжно.
-                show(el.bindLinkWrap, false);
-                show(el.bindFallback, false);
-                show(el.bindDone, true);
-                setError(el.bindError, "");
+        // Опрос останавливается только на окончательных состояниях:
+        // выдача выдаётся воркером, «failed» с деньгами на месте не финал.
+        function isTerminal(view) {
+            var status = view.status;
+            var grant = view.subscription_grant;
+            if (status === "expired" || status === "failed" || status === "cancelled") return true;
+            if (status === "paid") {
+                return !!grant && (grant.status === "succeeded" || grant.status === "permanent_failed");
+            }
+            return false;
+        }
+
+        function render(view) {
+            show(el.payDetails, view.status === "pending");
+            show(el.orderRetryWrap, view.status === "expired" || view.status === "cancelled");
+            show(el.orderLost, false);
+            setError(el.orderError, "");
+
+            var grant = view.subscription_grant;
+            var attempts = grant && grant.attempts ? " (попытка " + grant.attempts + ")" : "";
+
+            switch (view.status) {
+                case "pending":
+                    showState(
+                        "ждём оплату",
+                        "заказ действует до " + (humanDate(view.expires_at) || "—"),
+                        "···"
+                    );
+                    break;
+                case "paid":
+                    if (grant && grant.status === "succeeded") {
+                        showState("оплачено, подписка готова", "доступ открыт", "✓");
+                        renderSubscription(grant);
+                    } else if (grant && grant.status === "permanent_failed") {
+                        showState("оплачено, но выдача не удалась", "", "!");
+                        setError(el.orderError,
+                            "Оплата прошла, но подписку не подготовили автоматом: "
+                            + (grant.last_error_message || "сервис пишет в журнал")
+                            + ". Напишите нам — восстановим вручную. Заказ тоже помечен меткой.");
+                    } else if (grant && grant.status === "retryable_failed") {
+                        showState("оплачено, готовим подписку", "пора выдачи сдвинулась, пробуем снова" + attempts, "···");
+                    } else {
+                        showState("оплачено", "готовим подписку, обычно пара секунд" + attempts, "···");
+                    }
+                    break;
+                case "expired":
+                    showState("время платежа вышло", "реквизиты больше не действуют", "×");
+                    break;
+                case "cancelled":
+                    showState("заказ отменён", "платёж не завершался", "×");
+                    break;
+                default:
+                    showState("проверяем заказ", "статус: " + view.status, "···");
+            }
+        }
+
+        function renderSubscription(grant) {
+            var result = grant.result || {};
+            if (!result.subscription_url) return;
+            el.subscriptionUrl.value = result.subscription_url;
+            el.subscriptionOpen.href = result.subscription_url;
+            var until = humanDate(result.expire_at || grant.target_expire_at);
+            el.subscriptionExpiry.textContent = "подписка действует до " + (until || "—")
+                + "; продление — тем же контактом";
+            show(el.subscription, true);
+        }
+
+        function poll() {
+            if (!paymentId || inFlight) return;
+            inFlight = true;
+            api("/api/v1/payments/" + encodeURIComponent(paymentId))
+                .then(function (response) {
+                    // 404: заказ не знаю такого — прекращаем опрос.
+                    if (response.status === 404) {
+                        backToLanding("Заказ не найден — создайте новый.");
+                        return null;
+                    }
+                    return readJsonResponse(response).then(function (view) {
+                        if (response.status !== 200) {
+                            // Временная ошибка — опрос продолжается.
+                            showErrorTemporarily(describeError(response.status, view));
+                            return null;
+                        }
+                        render(view);
+                        if (view.status === "pending") {
+                            renderPayDetails(view);
+                        } else if (!isTerminal(view)) {
+                            // деньги пришли, но подписку ещё не выдали
+                            show(el.payDetails, false);
+                        }
+                        if (isTerminal(view)) {
+                            finish(view);
+                            return null;
+                        }
+                        schedulePoll();
+                        return null;
+                    });
+                })
+                .catch(function () {
+                    // Сеть моргнула — заказ на месте, продолжаем.
+                    schedulePoll();
+                })
+                .then(function () {
+                    inFlight = false;
+                });
+        }
+
+        function renderPayDetails(view) {
+            var instructions = view.payment_instructions || {};
+            el.payWallet.value = instructions.wallet_id || "";
+            el.payLabel.value = instructions.label || "";
+            if (instructions.payment_url) {
+                el.payOpen.setAttribute("data-payment-url", instructions.payment_url);
+                el.payOpen.disabled = false;
+            } else {
+                el.payOpen.disabled = true;
+            }
+            show(el.payDetails, true);
+        }
+
+        function finish(view) {
+            stopPolling();
+            if (view.status === "paid" && (!view.subscription_grant || view.subscription_grant.status === "succeeded")) {
+                // Заказ сохраняем: при следующем визите страница сама
+                // покажет ссылку подписки (ссылка в сохранённом заказе не
+                // хранится — меняем состояние по ответу сервиса).
+                show(el.orderLost, true);
                 return;
             }
-            show(el.bindDone, false);
-            show(el.bindLinkWrap, true);
-            show(el.bindFallback, true);
-            setError(el.bindError, "");
+            if (view.status === "failed") {
+                setError(el.orderError,
+                    "Платёж не прошёл сверку" +
+                    (view.label ? " (метка " + view.label + ")" : "") +
+                    ". Если деньги списали — напишите нам, разберёмся.");
+            }
+            store(ORDER_KEY, null);
+            show(el.orderLost, true);
         }
 
-        // --- опрос ---
+        function showErrorTemporarily(message) {
+            setError(el.orderError, message + " (опрос продолжается)");
+        }
 
         function stopPolling() {
             if (pollTimer) {
@@ -437,135 +749,72 @@ description: >-
             pollTimer = setTimeout(poll, POLL_MS);
         }
 
-        function poll() {
-            if (!token || inFlight) return;
-            inFlight = true;
-
-            api(orderPath(token))
-                .then(function (response) {
-                    // 410 — секрет восстановления истёк, 404 — заказа нет.
-                    // В обоих случаях опрос прекращён.
-                    if (response.status === 410 || response.status === 404) {
-                        recoveryExpired();
-                        return null;
-                    }
-                    return readJson(response).then(function (view) {
-                        render(view);
-                        if (!isFinal(view.fulfillment)) schedulePoll();
-                    });
-                })
-                .catch(function () {
-                    // Сеть моргнула — это не повод терять заказ.
-                    schedulePoll();
-                })
-                .then(function () {
-                    inFlight = false;
-                });
-        }
-
-        function recoveryExpired() {
-            stopPolling();
-            token = null;
-            storeToken(null);
-            show(el.order, false);
-            show(el.landing, true);
-            setError(el.landingError,
-                "Ссылка восстановления истекла. Подписка никуда не делась — найдите её в боте @"
-                + CFG.bot + " или купите заново.");
-        }
-
-        function openOrder(value) {
-            token = value;
-            storeToken(value);
-            show(el.landing, false);
-            show(el.order, true);
-            setError(el.landingError, "");
-            poll();
-        }
-
         // --- события ---
 
-        function busyButton(button, idleText) {
-            button.disabled = true;
-            button.textContent = "создаём заказ…";
-            return function done() {
-                button.disabled = false;
-                button.textContent = idleText;
-            };
-        }
-
-        el.buyButton.addEventListener("click", function () {
-            var nickname = el.nickname.value.trim();
-            if (!nickname) {
-                setError(el.landingError, "Введите никнейм — он понадобится в панели.");
-                el.nickname.focus();
-                return;
+        el.codeButton.addEventListener("click", requestCode);
+        el.contact.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                if (contactType() === "email") requestCode();
+                else el.buyButton.click();
             }
-            setError(el.landingError, "");
-
-            var idle = busyButton(el.buyButton, "купить " + CFG.plan.amount + CFG.plan.currency);
-            var key = newIdempotencyKey();
-
-            api("/orders", { method: "POST", body: { nickname: nickname }, idempotencyKey: key })
-                .then(function (response) {
-                    return readJson(response).then(function (payload) {
-                        return { status: response.status, payload: payload };
-                    });
-                })
-                .then(function (result) {
-                    idle();
-                    if (result.status !== 200) {
-                        setError(el.landingError, describeError(result.status, result.payload));
-                        return;
-                    }
-                    openOrder(result.payload.token);
-                    // На оплату уходим только после того, как заказ точно
-                    // существует: иначе возврат приведёт в пустую страницу.
-                    location.assign(result.payload.checkout_url);
-                })
-                .catch(function () {
-                    idle();
-                    setError(el.landingError, "Не удалось связаться с сервисом. Проверьте соединение.");
-                });
         });
-
-        el.nickname.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") el.buyButton.click();
+        el.code.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                el.buyButton.click();
+            }
         });
+        el.contactEmail.addEventListener("change", refreshContactHint);
+        el.contactType.addEventListener("change", refreshContactHint);
+
+        el.buyButton.addEventListener("click", createOrder);
 
         el.orderRetry.addEventListener("click", function () {
-            if (!token) return;
-            var idle = busyButton(el.orderRetry, "попробовать снова");
-            setError(el.orderError, "");
-
-            api(orderPath(token) + "/retry", { method: "POST" })
-                .then(function (response) {
-                    return readJson(response).then(function (payload) {
-                        if (response.status !== 200) {
-                            idle();
-                            setError(el.orderError, describeError(response.status, payload));
-                            return;
-                        }
-                        location.assign(payload.checkout_url);
-                    });
-                })
-                .catch(function () {
-                    idle();
-                    setError(el.orderError, "Не удалось связаться с сервисом.");
-                });
+            // Старый заказ не переплачиваем: начинаем заново.
+            stopPolling();
+            store(ORDER_KEY, null);
+            paymentId = null;
+            show(el.order, false);
+            show(el.landing, true);
+            setError(el.landingError, "");
+            el.contact.focus();
         });
 
         el.orderRestart.addEventListener("click", function () {
-            stopPolling();
-            token = null;
-            storeToken(null);
-            show(el.order, false);
-            show(el.landing, true);
-            setError(el.landingError, "");
-            el.nickname.focus();
+            backToLanding("");
+            el.contact.focus();
         });
 
-        el.subscriptionCopy.addEventListener("click", function () {            var url = el.subscriptionUrl.value;
+        el.orderCancel.addEventListener("click", function () {
+            if (!paymentId) return;
+            el.orderCancel.disabled = true;
+            api("/api/v1/payments/" + encodeURIComponent(paymentId) + "/cancel", { method: "POST" })
+                .then(function (response) {
+                    el.orderCancel.disabled = false;
+                    if (response.status === 200) {
+                        backToLanding("Заказ отменён. Можно оформить новый.");
+                        return;
+                    }
+                    return readJsonResponse(response).then(function (payload) {
+                        setError(el.orderError,
+                            describeError(response.status, payload)
+                            + " Если деньги уже ушли — оставить заказ можно, он доработает.");
+                    });
+                })
+                .catch(function () {
+                    el.orderCancel.disabled = false;
+                    setError(el.orderError, "Не удалось отменить заказ. Он останется ждать оплату.");
+                });
+        });
+
+        el.payOpen.addEventListener("click", function () {
+            var url = el.payOpen.getAttribute("data-payment-url");
+            if (url) window.open(url, "_blank", "noopener");
+        });
+
+        el.subscriptionCopy.addEventListener("click", function () {
+            var url = el.subscriptionUrl.value;
             if (!url) return;
             var copied = function () {
                 el.subscriptionCopy.textContent = "скопировано";
@@ -589,17 +838,13 @@ description: >-
         // --- старт ---
 
         (function start() {
-            var restored = queryParam("o") || readStoredToken();
+            refreshContactHint();
+            loadPlans();
 
-            if (queryParam("tg")) {
-                // Метка результата нужна была один раз, в адресе она только
-                // мешает — но токен из ?o= при этом сохраняем.
-                var kept = restored ? "?o=" + encodeURIComponent(restored) : "";
-                history.replaceState(null, "", location.pathname + kept);
+            var savedOrder = readJson(readStore(ORDER_KEY), null);
+            if (savedOrder && savedOrder.payment_id) {
+                openOrder(savedOrder.payment_id);
             }
-
-            if (!restored) return;
-            openOrder(restored);
         })();
     })();
 </script>

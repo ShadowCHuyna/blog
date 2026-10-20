@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Заказ · PVPN панель</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar" id="topbar">
+  <a class="brand" href="index.html">PVPN&nbsp;·&nbsp;панель</a>
+  <nav class="nav">
+    <a href="index.html" data-nav="plans">Тарифы</a>
+    <a href="payments.html" data-nav="payments">Платежи</a>
+    <a href="order.html" data-nav="order">Заказ</a>
+    <a href="grants.html" data-nav="grants">Выдачи</a>
+    <a href="webhooks.html" data-nav="webhooks">Уведомления</a>
+  </nav>
+  <div class="topbar-right">
+    <span class="operator" id="operator-info" hidden></span>
+    <button type="button" class="link-button" id="logout" hidden>Выйти</button>
+  </div>
+</header>
+
+<main class="content">
+  <div id="flash-slot"></div>
+  <div id="page">загрузка…</div>
+</main>
+
+<footer class="footer">
+  PVPN admin panel · static · поток оформления полностью повторяет клиентский
+</footer>
+
+<script src="app.js"></script>
+<script>
+(function () {
+    "use strict";
+
+    /*
+     * Оформление заказа в точности как у клиента (docs/api-endpoints.md §5, §6):
+     *   1. POST /api/v1/verify/{email}/request  — только для e-mail;
+     *      код для telegram пользователь получает в боте.
+     *   2. POST /api/v1/verify/{user}           — код → verification_token;
+     *   3. POST /api/v1/payments                — заказ с Idempotency-Key.
+     * Тарифы берём из публичного каталога /api/v1/plans.
+     */
+
+    var VERIFY_ERRORS = {
+        invalid_code: "Неверный код",
+        expired: "Срок действия кода истёк — запросите новый",
+        too_many_attempts: "Слишком много попыток ввода",
+        verification_mismatch: "Токен подтверждения не соответствует контакту"
+    };
+
+    var ctx = {
+        plans: [],
+        planId: "",
+        contactType: "email",
+        contactValue: ""
+    };
+
+    function pick(id) { return document.getElementById(id); }
+    function esc(value) { return PAdmin.esc(value); }
+
+    PAdmin.boot("order", function () {
+        PAdmin.flash("");
+        loadCatalogue();
+    });
+
+    function loadCatalogue() {
+        pick("page").innerHTML = '<p class="muted">загружаем каталог тарифов…</p>';
+        PAdmin.request("/api/v1/plans").then(function (payload) {
+            ctx.plans = (payload.items || []).filter(function (plan) {
+                return plan.active !== false;
+            });
+            renderWizard();
+        }).catch(function (error) {
+            if (error.status === undefined) {
+                pick("page").innerHTML = "";
+                PAdmin.flash("Не удалось связаться с API для каталога: " + (error.message || "нет соединения"), "error");
+                return;
+            }
+            PAdmin.flash(error.message, "error");
+        });
+    }
+
+    // ------------------------------------------------------------- шаг 1-2
+    function renderWizard() {
+        var options = ctx.plans.map(function (plan) {
+            return '<option value="' + esc(plan.plan_id) + '">' +
+                esc(plan.title) + " · " + PAdmin.fmtMoney(plan.amount, plan.currency) +
+                " · " + esc(plan.duration_days) + " дн.</option>";
+        }).join("");
+        pick("page").innerHTML =
+            '<div class="page-head"><h1>Заказ</h1><span class="muted">шаг 1: контакт и код</span></div>' +
+            '<div class="card"><form id="order-form" class="stack">' +
+            '<label><span>тариф</span><select id="o-plan" required>' + options + "</select></label>" +
+            '<div class="radio-row">' +
+            '<label><input type="radio" name="o-type" value="email" checked><span>e-mail</span></label>' +
+            '<label><input type="radio" name="o-type" value="telegram"><span>telegram id</span></label>' +
+            "</div>" +
+            '<label><span>контакт</span>' +
+            '<input type="text" id="o-contact" required autocomplete="off" spellcheck="false">' +
+            '<span class="hint" id="o-contact-hint"></span></label>' +
+            '<p class="field-error" id="o-error"></p>' +
+            '<div class="form-actions">' +
+            '<button type="submit" class="button primary">получить код</button>' +
+            "</div></form></div>";
+        updateHint();
+        pick("page").querySelectorAll('input[name="o-type"]').forEach(function (radio) {
+            radio.addEventListener("change", updateHint);
+        });
+        pick("order-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            setError("");
+            ctx.planId = pick("o-plan").value;
+            ctx.contactType = document.querySelector('input[name="o-type"]:checked').value;
+            ctx.contactValue = pick("o-contact").value.trim();
+            if (!ctx.contactValue) {
+                setError("Укажите контакт");
+                return;
+            }
+            if (ctx.contactType === "email" && ctx.contactValue.indexOf("@") < 1) {
+                setError("Укажите корректный e-mail");
+                return;
+            }
+            if (ctx.contactType === "telegram" && !/^\d{4,15}$/.test(ctx.contactValue)) {
+                setError("Telegram id — 4–15 цифр");
+                return;
+            }
+            requestCode();
+        });
+
+        function updateHint() {
+            var type = document.querySelector('input[name="o-type"]:checked').value;
+            pick("o-contact-hint").textContent = type === "email"
+                ? "на этот адрес придёт 4-значный код"
+                : "пользователь получает код в боте; здесь нужен его числовой id";
+        }
+
+        function setError(text) {
+            var el = pick("o-error");
+            if (el) el.textContent = text || "";
+        }
+    }
+
+    function requestCode() {
+        PAdmin.flash("Отправляем код…", "info");
+        var done = function (info) {
+            PAdmin.flash(info, "success");
+            renderCodeStep();
+        };
+        if (ctx.contactType === "telegram") {
+            done("Код пользователь получает в боте. Введите его на следующем шаге.");
+            return;
+        }
+        PAdmin.request(
+            "/api/v1/verify/" + encodeURIComponent(ctx.contactValue) + "/request",
+            { method: "POST", body: { type: "email" } }
+        ).then(function (payload) {
+            var expiry = payload && payload.expires_in ? " Действует " + payload.expires_in + " сек." : "";
+            done("Код отправлен на e-mail." + expiry);
+        }).catch(function (error) {
+            PAdmin.flash("");
+            if (error.status === undefined) {
+                PAdmin.flash("Не удалось связаться с API: " + (error.message || "нет соединения"), "error");
+                return;
+            }
+            renderWizard();
+            pick("o-plan").value = ctx.planId;
+            pick("o-contact").value = ctx.contactValue;
+            setWizardError(error);
+        });
+    }
+
+    function setWizardError(error) {
+        var el = pick("o-error");
+        if (el) {
+            el.textContent = error.code === "validation_error"
+                ? "Ошибка валидации запроса — проверьте поля"
+                : error.message + (error.status ? " (HTTP " + error.status + ")" : "");
+        }
+    }
+
+    // -------------------------------------------------------------- шаг 3
+    function renderCodeStep() {
+        pick("page").innerHTML =
+            '<div class="page-head"><h1>Заказ</h1><span class="muted">шаг 2: код подтверждения</span></div>' +
+            '<div class="card"><form id="code-form" class="stack">' +
+            '<div>' + PAdmin.kvTable([
+                ["тариф", esc(ctx.planId)],
+                ["контакт", esc(ctx.contactType) + ": " + esc(ctx.contactValue)]
+            ]) + "</div>" +
+            '<label><span>код (4 цифры)</span>' +
+            '<input type="text" id="o-code" required maxlength="4" pattern="\\d+" inputmode="numeric" autocomplete="one-time-code"></label>' +
+            '<p class="field-error" id="o-code-error"></p>' +
+            '<div class="form-actions">' +
+            '<button type="submit" class="button primary">подтвердить и создать заказ</button>' +
+            '<button type="button" id="o-back" class="button">назад</button>' +
+            "</div></form></div>";
+
+        pick("o-back").addEventListener("click", renderWizard);
+        pick("code-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            setCodeError("");
+            var code = pick("o-code").value.trim();
+            if (!/^\d{4}$/.test(code)) {
+                setCodeError("Введите код из 4 цифр");
+                return;
+            }
+            submitOrder(code);
+        });
+
+        function setCodeError(text) {
+            var el = pick("o-code-error");
+            if (el) el.textContent = text || "";
+        }
+    }
+
+    function submitOrder(code) {
+        PAdmin.flash("Подтверждаем код…", "info");
+        var body = { code: parseInt(code, 10), type: ctx.contactType };
+        PAdmin.request(
+            "/api/v1/verify/" + encodeURIComponent(ctx.contactValue),
+            { method: "POST", body: body }
+        ).then(function (verified) {
+            PAdmin.flash("Код подтверждён, создаём заказ…", "info");
+            return PAdmin.request("/api/v1/payments", {
+                method: "POST",
+                headers: { "Idempotency-Key": uuid() },
+                body: {
+                    client_uuid: uuid(),
+                    plan_id: ctx.planId,
+                    contact: { type: ctx.contactType, value: ctx.contactValue },
+                    verification_token: verified.verification_token
+                }
+            });
+        }).then(renderCreated).catch(function (error) {
+            PAdmin.flash("");
+            if (error.status === undefined) {
+                PAdmin.flash("Не удалось связаться с API: " + (error.message || "нет соединения"), "error");
+                return;
+            }
+            renderCodeStep();
+            var message = error.code === "validation_error"
+                ? "Ошибка валидации запроса — проверьте поля"
+                : (VERIFY_ERRORS[error.code] || error.message);
+            var el = pick("o-code-error");
+            if (el) el.textContent = message + (error.status ? " (HTTP " + error.status + ")" : "");
+        });
+    }
+
+    // ------------------------------------------------------------- результат
+    function renderCreated(order) {
+        var instructions = order.payment_instructions || {};
+        var url = instructions.payment_url
+            ? '<a href="' + esc(instructions.payment_url) + '" target="_blank" rel="noopener noreferrer">открыть оплату</a>'
+            : "—";
+        pick("page").innerHTML =
+            '<div class="page-head"><h1>Заказ создан</h1>' + PAdmin.statusBadge(order.status) + "</div>" +
+            '<div class="card">' + PAdmin.kvTable([
+                ["payment_id", "<code>" + esc(order.payment_id) + "</code>"],
+                ["label", "<code>" + esc(instructions.label) + "</code>"],
+                ["тариф", esc(order.plan_id) + " · " + esc(order.duration_days) + " дн."],
+                ["сумма", PAdmin.fmtMoney(order.amount, order.currency)],
+                ["кошелёк", "<code>" + esc(instructions.wallet_id) + "</code>"],
+                ["ссылка оплаты", url],
+                ["оплата действует до", PAdmin.fmtDate(order.expires_at)]
+            ]) +
+            '<p class="hint">' + esc(instructions.manual_instructions) + "</p>" +
+            '<div class="form-actions">' +
+            '<a class="button" href="payments.html?payment=' + encodeURIComponent(order.payment_id) + '">карточка платежа</a>' +
+            '<button type="button" id="o-again" class="button">создать ещё</button>' +
+            "</div></div>";
+        pick("o-again").addEventListener("click", loadCatalogue);
+    }
+
+    function uuid() {
+        if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (char) {
+            var random = Math.floor(Math.random() * 16);
+            var value = char === "x" ? random : (random & 0x3) | 0x8;
+            return value.toString(16);
+        });
+    }
+})();
+</script>
+</body>
+</html>
