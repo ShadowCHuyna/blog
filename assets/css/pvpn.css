@@ -1,0 +1,65 @@
+/* Модальное окно и оформление покупки pVPN */
+.checkout-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.checkout-modal[hidden] {
+    display: none;
+}
+
+.checkout-card {
+    background: var(--bg);
+    border: 1px solid var(--fg);
+    width: 100%;
+    max-width: 440px;
+    padding: 24px;
+    position: relative;
+    box-sizing: border-box;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+}
+
+.checkout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--muted);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+.checkout-close {
+    background: none;
+    border: none;
+    font: 18px/1 "Courier New", monospace;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.checkout-close:hover {
+    color: var(--accent);
+}
+
+.plan-item {
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.plan-item:hover {
+    background: rgba(255, 59, 0, 0.06);
+}
+
+.plan-item:hover .arrow {
+    color: var(--accent);
+}

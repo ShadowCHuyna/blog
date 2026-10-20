@@ -1,0 +1,173 @@
+(function () {
+    "use strict";
+
+    var state = {
+        offset: 0,
+        filters: { operation_id: "", label: "", signature_valid: "", processed: "", from: "", to: "" }
+    };
+    var events = [];
+
+    function pick(id) { return document.getElementById(id); }
+    function esc(value) { return PAdmin.esc(value); }
+
+    PAdmin.boot("webhooks", function () {
+        renderList();
+    });
+
+    function renderList() {
+        pick("page").innerHTML =
+            '<div class="page-head"><h1>Уведомления ЮMoney</h1></div>' +
+            '<div class="filters">' +
+            '<label><span>operation_id</span><input type="text" id="w-operation" spellcheck="false"></label>' +
+            '<label><span>label</span><input type="text" id="w-label" spellcheck="false"></label>' +
+            '<label><span>подпись</span><select id="w-sign">' +
+            '<option value="">любая</option><option value="true">верна</option>' +
+            '<option value="false">неверна</option></select></label>' +
+            '<label><span>обработано</span><select id="w-processed">' +
+            '<option value="">любое</option><option value="true">да</option>' +
+            '<option value="false">нет</option></select></label>' +
+            '<label><span>получено с</span><input type="datetime-local" id="w-from"></label>' +
+            '<label><span>получено по</span><input type="datetime-local" id="w-to"></label>' +
+            '<button type="button" id="w-apply" class="button primary">применить</button>' +
+            '<button type="button" id="w-reset" class="button">сбросить</button>' +
+            "</div>" +
+            '<div id="list-slot"></div><div id="pager"></div>' +
+            '<section id="detail" hidden></section>';
+
+        pick("w-operation").value = state.filters.operation_id;
+        pick("w-label").value = state.filters.label;
+        pick("w-sign").value = state.filters.signature_valid;
+        pick("w-processed").value = state.filters.processed;
+        pick("w-from").value = state.filters.from;
+        pick("w-to").value = state.filters.to;
+
+        pick("w-apply").addEventListener("click", function () {
+            state.filters = {
+                operation_id: pick("w-operation").value.trim(),
+                label: pick("w-label").value.trim(),
+                signature_valid: pick("w-sign").value,
+                processed: pick("w-processed").value,
+                from: pick("w-from").value,
+                to: pick("w-to").value
+            };
+            state.offset = 0;
+            refreshList();
+        });
+        pick("w-reset").addEventListener("click", function () {
+            state = {
+                offset: 0,
+                filters: { operation_id: "", label: "", signature_valid: "", processed: "", from: "", to: "" }
+            };
+            renderList();
+        });
+
+        refreshList();
+    }
+
+    function refreshList() {
+        PAdmin.flash("");
+        var filters = state.filters;
+        var query = PAdmin.buildQuery({
+            limit: 50,
+            offset: state.offset,
+            operation_id: filters.operation_id,
+            label: filters.label,
+            signature_valid: filters.signature_valid,
+            processed: filters.processed,
+            received_from: toIso(filters.from),
+            received_to: toIso(filters.to)
+        });
+        PAdmin.request("/api/v1/admin/webhook-events" + query).then(function (payload) {
+            renderTable(payload);
+        }).catch(errorHandler());
+    }
+
+    // datetime-local → ISO 8601 (UTC), как ждёт API.
+    function toIso(local) {
+        var parsed = new Date(local.length === 16 ? local + ":00" : local);
+        if (isNaN(parsed.getTime())) return "";
+        return parsed.toISOString();
+    }
+
+    function renderTable(payload) {
+        var slot = pick("list-slot");
+        var items = payload.items || [];
+        events = items;
+        if (items.length === 0) {
+            slot.innerHTML = '<div class="empty">событий по заданным фильтрам нет</div>';
+        } else {
+            var rows = items.map(function (event, index) {
+                var money = "";
+                if (event.amount) {
+                    money = esc(event.amount) +
+                        (event.withdraw_amount ? " / " + esc(event.withdraw_amount) : "") +
+                        (event.currency ? " " + esc(event.currency) : "");
+                }
+                return '<tr data-index="' + index + '">' +
+                    "<td><code>" + esc(PAdmin.short(event.operation_id)) + "</code></td>" +
+                    "<td>" + PAdmin.fmtDate(event.received_at) + "</td>" +
+                    "<td><code>" + esc(event.notification_type) + "</code></td>" +
+                    "<td>" + PAdmin.fmtBool(event.matched) + "</td>" +
+                    "<td>" + PAdmin.fmtBool(event.signature_valid) + "</td>" +
+                    "<td>" + esc(event.status) + "</td>" +
+                    "<td>" + (money || "—") + "</td>" +
+                    "<td>" + PAdmin.fmtBool(event.is_test) + "</td></tr>";
+            }).join("");
+            slot.innerHTML =
+                '<div class="table-wrap"><table><thead><tr>' +
+                "<th>операция</th><th>получено</th><th>тип</th><th>сопоставлено</th>" +
+                "<th>подпись</th><th>статус</th><th>сумма (зачислено/списано)</th><th>тест</th>" +
+                "</tr></thead><tbody>" + rows + "</tbody></table></div>";
+
+            Array.prototype.forEach.call(slot.querySelector("tbody").rows, function (row) {
+                row.style.cursor = "pointer";
+                row.addEventListener("click", function () {
+                    openDetail(events[parseInt(row.getAttribute("data-index"), 10)]);
+                });
+            });
+        }
+        PAdmin.renderPagination(pick("pager"), payload.pagination, function (offset) {
+            state.offset = offset;
+            refreshList();
+        });
+    }
+
+    function openDetail(event) {
+        var detail = pick("detail");
+        detail.hidden = false;
+        detail.innerHTML =
+            '<div class="card"><h2 style="margin-top:0">событие <code>' + esc(event.operation_id) + "</code></h2>" +
+            PAdmin.kvTable([
+                ["event_id", "<code>" + esc(event.event_id) + "</code>"],
+                ["operation_id", "<code>" + esc(event.operation_id) + "</code>"],
+                ["label", event.label ? "<code>" + esc(event.label) + "</code>" : "—"],
+                ["тип уведомления", esc(event.notification_type)],
+                ["подпись", PAdmin.fmtBool(event.signature_valid)],
+                ["сопоставлено с платежом", PAdmin.fmtBool(event.matched)],
+                ["статус", esc(event.status)],
+                ["ошибка", esc(event.error || "")],
+                ["сумма (зачислено)", esc(event.amount || "")],
+                ["сумма (списано)", esc(event.withdraw_amount || "")],
+                ["валюта", esc(event.currency || "")],
+                ["тестовое", PAdmin.fmtBool(event.is_test)],
+                ["получено", PAdmin.fmtDate(event.received_at)],
+                ["обработано", PAdmin.fmtDate(event.processed_at)]
+            ]) +
+            '<div class="form-actions"><button type="button" id="d-close" class="button">закрыть</button></div></div>';
+        detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        pick("d-close").addEventListener("click", function () {
+            detail.hidden = true;
+            detail.innerHTML = "";
+        });
+    }
+
+    function errorHandler() {
+        return function (error) {
+            if (error.status === undefined) {
+                PAdmin.flash("Не удалось связаться с API: " + (error.message || "нет соединения"), "error");
+                return;
+            }
+            PAdmin.flash(error.message + (error.status ? " (HTTP " + error.status + ")" : ""), "error");
+        };
+    }
+})();

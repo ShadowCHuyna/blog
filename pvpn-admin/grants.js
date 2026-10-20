@@ -1,0 +1,202 @@
+(function () {
+    "use strict";
+
+    var STATUSES = [
+        "pending", "processing", "succeeded", "retryable_failed", "permanent_failed"
+    ];
+    var ACTIONS = ["extend", "create"];
+    var RETRYABLE = ["retryable_failed", "permanent_failed", "processing"];
+    var state = { offset: 0, filters: { status: "", payment_id: "", action: "" } };
+    var grants = [];
+
+    function pick(id) { return document.getElementById(id); }
+    function esc(value) { return PAdmin.esc(value); }
+
+    PAdmin.boot("grants", function () {
+        renderList();
+    });
+
+    function optionList(values) {
+        return values.map(function (value) {
+            return '<option value="' + esc(value) + '">' + esc(value) + "</option>";
+        }).join("");
+    }
+
+    function renderList() {
+        pick("page").innerHTML =
+            '<div class="page-head"><h1>Выдачи подписок</h1></div>' +
+            '<div class="filters">' +
+            '<label><span>статус</span><select id="g-status">' +
+            '<option value="">любой</option>' + optionList(STATUSES) + "</select></label>" +
+            '<label><span>действие</span><select id="g-action">' +
+            '<option value="">любое</option>' + optionList(ACTIONS) + "</select></label>" +
+            '<label><span>payment_id</span><input type="text" id="g-payment" spellcheck="false"></label>' +
+            '<button type="button" id="g-apply" class="button primary">применить</button>' +
+            '<button type="button" id="g-reset" class="button">сбросить</button>' +
+            "</div>" +
+            '<div id="list-slot"></div><div id="pager"></div>' +
+            '<section id="detail" hidden></section>';
+
+        pick("g-status").value = state.filters.status;
+        pick("g-action").value = state.filters.action;
+        pick("g-payment").value = state.filters.payment_id;
+
+        pick("g-apply").addEventListener("click", function () {
+            state.filters = {
+                status: pick("g-status").value,
+                payment_id: pick("g-payment").value.trim(),
+                action: pick("g-action").value
+            };
+            state.offset = 0;
+            refreshList();
+        });
+        pick("g-reset").addEventListener("click", function () {
+            state = { offset: 0, filters: { status: "", payment_id: "", action: "" } };
+            renderList();
+        });
+
+        refreshList();
+    }
+
+    function refreshList() {
+        PAdmin.flash("");
+        var query = PAdmin.buildQuery({
+            limit: 50,
+            offset: state.offset,
+            status: state.filters.status,
+            action: state.filters.action,
+            payment_id: state.filters.payment_id
+        });
+        PAdmin.request("/api/v1/admin/grants" + query).then(function (payload) {
+            renderTable(payload);
+        }).catch(errorHandler());
+    }
+
+    function renderTable(payload) {
+        var slot = pick("list-slot");
+        var items = payload.items || [];
+        grants = items;
+        if (items.length === 0) {
+            slot.innerHTML = '<div class="empty">выдач по заданным фильтрам нет</div>';
+        } else {
+            var rows = items.map(function (grant) {
+                var user = grant.remnawave_username
+                    || (grant.remnawave_user_id ? "id " + grant.remnawave_user_id : "—");
+                return '<tr data-index="' + grants.indexOf(grant) + '">' +
+                    "<td><code>" + esc(PAdmin.short(grant.grant_id)) + "</code></td>" +
+                    "<td><code>" + esc(PAdmin.short(grant.payment_id)) + "</code></td>" +
+                    "<td>" + esc(grant.action) + "</td>" +
+                    "<td>" + PAdmin.statusBadge(grant.status) + "</td>" +
+                    "<td>" + esc(grant.attempts) + "</td>" +
+                    "<td>" + esc(user) + "</td>" +
+                    "<td>" + PAdmin.fmtDate(grant.target_expire_at) + "</td>" +
+                    "<td>" + PAdmin.fmtDate(grant.created_at) + "</td>" +
+                    '<td class="row-actions"></td></tr>';
+            }).join("");
+            slot.innerHTML =
+                '<div class="table-wrap"><table><thead><tr>' +
+                "<th>выдача</th><th>платёж</th><th>действие</th><th>статус</th>" +
+                "<th>попытки</th><th>remnawave</th><th>expire_at</th><th>создана</th><th></th>" +
+                "</tr></thead><tbody>" + rows + "</tbody></table></div>";
+
+            var tbody = slot.querySelector("tbody");
+            Array.prototype.forEach.call(tbody.rows, function (row) {
+                var grant = grants[parseInt(row.getAttribute("data-index"), 10)];
+                row.style.cursor = "pointer";
+                row.addEventListener("click", function () { openDetail(grant); });
+                if (RETRYABLE.indexOf(grant.status) >= 0) {
+                    var cell = row.querySelector(".row-actions");
+                    var button = document.createElement("button");
+                    button.type = "button";
+                    button.className = "button small primary";
+                    button.textContent = "повторить";
+                    button.addEventListener("click", function (event) {
+                        event.stopPropagation();
+                        retryGrant(grant.grant_id);
+                    });
+                    cell.appendChild(button);
+                }
+            });
+        }
+        PAdmin.renderPagination(pick("pager"), payload.pagination, function (offset) {
+            state.offset = offset;
+            refreshList();
+        });
+    }
+
+    function openDetail(grant) {
+        var detail = pick("detail");
+        detail.hidden = false;
+        detail.innerHTML =
+            '<div class="card"><h2 style="margin-top:0">выдача <code>' +
+            esc(grant.grant_id) + "</code></h2>" +
+            PAdmin.kvTable([
+                ["payment_id", "<code>" + esc(grant.payment_id) + "</code>"],
+                ["действие", esc(grant.action)],
+                ["статус", PAdmin.statusBadge(grant.status)],
+                ["попытки", esc(grant.attempts)],
+                ["remnawave user", esc(grant.remnawave_username || "") +
+                    (grant.remnawave_user_id ? " (id " + esc(grant.remnawave_user_id) + ")" : "")],
+                ["target expire_at", PAdmin.fmtDate(grant.target_expire_at)],
+                ["выполнена", PAdmin.fmtDate(grant.succeeded_at)],
+                ["последняя ошибка", esc(grant.last_error_code || "") +
+                    (grant.last_error_message ? " · " + esc(grant.last_error_message) : "")],
+                ["создана", PAdmin.fmtDate(grant.created_at)],
+                ["обновлена", PAdmin.fmtDate(grant.updated_at)]
+            ]) +
+            (grant.result ? PAdmin.detailsJson("результат", grant.result) : "") +
+            '<div class="form-actions">' +
+            (RETRYABLE.indexOf(grant.status) >= 0
+                ? '<button type="button" id="d-retry" class="button primary">повторить выдачу</button>'
+                : "") +
+            '<button type="button" id="d-close" class="button">закрыть</button>' +
+            "</div></div>";
+        detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        pick("d-close").addEventListener("click", function () {
+            detail.hidden = true;
+            detail.innerHTML = "";
+        });
+        var button = pick("d-retry");
+        if (button) {
+            button.addEventListener("click", function () { retryGrant(grant.grant_id); });
+        }
+    }
+
+    function retryGrant(grantId) {
+        PAdmin.request(
+            "/api/v1/admin/grants/" + encodeURIComponent(grantId) + "/retry",
+            { method: "POST" }
+        ).then(function (result) {
+            PAdmin.flash(
+                "Повтор запущен: статус " + result.status + ", попыток " + result.attempts,
+                result.status === "succeeded" ? "success" : "info"
+            );
+            closeDetail();
+            refreshList();
+        }).catch(function (error) {
+            if (error.status === undefined) {
+                PAdmin.flash("Не удалось связаться с API: " + (error.message || "нет соединения"), "error");
+                return;
+            }
+            PAdmin.flash(error.message + (error.status ? " (HTTP " + error.status + ")" : ""), "error");
+        });
+    }
+
+    function closeDetail() {
+        var detail = pick("detail");
+        if (detail) {
+            detail.hidden = true;
+            detail.innerHTML = "";
+        }
+    }
+
+    function errorHandler() {
+        return function (error) {
+            if (error.status === undefined) {
+                PAdmin.flash("Не удалось связаться с API: " + (error.message || "нет соединения"), "error");
+                return;
+            }
+            PAdmin.flash(error.message + (error.status ? " (HTTP " + error.status + ")" : ""), "error");
+        };
+    }
+})();

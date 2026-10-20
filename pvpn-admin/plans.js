@@ -1,0 +1,249 @@
+(function () {
+    "use strict";
+
+    var activeFilter = "all";
+    var offset = 0;
+
+    function pick(id) { return document.getElementById(id); }
+
+    var REFERENCE_PLAN = {
+        plan_id: "", title: "", amount: "0.00", currency: "RUB",
+        duration_days: 30, active: true, sort_order: 10,
+        remnawave: { traffic_limit_bytes: 0, traffic_limit_strategy: "NO_RESET", internal_squads: [], tag: "" }
+    };
+
+    PAdmin.boot("plans", function () {
+        renderList();
+    });
+
+    function reload(nextOffset) {
+        if (typeof nextOffset === "number") offset = nextOffset;
+        renderList();
+    }
+
+    function renderList() {
+        var page = pick("page");
+        page.innerHTML =
+            '<div class="page-head"><h1>Тарифы</h1>' +
+            '<div class="head-actions"><button type="button" id="new-plan" class="button primary">новый тариф</button></div></div>' +
+            '<div class="filters">' +
+            '<label><span>активен</span><select id="f-active">' +
+            '<option value="all">все</option>' +
+            '<option value="true">активные</option>' +
+            '<option value="false">скрытые</option></select></label>' +
+            '<button type="button" id="f-refresh" class="button">обновить</button>' +
+            "</div>" +
+            '<div id="list-slot"></div><div id="pager"></div>' +
+            '<section id="editor" hidden></section>';
+
+        pick("f-active").value = activeFilter;
+        pick("f-active").addEventListener("change", function () {
+            activeFilter = this.value;
+            reload(0);
+        });
+        pick("f-refresh").addEventListener("click", function () { PAdmin.flash(""); reload(); });
+        pick("new-plan").addEventListener("click", function () { openEditor(null); });
+
+        PAdmin.flash("");
+        var query = PAdmin.buildQuery({
+            active: activeFilter === "all" ? "" : activeFilter,
+            limit: 50,
+            offset: offset
+        });
+        PAdmin.request("/api/v1/admin/plans" + query).then(function (payload) {
+            renderTable(payload);
+        }).catch(errorHandler(reload));
+    }
+
+    function renderTable(payload) {
+        var slot = pick("list-slot");
+        var items = payload.items || [];
+        if (items.length === 0) {
+            slot.innerHTML = '<div class="empty">тарифов пока нет — создайте первый</div>';
+        } else {
+            var rows = items.map(function (plan) {
+                return "<tr data-plan-id=\"" + PAdmin.esc(plan.plan_id) + "\">" +
+                    "<td><code>" + PAdmin.esc(plan.plan_id) + "</code></td>" +
+                    "<td>" + PAdmin.esc(plan.title) + "</td>" +
+                    "<td>" + PAdmin.fmtMoney(plan.amount, plan.currency) + "</td>" +
+                    "<td>" + PAdmin.esc(plan.duration_days) + "</td>" +
+                    "<td>" + PAdmin.fmtBool(plan.active) + "</td>" +
+                    "<td>" + PAdmin.esc(plan.sort_order) + "</td>" +
+                    "<td class=\"muted\">" + PAdmin.fmtDate(plan.updated_at) + "</td></tr>";
+            }).join("");
+            slot.innerHTML =
+                '<div class="table-wrap"><table><thead><tr>' +
+                "<th>plan_id</th><th>название</th><th>сумма</th><th>дней</th>" +
+                "<th>активен</th><th>сортировка</th><th>обновлён</th></tr></thead>" +
+                "<tbody>" + rows + "</tbody></table></div>";
+            slot.querySelectorAll("tr[data-plan-id]").forEach(function (row) {
+                row.style.cursor = "pointer";
+                row.addEventListener("click", function () {
+                    openDetail(row.getAttribute("data-plan-id"));
+                });
+            });
+        }
+        PAdmin.renderPagination(pick("pager"), payload.pagination, reload);
+    }
+
+    function openDetail(planId) {
+        var editor = pick("editor");
+        editor.hidden = false;
+        editor.innerHTML = '<p class="muted">загружаем тариф…</p>';
+        editor.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+        PAdmin.request("/api/v1/admin/plans/" + encodeURIComponent(planId))
+            .then(function (plan) {
+                var remnawave = Object.keys(plan.remnawave || {}).length
+                    ? PAdmin.detailsJson("remnawave-конфиг", plan.remnawave)
+                    : "";
+                editor.innerHTML = "<h2>тариф «" + PAdmin.esc(plan.plan_id) + "»</h2><div class=\"card\">" +
+                    PAdmin.kvTable([
+                        ["plan_id", plan.plan_id],
+                        ["название", plan.title],
+                        ["сумма", PAdmin.fmtMoney(plan.amount, plan.currency)],
+                        ["длительность", plan.duration_days + " дн."],
+                        ["активен", PAdmin.fmtBool(plan.active)],
+                        ["сортировка", plan.sort_order],
+                        ["created_at", PAdmin.fmtDate(plan.created_at)],
+                        ["updated_at", PAdmin.fmtDate(plan.updated_at)]
+                    ]) + remnawave +
+                    '<div class="form-actions">' +
+                    '<button type="button" id="btn-edit" class="button">редактировать</button>' +
+                    '<button type="button" id="btn-delete" class="button danger">удалить</button>' +
+                    '<button type="button" id="btn-close" class="button">закрыть</button>' +
+                    "</div></div>";
+                pick("btn-edit").addEventListener("click", function () { openEditor(plan); });
+                pick("btn-close").addEventListener("click", closeEditor);
+                pick("btn-delete").addEventListener("click", function () {
+                    if (!window.confirm("Удалить тариф «" + plan.plan_id + "»? Действие необратимо.")) return;
+                    PAdmin.request("/api/v1/admin/plans/" + encodeURIComponent(plan.plan_id), { method: "DELETE" })
+                        .then(function () {
+                            closeEditor();
+                            PAdmin.flash("Тариф «" + plan.plan_id + "» удалён", "success");
+                            reload();
+                        })
+                        .catch(errorHandler());
+                });
+            })
+            .catch(errorHandler());
+    }
+
+    function openEditor(plan) {
+        var editor = pick("editor");
+        var editing = plan !== null;
+        var values = editing ? plan : REFERENCE_PLAN;
+        editor.hidden = false;
+        editor.innerHTML =
+            "<h2>" + (editing ? "редактирование тарифа" : "новый тариф") + "</h2>" +
+            '<div class="card"><form id="plan-form" class="stack"><div class="grid-2">' +
+            '<label><span>plan_id</span>' +
+            '<input type="text" id="p-id" required maxlength="64" pattern="[A-Za-z0-9._\\-]+"' +
+            (editing ? " readonly" : "") + " value=\"" + PAdmin.esc(values.plan_id) + '">' +
+            '<span class="hint">латиница, цифры, точка, дефис, подчёркивание</span></label>' +
+            '<label><span>название</span>' +
+            '<input type="text" id="p-title" required maxlength="255" value="' + PAdmin.esc(values.title) + '"></label>' +
+            '<label><span>сумма</span>' +
+            '<input type="number" id="p-amount" required min="0.01" step="0.01" value="' + PAdmin.esc(values.amount) + '"></label>' +
+            '<label><span>валюта</span>' +
+            '<input type="text" id="p-currency" required maxlength="3" minlength="3" value="' + PAdmin.esc(values.currency) + '"></label>' +
+            '<label><span>длительность, дней</span>' +
+            '<input type="number" id="p-days" required min="1" max="3650" value="' + PAdmin.esc(values.duration_days) + '"></label>' +
+            '<label><span>сортировка</span>' +
+            '<input type="number" id="p-sort" value="' + PAdmin.esc(values.sort_order) + '"></label>' +
+            "</div>" +
+            '<label class="checkbox"><input type="checkbox" id="p-active"' + (values.active ? " checked" : "") + ">" +
+            "<span>активен — показывать в каталоге</span></label>" +
+            '<label><span>remnawave-конфиг (JSON, можно пусто)</span>' +
+            '<textarea id="p-remnawave" spellcheck="false"></textarea>' +
+            '<span class="hint">traffic_limit_bytes, traffic_limit_strategy, internal_squads, tag</span></label>' +
+            '<p class="field-error" id="p-error"></p>' +
+            '<div class="form-actions">' +
+            '<button type="submit" class="button primary">' + (editing ? "сохранить" : "создать") + "</button>" +
+            '<button type="button" id="p-cancel" class="button">отмена</button>' +
+            "</div></form></div>";
+
+        pick("p-remnawave").value =
+            values.remnawave && Object.keys(values.remnawave).length
+                ? JSON.stringify(values.remnawave, null, 2)
+                : "";
+        pick("p-cancel").addEventListener("click", closeEditor);
+
+        pick("plan-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            setError("");
+            var remnawave = {};
+            var raw = pick("p-remnawave").value.trim();
+            if (raw) {
+                try {
+                    remnawave = JSON.parse(raw);
+                } catch (e) {
+                    setError("remnawave-конфиг: некорректный JSON — " + e.message);
+                    return;
+                }
+            }
+            var payload = {
+                title: pick("p-title").value.trim(),
+                amount: pick("p-amount").value,
+                currency: pick("p-currency").value.trim().toUpperCase(),
+                duration_days: parseInt(pick("p-days").value, 10),
+                active: pick("p-active").checked,
+                sort_order: parseInt(pick("p-sort").value || "0", 10),
+                remnawave: remnawave
+            };
+            var requestId;
+            if (editing) {
+                requestId = PAdmin.request(
+                    "/api/v1/admin/plans/" + encodeURIComponent(values.plan_id),
+                    { method: "PATCH", body: payload }
+                ).then(function (updated) {
+                    PAdmin.flash("Изменения сохранены", "success");
+                    reload();
+                    openDetail(updated.plan_id);
+                });
+            } else {
+                payload.plan_id = pick("p-id").value.trim();
+                requestId = PAdmin.request("/api/v1/admin/plans", { method: "POST", body: payload })
+                    .then(function (created) {
+                        PAdmin.flash("Тариф «" + created.plan_id + "» создан", "success");
+                        reload();
+                        openDetail(created.plan_id);
+                    });
+            }
+            requestId.catch(errorHandler());
+        });
+
+        function setError(text) {
+            var el = pick("p-error");
+            if (el) el.textContent = text || "";
+        }
+    }
+
+    function closeEditor() {
+        var editor = pick("editor");
+        if (editor) {
+            editor.hidden = true;
+            editor.innerHTML = "";
+        }
+    }
+
+    function errorHandler(retry) {
+        return function (error) {
+            if (error.status === undefined) {
+                // Сеть недоступна.
+                PAdmin.flash("Не удалось связаться с API: " + (error.message || "нет соединения"), "error");
+                return;
+            }
+            PAdmin.flash(statusText(error), "error");
+            if (retry) retry();
+        };
+    }
+
+    function statusText(error) {
+        var text = error.code === "validation_error"
+            ? "Ошибка валидации запроса — проверьте поля"
+            : error.message;
+        if (error.status === 409) text = "Конфликт: " + error.message;
+        return text + (error.status ? " (HTTP " + error.status + ")" : "");
+    }
+})();
