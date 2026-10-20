@@ -23,6 +23,62 @@ description: >-
 {%- assign api_base = site.pvpn_api_base | default: site.data.pvpn.api_base -%}
 {%- assign plan = site.data.pvpn.plan %}
 
+<style>
+.checkout-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+    box-sizing: border-box;
+}
+.checkout-modal[hidden] {
+    display: none;
+}
+.checkout-card {
+    background: var(--bg);
+    border: 1px solid var(--fg);
+    width: 100%;
+    max-width: 440px;
+    padding: 24px;
+    position: relative;
+    box-sizing: border-box;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+}
+.checkout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--muted);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+.checkout-close {
+    background: none;
+    border: none;
+    font: 18px/1 "Courier New", monospace;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0 4px;
+}
+.checkout-close:hover {
+    color: var(--accent);
+}
+.plan-item {
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.plan-item:hover {
+    background: rgba(255, 59, 0, 0.06);
+}
+.plan-item:hover .arrow {
+    color: var(--accent);
+}
+</style>
+
 <h1>pVPN.</h1>
 
 <p class="lead">
@@ -46,51 +102,70 @@ description: >-
     <h2 class="comment">тариф<span class="tag">[02/03]</span></h2>
 
     <p class="comment">
-        Список загружается из сервиса, поэтому цены всегда актуальные.
+        Нажмите на подходящий тариф, чтобы перейти к оформлению.
     </p>
 
     <div class="list" id="plans" aria-label="выбор тарифа">
         <div class="list-item"><span class="meta">загружаем тарифы…</span></div>
     </div>
 
-    <p>
-        <label class="label" for="contact">// e-mail для подписки</label>
-        <input
-            type="email"
-            id="contact"
-            class="search-input"
-            autocomplete="email"
-            spellcheck="false"
-            placeholder="ваш e-mail">
-        <span class="meta" id="contact-hint">на этот адрес придёт 4-значный код подтверждения</span>
-    </p>
-
-    <p class="buttons">
-        <button type="button" id="code-button" class="button">получить код</button>
-    </p>
-
-    <p id="code-row" hidden>
-        <label class="label" for="code">// код подтверждения из письма</label>
-        <input
-            type="text"
-            id="code"
-            class="search-input"
-            maxlength="4"
-            inputmode="numeric"
-            autocomplete="one-time-code"
-            placeholder="0000">
-    </p>
-
-    <p class="buttons">
-        <button type="button" id="buy-button" class="button" disabled>оформить заказ</button>
-    </p>
-
-    <p class="comment" id="order-note">
-        подписка выдаётся на указанный e-mail после подтверждения оплаты
-    </p>
-
     <p class="notice-error" id="landing-error" hidden></p>
 </section>
+
+<!-- Модальное окно оформления -->
+<div id="checkout-modal" class="checkout-modal" hidden>
+    <div class="checkout-card" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+        <div class="checkout-header">
+            <div>
+                <span class="meta">// оформление подписки</span>
+                <h3 id="checkout-title" style="margin: 0.2em 0 0;"></h3>
+            </div>
+            <button type="button" id="checkout-close" class="checkout-close" aria-label="Закрыть">✕</button>
+        </div>
+
+        <!-- Шаг 1: ввод почты -->
+        <div id="step-email">
+            <p>
+                <label class="label" for="contact">// e-mail для подписки</label>
+                <input
+                    type="email"
+                    id="contact"
+                    class="search-input"
+                    autocomplete="email"
+                    spellcheck="false"
+                    placeholder="ваш e-mail">
+                <span class="meta" style="margin-top: 6px;">на этот адрес придёт 4-значный код подтверждения</span>
+            </p>
+            <p class="notice-error" id="email-error" hidden></p>
+            <p class="buttons" style="margin-bottom: 0;">
+                <button type="button" id="email-submit" class="button">оплатить</button>
+            </p>
+        </div>
+
+        <!-- Шаг 2: ввод кода -->
+        <div id="step-code" hidden>
+            <p>
+                <label class="label" for="code">// код подтверждения из письма</label>
+                <input
+                    type="text"
+                    id="code"
+                    class="search-input"
+                    maxlength="4"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    placeholder="0000">
+                <span class="meta" style="margin-top: 6px;">
+                    код отправлен на <strong id="code-sent-email"></strong> ·
+                    <button type="button" id="change-email" class="linkbutton">изменить</button>
+                </span>
+            </p>
+            <p class="notice-error" id="code-error" hidden></p>
+            <p class="buttons" style="margin-bottom: 0;">
+                <button type="button" id="code-submit" class="button">подтвердить и перейти к оплате →</button>
+            </p>
+        </div>
+    </div>
+</div>
 
 <!--
     Блок заказа есть в разметке всегда, чтобы при возврате с платёжной
@@ -173,14 +248,21 @@ description: >-
         var el = {
             landing: pick("landing"),
             plans: pick("plans"),
-            contact: pick("contact"),
-            contactHint: pick("contact-hint"),
-            codeButton: pick("code-button"),
-            codeRow: pick("code-row"),
-            code: pick("code"),
-            buyButton: pick("buy-button"),
-            orderNote: pick("order-note"),
             landingError: pick("landing-error"),
+
+            checkoutModal: pick("checkout-modal"),
+            checkoutTitle: pick("checkout-title"),
+            checkoutClose: pick("checkout-close"),
+            stepEmail: pick("step-email"),
+            stepCode: pick("step-code"),
+            contact: pick("contact"),
+            emailError: pick("email-error"),
+            emailSubmit: pick("email-submit"),
+            code: pick("code"),
+            codeSentEmail: pick("code-sent-email"),
+            changeEmail: pick("change-email"),
+            codeError: pick("code-error"),
+            codeSubmit: pick("code-submit"),
 
             order: pick("order"),
             orderAmount: pick("order-amount"),
@@ -189,8 +271,6 @@ description: >-
 
             payDetails: pick("pay-details"),
             payOpen: pick("pay-open"),
-            payWallet: pick("pay-wallet"),
-            payLabel: pick("pay-label"),
             orderCancel: pick("order-cancel"),
 
             orderRetryWrap: pick("order-retry-wrap"),
@@ -324,7 +404,6 @@ description: >-
                     });
                     renderPlans();
                     setError(el.landingError, plans.length ? "" : "Каталог пуст: тарифов нет.");
-                    el.buyButton.disabled = plans.length === 0;
                 })
                 .catch(function (error) {
                     setError(el.landingError,
@@ -344,22 +423,27 @@ description: >-
                 return;
             }
             el.plans.innerHTML = plans.map(function (item, index) {
-                return '<div class="list-item" data-plan-id="' + item.plan_id + '">' +
-                    '<input type="radio" name="plan" id="plan-' + index + '"' +
-                    (selectedPlan === item.plan_id ? " checked" : "") + '>' +
-                    '<label for="plan-' + index + '">' +
+                var num = (index + 1) < 10 ? "0" + (index + 1) : String(index + 1);
+                return '<div class="list-item plan-item" role="button" tabindex="0" data-plan-id="' + item.plan_id + '">' +
+                    '<span class="number">' + num + '</span>' +
+                    '<span>' +
                     '<strong>' + item.title + "</strong>" +
-                    '<br><span class="meta">' + item.duration_days + " дн. · продление на тот же срок</span>" +
-                    "</label>" +
-                    '<span class="arrow">' + money(item) + "</span></div>";
+                    '<br><span class="meta">' + item.duration_days + " дн. · 5 устройств, безлимитный трафик</span>" +
+                    "</span>" +
+                    '<span class="arrow">' + money(item) + " →</span></div>";
             }).join("");
 
-            if (!selectedPlan || plans.every(function (item) { return item.plan_id !== selectedPlan; })) {
-                selectedPlan = plans[0].plan_id;
-            }
-            el.plans.querySelectorAll('input[name="plan"]').forEach(function (radio) {
-                radio.addEventListener("change", function () {
-                    selectedPlan = radio.closest(".list-item").getAttribute("data-plan-id");
+            el.plans.querySelectorAll(".plan-item").forEach(function (node) {
+                function trigger() {
+                    var planId = node.getAttribute("data-plan-id");
+                    openCheckout(planId);
+                }
+                node.addEventListener("click", trigger);
+                node.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        trigger();
+                    }
                 });
             });
         }
@@ -369,6 +453,27 @@ description: >-
                 if (plans[i].plan_id === selectedPlan) return plans[i];
             }
             return null;
+        }
+
+        function openCheckout(planId) {
+            selectedPlan = planId;
+            var plan = currentPlan();
+            if (!plan) return;
+            el.checkoutTitle.textContent = plan.title + " — " + money(plan) + " (" + plan.duration_days + " дн.)";
+            show(el.stepEmail, true);
+            show(el.stepCode, false);
+            setError(el.emailError, "");
+            setError(el.codeError, "");
+            show(el.checkoutModal, true);
+            setTimeout(function () {
+                if (el.contact) el.contact.focus();
+            }, 60);
+        }
+
+        function closeCheckout() {
+            show(el.checkoutModal, false);
+            setError(el.emailError, "");
+            setError(el.codeError, "");
         }
 
         // --- подтверждение контакта (только e-mail) ---
@@ -384,17 +489,17 @@ description: >-
             return "";
         }
 
-        function requestCode() {
+        function submitEmail() {
             var problem = validateContact();
             if (problem) {
-                setError(el.landingError, problem);
+                setError(el.emailError, problem);
                 el.contact.focus();
                 return;
             }
-            setError(el.landingError, "");
+            setError(el.emailError, "");
+            el.emailSubmit.disabled = true;
+            el.emailSubmit.textContent = "отправляем код…";
 
-            el.codeButton.disabled = true;
-            el.codeButton.textContent = "отправляем…";
             api("/api/v1/verify/" + encodeURIComponent(contactValue()) + "/request", {
                 method: "POST",
                 body: { type: "email" }
@@ -405,55 +510,41 @@ description: >-
                     });
                 })
                 .then(function (result) {
-                    el.codeButton.disabled = false;
-                    el.codeButton.textContent = "получить код";
+                    el.emailSubmit.disabled = false;
+                    el.emailSubmit.textContent = "оплатить";
                     if (result.status !== 200) {
-                        setError(el.landingError, describeError(result.status, result.payload));
+                        setError(el.emailError, describeError(result.status, result.payload));
                         return;
                     }
-                    var expires = result.payload.expires_in
-                        ? " Код действует " + result.payload.expires_in + " сек."
-                        : "";
-                    setError(el.landingError, "");
-                    el.orderNote.textContent = "код отправлен на " + contactValue() + "." + expires;
-                    show(el.codeRow, true);
-                    el.code.focus();
+                    show(el.stepEmail, false);
+                    show(el.stepCode, true);
+                    el.codeSentEmail.textContent = contactValue();
+                    el.code.value = "";
+                    setError(el.codeError, "");
+                    setTimeout(function () {
+                        el.code.focus();
+                    }, 60);
                 })
                 .catch(function () {
-                    el.codeButton.disabled = false;
-                    el.codeButton.textContent = "получить код";
-                    setError(el.landingError, "Не удалось отправить код. Проверьте соединение.");
+                    el.emailSubmit.disabled = false;
+                    el.emailSubmit.textContent = "оплатить";
+                    setError(el.emailError, "Не удалось отправить код. Проверьте соединение.");
                 });
-        }
-
-        function busyBuy() {
-            var plan = currentPlan();
-            var idleTitle = plan ? "оформить заказ на " + money(plan) : "оформить заказ";
-            el.buyButton.disabled = true;
-            return function () {
-                el.buyButton.textContent = idleTitle;
-                if (plans.length > 0) el.buyButton.disabled = false;
-            };
         }
 
         // --- создание заказа ---
 
-        function createOrder() {
-            var problem = validateContact();
-            if (problem) {
-                setError(el.landingError, problem);
-                el.contact.focus();
-                return;
-            }
+        function submitCode() {
             var code = el.code.value.trim();
             if (!/^\d{4}$/.test(code)) {
-                setError(el.landingError, "Введите 4-значный код подтверждения.");
+                setError(el.codeError, "Введите 4-значный код подтверждения.");
                 el.code.focus();
                 return;
             }
-            setError(el.landingError, "");
+            setError(el.codeError, "");
+            el.codeSubmit.disabled = true;
+            el.codeSubmit.textContent = "проверяем…";
 
-            var idle = busyBuy();
             var value = contactValue();
             var key = idempotencyKey();
 
@@ -469,10 +560,11 @@ description: >-
                 })
                 .then(function (result) {
                     if (result.status !== 200) {
-                        idle();
+                        el.codeSubmit.disabled = false;
+                        el.codeSubmit.textContent = "подтвердить и перейти к оплате →";
                         var reason = result.payload && result.payload.reason;
-                        setError(el.landingError, reason === "expired"
-                            ? "Код устарел — запросите новый."
+                        setError(el.codeError, reason === "expired"
+                            ? "Код устарел — вернитесь и запросите новый."
                             : describeError(result.status, result.payload));
                         return null;
                     }
@@ -494,19 +586,20 @@ description: >-
                 })
                 .then(function (result) {
                     if (!result) return;
-                    idle();
+                    el.codeSubmit.disabled = false;
+                    el.codeSubmit.textContent = "подтвердить и перейти к оплате →";
                     if (result.status !== 200 && result.status !== 201) {
-                        // Заказ не создан — ключ не закрепляем, следующая
-                        // попытка получит свежий.
                         store(PENDING_KEY, null);
-                        setError(el.landingError, describeError(result.status, result.payload));
+                        setError(el.codeError, describeError(result.status, result.payload));
                         return;
                     }
+                    closeCheckout();
                     acceptedOrder(result.payload);
                 })
                 .catch(function () {
-                    idle();
-                    setError(el.landingError, "Не удалось связаться с сервисом. Заказ мог не создаться — просто нажмите кнопку снова.");
+                    el.codeSubmit.disabled = false;
+                    el.codeSubmit.textContent = "подтвердить и перейти к оплате →";
+                    setError(el.codeError, "Не удалось связаться с сервисом. Попробуйте ещё раз.");
                 });
         }
 
@@ -713,21 +806,43 @@ description: >-
 
         // --- события ---
 
-        el.codeButton.addEventListener("click", requestCode);
-        el.contact.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                requestCode();
-            }
+        el.checkoutClose.addEventListener("click", closeCheckout);
+        el.checkoutModal.addEventListener("click", function (event) {
+            if (event.target === el.checkoutModal) closeCheckout();
         });
-        el.code.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                el.buyButton.click();
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && !el.checkoutModal.hidden) {
+                closeCheckout();
             }
         });
 
-        el.buyButton.addEventListener("click", createOrder);
+        el.changeEmail.addEventListener("click", function () {
+            show(el.stepCode, false);
+            show(el.stepEmail, true);
+            setError(el.emailError, "");
+            el.contact.focus();
+        });
+
+        el.emailSubmit.addEventListener("click", submitEmail);
+        el.contact.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                submitEmail();
+            }
+        });
+
+        el.codeSubmit.addEventListener("click", submitCode);
+        el.code.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                submitCode();
+            }
+        });
+        el.code.addEventListener("input", function () {
+            if (/^\d{4}$/.test(el.code.value.trim())) {
+                submitCode();
+            }
+        });
 
         el.orderRetry.addEventListener("click", function () {
             // Старый заказ не переплачиваем: начинаем заново.
@@ -737,7 +852,6 @@ description: >-
             show(el.order, false);
             show(el.landing, true);
             setError(el.landingError, "");
-            el.contact.focus();
         });
 
         el.orderRestart.addEventListener("click", function () {
