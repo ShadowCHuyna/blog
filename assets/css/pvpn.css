@@ -1,62 +1,210 @@
-/* Модальное окно и оформление покупки pVPN */
-.checkout-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.75);
+/* ==========================================================================
+   pVPN Styles (Dark & Light Theme Compatible)
+   ========================================================================== */
+
+/* --- Уведомления --- */
+.pvpn-notice-box {
+    border-left: 3px solid var(--accent);
+    background: rgba(255, 59, 0, 0.06);
+    padding: 14px 18px;
+    margin: 1.4em 0;
+    text-align: left;
+}
+
+.pvpn-notice-box.pvpn-notice-warning {
+    border-left-color: var(--accent);
+}
+
+.pvpn-notice-box.pvpn-notice-info {
+    border-left-color: var(--muted);
+    background: rgba(128, 128, 128, 0.08);
+}
+
+.pvpn-notice-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 16px;
-    box-sizing: border-box;
+    gap: 8px;
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--fg);
+    margin-bottom: 6px;
 }
 
-.checkout-modal[hidden] {
-    display: none;
+.pvpn-notice-box p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--fg);
 }
 
-.checkout-card {
-    background: var(--bg);
-    border: 1px solid var(--fg);
-    width: 100%;
-    max-width: 440px;
-    padding: 24px;
-    position: relative;
-    box-sizing: border-box;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+.pvpn-notice-box p + p {
+    margin-top: 6px;
 }
 
-.checkout-header {
+/* --- Карточки тарифов --- */
+.pvpn-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin: 1.6em 0;
+}
+
+.pvpn-plan-card {
+    border: 1px solid var(--muted);
+    padding: 20px;
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 1px solid var(--muted);
-    padding-bottom: 12px;
-    margin-bottom: 16px;
+    background: var(--bg);
+    transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.pvpn-plan-card:hover {
+    border-color: var(--fg);
+}
+
+.pvpn-plan-card.featured {
+    border-color: var(--accent);
+    position: relative;
+}
+
+.pvpn-plan-badge {
+    position: absolute;
+    top: -10px;
+    right: 12px;
+    background: var(--accent);
+    color: #fff;
+    font: 11px/1.2 "Courier New", monospace;
+    padding: 3px 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pvpn-plan-header {
+    margin-bottom: 12px;
+}
+
+.pvpn-plan-title {
+    font-size: 1.2em;
+    margin: 0.2em 0;
+    font-family: Georgia, serif;
+}
+
+.pvpn-plan-price {
+    font-family: "Courier New", monospace;
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--accent);
+    margin: 8px 0;
+    line-height: 1;
+}
+
+.pvpn-plan-period {
+    font-size: 0.5em;
+    font-weight: normal;
+    color: var(--muted);
+}
+
+.pvpn-plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 14px 0 20px;
+    font-size: 13px;
+    font-family: "Courier New", monospace;
+    color: var(--muted);
+}
+
+.pvpn-plan-features li {
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(128, 128, 128, 0.2);
+}
+
+.pvpn-plan-features li:last-child {
+    border-bottom: none;
+}
+
+.pvpn-plan-features li::before {
+    content: "✓ ";
+    color: var(--accent);
+}
+
+.pvpn-plan-action {
+    margin-top: auto;
+}
+
+.pvpn-plan-action .button {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+/* --- Блок продления подписки --- */
+.pvpn-renew-card {
+    border: 1px dashed var(--muted);
+    padding: 18px 20px;
+    margin: 2em 0 1.2em;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.pvpn-renew-card h3 {
+    margin: 0.3em 0 0.5em;
+}
+
+.pvpn-renew-card p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 14px;
+}
+
+/* --- Оформление заказа (Checkout) --- */
+.pvpn-back-link {
+    display: inline-block;
+    font: 13px "Courier New", monospace;
+    color: var(--muted);
+    text-decoration: none;
+    margin-bottom: 14px;
+}
+
+.pvpn-back-link:hover {
+    color: var(--accent);
+}
+
+.checkout-plan-summary {
+    border: 1px solid var(--muted);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.checkout-plan-details strong {
+    color: var(--accent);
 }
 
 .checkout-tabs {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     border-bottom: 1px solid var(--muted);
+    margin-bottom: 24px;
     padding-bottom: 8px;
-    margin-bottom: 16px;
 }
 
 .checkout-tab {
     background: none;
     border: none;
-    font: 13px "Courier New", monospace;
+    font: 14px "Courier New", monospace;
     color: var(--muted);
     cursor: pointer;
-    padding: 4px 6px;
-    border-radius: 0;
-    transition: color 0.15s ease, border-color 0.15s ease;
+    padding: 6px 4px;
     border-bottom: 2px solid transparent;
     margin-bottom: -9px;
+    transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .checkout-tab:hover {
@@ -66,30 +214,269 @@
 .checkout-tab.active {
     color: var(--accent);
     border-bottom-color: var(--accent);
+    font-weight: bold;
 }
 
-.checkout-close {
-    background: none;
-    border: none;
-    font: 18px/1 "Courier New", monospace;
+.checkout-step-box {
+    margin-bottom: 24px;
+}
+
+.code-input {
+    font-size: 24px !important;
+    letter-spacing: 12px;
+    text-align: center;
+    max-width: 220px !important;
+    font-weight: bold;
+}
+
+.checkout-confirm-card {
+    border: 1px solid var(--muted);
+    padding: 16px 20px;
+    margin: 16px 0;
+    line-height: 1.8;
+}
+
+/* --- Экран заказа (Order / Status) --- */
+.order-status-card {
+    border: 1px solid var(--muted);
+    padding: 20px;
+    margin: 1.4em 0;
+    background: var(--bg);
+}
+
+.order-badge-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--muted);
+}
+
+.order-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font: 13px "Courier New", monospace;
+    padding: 4px 10px;
+    border: 1px solid var(--muted);
+}
+
+.order-badge.badge-pending {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(255, 59, 0, 0.08);
+}
+
+.order-badge.badge-success {
+    border-color: #2ea44f;
+    color: #2ea44f;
+    background: rgba(46, 164, 79, 0.08);
+}
+
+.order-badge.badge-progress {
+    border-color: #0366d6;
+    color: #0366d6;
+    background: rgba(3, 102, 214, 0.08);
+}
+
+.order-badge.badge-failed {
+    border-color: #cb2431;
+    color: #cb2431;
+    background: rgba(203, 36, 49, 0.08);
+}
+
+.polling-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: 13px "Courier New", monospace;
     color: var(--muted);
+    margin: 14px 0;
+}
+
+.spin-icon {
+    display: inline-block;
+    animation: pvpn-spin 2s linear infinite;
+}
+
+@keyframes pvpn-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* --- Персональная ссылка подписки --- */
+.pvpn-sub-container {
+    border: 1px solid var(--fg);
+    padding: 20px;
+    margin: 1.6em 0;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.sub-input-group {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+
+.sub-input-group .search-input {
+    flex: 1;
+    min-width: 240px;
+    font-size: 13px;
+    text-overflow: ellipsis;
+}
+
+.sub-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 14px 0 8px;
+}
+
+.sub-actions .button {
+    margin: 0;
+}
+
+.button-accent {
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+}
+
+.button-accent:hover {
+    background: var(--accent) !important;
+    color: #fff !important;
+}
+
+/* --- Инструкция по настройке (Setup Guide) --- */
+.pvpn-setup-section {
+    margin-top: 2.4em;
+    border-top: 1px solid var(--muted);
+    padding-top: 1.6em;
+}
+
+.setup-method-box {
+    border: 1px solid var(--accent);
+    padding: 18px 20px;
+    margin: 1.4em 0;
+    background: rgba(255, 59, 0, 0.04);
+}
+
+.setup-method-box h3 {
+    margin-top: 0;
+}
+
+.setup-method-box ul {
+    margin: 10px 0 0;
+    padding-left: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.platform-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 1.4em 0 1em;
+    border-bottom: 1px solid var(--muted);
+    padding-bottom: 6px;
+}
+
+.platform-tab {
+    background: none;
+    border: 1px solid transparent;
+    font: 13px "Courier New", monospace;
+    color: var(--muted);
+    padding: 6px 12px;
     cursor: pointer;
-    padding: 0 4px;
+    transition: all 0.15s ease;
 }
 
-.checkout-close:hover {
-    color: var(--accent);
+.platform-tab:hover {
+    color: var(--fg);
 }
 
-.plan-item {
-    cursor: pointer;
-    transition: background 0.15s ease;
+.platform-tab.active {
+    color: var(--fg);
+    border-color: var(--fg);
+    background: rgba(0, 0, 0, 0.05);
+    font-weight: bold;
 }
 
-.plan-item:hover {
-    background: rgba(255, 59, 0, 0.06);
+.platform-panel {
+    border: 1px solid var(--muted);
+    padding: 20px;
+    margin-bottom: 1.6em;
+    background: var(--bg);
 }
 
-.plan-item:hover .arrow {
-    color: var(--accent);
+.platform-panel[hidden] {
+    display: none;
+}
+
+.platform-panel ol {
+    margin: 10px 0 0;
+    padding-left: 20px;
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.platform-panel ol li {
+    margin-bottom: 8px;
+}
+
+.pvpn-support-card {
+    border: 1px dashed var(--muted);
+    padding: 16px 20px;
+    margin: 1.8em 0;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.pvpn-support-card h4 {
+    margin: 0.2em 0 0.5em;
+    font-family: Georgia, serif;
+}
+
+/* --- Адаптивность для мобильных экранов --- */
+@media (max-width: 600px) {
+    .pvpn-plans-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sub-input-group {
+        flex-direction: column;
+    }
+
+    .sub-input-group .button {
+        width: 100%;
+        text-align: center;
+    }
+
+    .sub-actions {
+        flex-direction: column;
+    }
+
+    .sub-actions .button {
+        width: 100%;
+        text-align: center;
+    }
+
+    .checkout-tabs {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .checkout-tab {
+        border-bottom: none;
+        border-left: 2px solid transparent;
+        padding-left: 8px;
+        margin-bottom: 0;
+    }
+
+    .checkout-tab.active {
+        border-left-color: var(--accent);
+    }
 }

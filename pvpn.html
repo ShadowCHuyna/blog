@@ -1,38 +1,47 @@
 ---
 layout: default
 permalink: /pvpn/
-title: pVPN — купить подписку
+title: pVPN — надёжный и быстрый VLESS VPN
 description: >-
-  VPN. 5 устройств, безлимитный трафик, {{ site.data.pvpn.plan.amount }}{{ site.data.pvpn.plan.currency }} за {{ site.data.pvpn.plan.days }} дней.
+  pVPN — персональный VPN на протоколе VLESS Reality. Устойчив к блокировкам ТСПУ, до 5 устройств, безлимитный трафик и никаких логов.
 extra_css: /assets/css/pvpn.css
 ---
 
-{%- comment -%}
-Адрес API можно переопределить на сборке — так страница проверяется
-локально, без обращения к боевому сервису:
-
-    jekyll build --config _config.yml,_config.dev.yml
-
-Поток покупки повторяет контракт сервиса (docs/api-endpoints.md):
-
-    GET  /api/v1/plans              — каталог активных тарифов
-    POST /api/v1/verify/{user}/request — код на e-mail (для telegram — код из бота)
-    POST /api/v1/verify/{user}      — код → verification_token
-    POST /api/v1/payments           — заказ (Idempotency-Key, client_uuid)
-    GET  /api/v1/payments/{id}      — статус заказа и выдачи (опрос)
-{%- endcomment -%}
 {%- assign api_base = site.pvpn_api_base | default: site.data.pvpn.api_base -%}
-{%- assign plan = site.data.pvpn.plan %}
 
 <h1>pVPN.</h1>
 
 <p class="lead">
-    Свой VPN-сервер.
-    {{ plan.amount }}{{ plan.currency }} за {{ plan.days }} дней.
+    Быстрый, приватный и устойчивый к блокировкам VPN на базе современного протокола VLESS Reality.
+    Работает там, где другие протоколы уже заблокированы.
 </p>
 
-<section class="section" id="landing">
-    <h2 class="comment">что входит<span class="tag">[01/02]</span></h2>
+<section class="section">
+    <h2 class="comment">тарифы подписки<span class="tag">[01/03]</span></h2>
+
+    <!-- Динамический контейнер тарифов -->
+    <div id="pvpn-plans" class="pvpn-plans-grid" aria-label="Каталог тарифов">
+        <div class="pvpn-plan-card">
+            <div class="meta">// загрузка</div>
+            <p class="comment">Загружаем доступные тарифы…</p>
+        </div>
+    </div>
+    <p class="notice-error" id="pvpn-plans-error" hidden></p>
+
+    <!-- Блок быстрого продления -->
+    <div class="pvpn-renew-card">
+        <div class="meta">// уже есть подписка?</div>
+        <h3>Продление без изменения настроек</h3>
+        <p>
+            Если вы уже пользуетесь pVPN, вам не нужно заново настраивать клиенты на ваших телефонах и компьютерах.
+            Просто укажите вашу действующую ссылку на подписку — срок действия продлится автоматически.
+        </p>
+        <a href="{{ '/pvpn/checkout/?mode=renew' | relative_url }}" class="button">Продлить по действующей ссылке →</a>
+    </div>
+</section>
+
+<section class="section">
+    <h2 class="comment">что входит<span class="tag">[02/03]</span></h2>
 
     <div class="grid">
         {% for feature in site.data.pvpn.features %}
@@ -43,177 +52,77 @@ extra_css: /assets/css/pvpn.css
         </div>
         {% endfor %}
     </div>
-
-    <h2 class="comment">тариф<span class="tag">[02/02]</span></h2>
-
-    <p class="comment">
-        Нажмите на подходящий тариф, чтобы перейти к оформлению.
-        Уже есть подписка? <button type="button" id="landing-renew" class="linkbutton">Продлить по ссылке →</button>
-    </p>
-
-    <div class="list" id="plans" aria-label="выбор тарифа">
-        <div class="list-item"><span class="meta">загружаем тарифы…</span></div>
-    </div>
-
-    <p class="notice-error" id="landing-error" hidden></p>
 </section>
 
-<!-- Модальное окно оформления -->
-<div id="checkout-modal" class="checkout-modal" hidden>
-    <div class="checkout-card" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
-        <div class="checkout-header">
-            <div>
-                <span class="meta">// оформление подписки</span>
-                <h3 id="checkout-title" style="margin: 0.2em 0 0;"></h3>
-            </div>
-            <button type="button" id="checkout-close" class="checkout-close" aria-label="Закрыть">✕</button>
-        </div>
-
-        <!-- Переключатель: новая / продление -->
-        <div class="checkout-tabs">
-            <button type="button" id="tab-new" class="checkout-tab active">// новая (e-mail)</button>
-            <button type="button" id="tab-renew" class="checkout-tab">// продлить по ссылке</button>
-        </div>
-
-        <!-- Поток новой подписки -->
-        <div id="flow-new">
-            <!-- Шаг 1: ввод почты -->
-            <div id="step-email">
-                <label class="label" for="contact">// e-mail для подписки</label>
-                <p>
-                    <input
-                        type="email"
-                        id="contact"
-                        class="search-input"
-                        autocomplete="email"
-                        spellcheck="false"
-                        placeholder="ваш e-mail">
-                    <span class="meta" style="margin-top: 6px;">на этот адрес придёт 4-значный код подтверждения</span>
-                </p>
-                <p class="notice-error" id="email-error" hidden></p>
-                <p class="buttons" style="margin-bottom: 0;">
-                    <button type="button" id="email-submit" class="button">оплатить</button>
-                </p>
-            </div>
-
-            <!-- Шаг 2: ввод кода -->
-            <div id="step-code" hidden>
-                <label class="label" for="code">// код подтверждения из письма</label>
-                <p>
-                    <input
-                        type="text"
-                        id="code"
-                        class="search-input"
-                        maxlength="4"
-                        inputmode="numeric"
-                        autocomplete="one-time-code"
-                        placeholder="0000">
-                    <span class="meta" style="margin-top: 6px;">
-                        код отправлен на <strong id="code-sent-email"></strong> ·
-                        <button type="button" id="change-email" class="linkbutton">изменить</button>
-                    </span>
-                </p>
-                <p class="notice-error" id="code-error" hidden></p>
-                <p class="buttons" style="margin-bottom: 0;">
-                    <button type="button" id="code-submit" class="button">подтвердить и перейти к оплате →</button>
-                </p>
-            </div>
-        </div>
-
-        <!-- Поток продления по ссылке -->
-        <div id="flow-renew" hidden>
-            <!-- Шаг 1: ввод ссылки -->
-            <div id="step-renew-input">
-                <label class="label" for="renew-url">// ссылка на подписку</label>
-                <p>
-                    <input
-                        type="text"
-                        id="renew-url"
-                        class="search-input"
-                        autocomplete="off"
-                        spellcheck="false"
-                        placeholder="https://sub.pvpn.potatom.net/... или short UUID">
-                    <span class="meta" style="margin-top: 6px;">ссылка из вашего VPN-клиента или письма активации</span>
-                </p>
-                <p class="notice-error" id="renew-error" hidden></p>
-                <p class="buttons" style="margin-bottom: 0;">
-                    <button type="button" id="renew-submit" class="button">найти подписку</button>
-                </p>
-            </div>
-
-            <!-- Шаг 2: подтверждение найденной подписки -->
-            <div id="step-renew-confirm" hidden>
-                <label class="label">// найденная подписка</label>
-                <p class="comment" style="margin-top: 0; line-height: 1.6;">
-                    пользователь: <strong id="renew-username" style="color: var(--fg);"></strong><br>
-                    статус: <strong id="renew-status" style="color: var(--fg);"></strong><br>
-                    действует до: <strong id="renew-expires" style="color: var(--fg);"></strong><br>
-                    будет продлена на: <strong id="renew-duration" style="color: var(--fg);"></strong>
-                </p>
-                <p class="notice-error" id="renew-confirm-error" hidden></p>
-                <p class="buttons" style="margin-bottom: 0;">
-                    <button type="button" id="renew-pay" class="button">перейти к оплате →</button>
-                    <button type="button" id="renew-change" class="linkbutton">другая ссылка</button>
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!--
-    Блок заказа есть в разметке всегда, чтобы при возврате с платёжной
-    страницы не было прыжка вёрстки: меняется только видимость.
--->
-<section class="section" id="order" hidden>
-    <h2 class="comment">ваш заказ<span class="tag">[03/03]</span></h2>
+<section class="section">
+    <h2 class="comment">как это работает<span class="tag">[03/03]</span></h2>
 
     <div class="list">
         <div class="list-item">
-            <span class="number" id="order-amount">···</span>
-            <span id="order-state"><strong>создаём заказ</strong></span>
-            <span class="arrow" id="order-mark">···</span>
+            <span class="number">01</span>
+            <span>
+                <strong>Выберите подходящий период</strong><br>
+                <span class="meta">Месяц, три или год — выберите тариф и укажите ваш e-mail</span>
+            </span>
+            <span class="arrow">→</span>
+        </div>
+        <div class="list-item">
+            <span class="number">02</span>
+            <span>
+                <strong>Оплатите онлайн</strong><br>
+                <span class="meta">Принимаются карты российских банков, СБП и кошелёк ЮMoney</span>
+            </span>
+            <span class="arrow">→</span>
+        </div>
+        <div class="list-item">
+            <span class="number">03</span>
+            <span>
+                <strong>Подключитесь в один клик</strong><br>
+                <span class="meta">Откройте персональную ссылку в браузере или скопируйте в Happ / v2rayNG</span>
+            </span>
+            <span class="arrow">✓</span>
         </div>
     </div>
+</section>
 
-    <!-- реквизиты перевода: показываем, пока платёж не оплачен -->
-    <div id="pay-details" hidden>
-        <p>
-            <button type="button" id="pay-open" class="button">открыть страницу оплаты</button>
-            <button type="button" id="order-cancel" class="linkbutton">отменить заказ</button>
+<section class="section">
+    <h2 class="comment">частые вопросы<span class="tag">[faq]</span></h2>
+
+    <details>
+        <summary>На каких устройствах работает pVPN?</summary>
+        <p style="margin-top: 0.6em; font-size: 14px;">
+            На любых устройствах: iPhone, iPad (iOS), телефонах и планшетах на Android, компьютерах на Windows, macOS и Linux, а также на роутерах с прошивками Keenetic, OpenWrt и др.
         </p>
-        <p class="comment">
-            страница оплаты открылась в новой вкладке. Если она закрылась — нажмите кнопку выше.
-            После подтверждения перевода подписка появится здесь автоматически.
+    </details>
+
+    <details>
+        <summary>Какие приложения нужны для подключения?</summary>
+        <p style="margin-top: 0.6em; font-size: 14px;">
+            Для iOS: бесплатное приложение <strong>Happ</strong> (или FoXray, Streisand).<br>
+            Для Android: <strong>v2rayNG</strong> или Happ.<br>
+            Для Windows: <strong>v2rayN</strong> или Hiddify.<br>
+            Для macOS: <strong>FoXray</strong>, V2Box или Hiddify.<br>
+            Сразу после оплаты вы получите персональную страницу со ссылками на приложения, QR-кодом и быстрой настройкой.
         </p>
-    </div>
+    </details>
 
-    <p class="buttons" id="order-retry-wrap" hidden>
-        <button type="button" id="order-retry" class="button">создать заказ заново</button>
-    </p>
-
-    <p class="notice-error" id="order-error" hidden></p>
-
-    <div id="subscription" hidden>
-        <p class="label">// ссылка подписки</p>
-
-        <p>
-            <input type="text" id="subscription-url" class="search-input" readonly>
+    <details>
+        <summary>Почему именно протокол VLESS Reality?</summary>
+        <p style="margin-top: 0.6em; font-size: 14px;">
+            Протоколы OpenVPN и WireGuard активно блокируются провайдерами и системами ТСПУ. VLESS Reality маскирует VPN-соединение под легитимный HTTPS-трафик к популярным мировым сайтам, поэтому его невозможно обнаружить и заблокировать по сигнатурам.
         </p>
+    </details>
 
-        <p class="buttons">
-            <button type="button" id="subscription-copy" class="button">скопировать</button>
-            <a class="button" id="subscription-open" href="#" rel="noopener noreferrer">открыть</a>
+    <details>
+        <summary>Куда обращаться, если нужна помощь?</summary>
+        <p style="margin-top: 0.6em; font-size: 14px;">
+            Наша служба поддержки доступна в Telegram: <a href="{{ site.data.pvpn.bot_url }}" target="_blank" rel="noopener">@{{ site.data.pvpn.bot_username }}</a> или по электронной почте <a href="mailto:bork@potatom.net">bork@potatom.net</a>.
         </p>
-
-        <p class="comment" id="subscription-expiry"></p>
-    </div>
-
-    <p class="comment" id="order-lost" hidden>
-        <button type="button" id="order-restart" class="linkbutton">начать новый заказ</button>
-    </p>
+    </details>
 </section>
 
 <script>
     window.PVPN_CONFIG = { api_base: {{ api_base | jsonify }} };
 </script>
-<script src="{{ '/assets/js/pvpn.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/pvpn-common.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/pvpn-landing.js' | relative_url }}"></script>

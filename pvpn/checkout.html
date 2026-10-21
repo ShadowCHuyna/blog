@@ -1,0 +1,136 @@
+---
+layout: default
+permalink: /pvpn/checkout/
+title: pVPN — Оформление подписки
+description: Быстрое и удобное оформление подписки на pVPN.
+extra_css: /assets/css/pvpn.css
+---
+
+{%- assign api_base = site.pvpn_api_base | default: site.data.pvpn.api_base -%}
+
+<a href="{{ '/pvpn/' | relative_url }}" class="pvpn-back-link">← Вернуться к тарифам</a>
+
+<h1>Оформление pVPN.</h1>
+
+<!-- Панель выбранного тарифа -->
+<div id="checkout-plan-summary" class="checkout-plan-summary">
+    <div class="checkout-plan-details">
+        <span class="meta">// выбранный тариф</span>
+        <div>
+            <strong id="checkout-plan-title">Загрузка…</strong> —
+            <strong id="checkout-plan-price">…</strong>
+            (<span id="checkout-plan-duration">…</span>)
+        </div>
+    </div>
+    <div id="checkout-plan-select-wrap">
+        <select id="checkout-plan-select" class="search-input" style="max-width: 300px; padding: 4px 8px;" aria-label="Сменить тариф"></select>
+    </div>
+</div>
+
+<!-- Переключатель: Новая подписка / Продление по ссылке -->
+<div class="checkout-tabs" role="tablist">
+    <button type="button" id="tab-new" class="checkout-tab active" role="tab" aria-selected="true">// новая подписка (по e-mail)</button>
+    <button type="button" id="tab-renew" class="checkout-tab" role="tab" aria-selected="false">// продлить по ссылке</button>
+</div>
+
+<!-- ========================================== -->
+<!-- Поток 1: Новая подписка                     -->
+<!-- ========================================== -->
+<div id="flow-new">
+    <!-- Шаг 1: Ввод e-mail -->
+    <div id="step-email" class="checkout-step-box">
+        <label class="label" for="checkout-email">// шаг 1 из 2: ваш e-mail</label>
+        <p>
+            <input
+                type="email"
+                id="checkout-email"
+                class="search-input"
+                autocomplete="email"
+                spellcheck="false"
+                placeholder="name@example.com"
+                autofocus>
+            <span class="meta" style="margin-top: 6px;">
+                На этот адрес придёт 4-значный проверочный код, а после оплаты — персональная ссылка на подписку.
+            </span>
+        </p>
+        <p class="notice-error" id="email-error" hidden></p>
+        <p class="buttons" style="margin-bottom: 0;">
+            <button type="button" id="btn-request-code" class="button button-accent">Получить проверочный код →</button>
+        </p>
+    </div>
+
+    <!-- Шаг 2: Ввод проверочного кода -->
+    <div id="step-code" class="checkout-step-box" hidden>
+        <label class="label" for="checkout-code">// шаг 2 из 2: код подтверждения из письма</label>
+        <p>
+            <input
+                type="text"
+                id="checkout-code"
+                class="search-input code-input"
+                maxlength="4"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                placeholder="0000">
+            <span class="meta" style="margin-top: 8px;">
+                Код отправлен на <strong id="code-sent-email"></strong> ·
+                <button type="button" id="btn-change-email" class="linkbutton">изменить e-mail</button>
+            </span>
+        </p>
+        <p class="comment" style="font-size: 13px;">
+            Письмо обычно приходит в течение 10–30 секунд. Если не пришло — проверьте папку «Спам».
+        </p>
+        <p class="notice-error" id="code-error" hidden></p>
+        <p class="buttons" style="margin-bottom: 0;">
+            <button type="button" id="btn-confirm-code" class="button button-accent">Подтвердить и перейти к оплате →</button>
+        </p>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- Поток 2: Продление по ссылке               -->
+<!-- ========================================== -->
+<div id="flow-renew" hidden>
+    <!-- Шаг 1: Ввод ссылки -->
+    <div id="step-renew-input" class="checkout-step-box">
+        <label class="label" for="checkout-renew-url">// ссылка на действующую подписку</label>
+        <p>
+            <input
+                type="text"
+                id="checkout-renew-url"
+                class="search-input"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="https://sub.pvpn.potatom.net/... или short UUID">
+            <span class="meta" style="margin-top: 6px;">
+                Скопируйте ссылку из вашего VPN-клиента (Happ, v2rayNG) или найдите в письме активации.
+            </span>
+        </p>
+        <p class="notice-error" id="renew-error" hidden></p>
+        <p class="buttons" style="margin-bottom: 0;">
+            <button type="button" id="btn-resolve" class="button button-accent">Найти подписку →</button>
+        </p>
+    </div>
+
+    <!-- Шаг 2: Подтверждение найденной подписки -->
+    <div id="step-renew-confirm" class="checkout-step-box" hidden>
+        <label class="label">// найденная подписка</label>
+        <div class="checkout-confirm-card">
+            <div class="meta">// информация об аккаунте</div>
+            пользователь: <strong id="renew-username" style="color: var(--fg);">…</strong><br>
+            текущий статус: <strong id="renew-status" style="color: var(--fg);">…</strong><br>
+            действует до: <strong id="renew-expires" style="color: var(--fg);">…</strong><br>
+            будет продлена на: <strong id="renew-extension" style="color: var(--accent);">…</strong>
+        </div>
+        <p class="notice-error" id="renew-confirm-error" hidden></p>
+        <p class="buttons" style="margin-bottom: 0;">
+            <button type="button" id="btn-pay-renew" class="button button-accent">Оплатить продление →</button>
+            <button type="button" id="btn-change-renew" class="linkbutton" style="margin-left: 12px;">другая ссылка</button>
+        </p>
+    </div>
+</div>
+
+<script>
+    window.PVPN_CONFIG = { api_base: {{ api_base | jsonify }} };
+</script>
+<script src="{{ '/assets/js/pvpn-common.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/pvpn-checkout.js' | relative_url }}"></script>

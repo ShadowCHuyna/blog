@@ -1,0 +1,218 @@
+---
+layout: default
+permalink: /pvpn/order/
+title: pVPN — Статус заказа и настройка
+description: Проверка статуса оплаты и инструкция по подключению pVPN.
+extra_css: /assets/css/pvpn.css
+---
+
+{%- assign api_base = site.pvpn_api_base | default: site.data.pvpn.api_base -%}
+
+<a href="{{ '/pvpn/' | relative_url }}" class="pvpn-back-link">← Вернуться к тарифам</a>
+
+<h1>Статус заказа.</h1>
+
+<!-- Ошибка: Заказ не найден -->
+<div id="order-state-not-found" class="checkout-step-box" hidden>
+    <div class="pvpn-notice-box pvpn-notice-warning">
+        <div class="pvpn-notice-header">
+            <span>⚠</span>
+            <span>Заказ не найден</span>
+        </div>
+        <p>Не удалось найти активный заказ. Возможно, ссылка устарела или заказ был закрыт.</p>
+    </div>
+    <p>
+        <a href="{{ '/pvpn/' | relative_url }}" class="button button-accent">Выбрать тариф pVPN →</a>
+    </p>
+</div>
+
+<!-- Блок информации о заказе -->
+<div class="order-status-card" id="order-main-card">
+    <div class="order-badge-row">
+        <div>
+            <span class="meta">// сумма к оплате</span>
+            <div style="font-size: 1.5em; font-family: 'Courier New', monospace; font-weight: bold; color: var(--fg);" id="order-amount-display">
+                ···
+            </div>
+        </div>
+        <div>
+            <span class="order-badge badge-pending" id="order-badge-display">
+                ⏳ Ожидаем оплату
+            </span>
+        </div>
+    </div>
+
+    <!-- 1. Состояние: Ожидание оплаты -->
+    <div id="order-state-pending">
+        <!-- ГЛАВНОЕ УВЕДОМЛЕНИЕ О ВРЕМЕНИ СВЕРКИ (1-5 МИНУТ) -->
+        <div class="pvpn-notice-box pvpn-notice-warning">
+            <div class="pvpn-notice-header">
+                <span>⏱️</span>
+                <span>Сверка платежа может занять от 1 до 5 минут</span>
+            </div>
+            <p>
+                Пожалуйста, не закрывайте эту страницу (или добавьте ссылку в закладки).
+                После того, как банк подтвердит поступление средств, страница <strong>обновится автоматически</strong> и предоставит ссылку для подключения.
+            </p>
+        </div>
+
+        <div class="sub-actions">
+            <a id="order-btn-pay" href="#" target="_blank" rel="noopener noreferrer" class="button button-accent">
+                Открыть страницу оплаты (ЮMoney) ↗
+            </a>
+            <button type="button" id="order-btn-cancel" class="linkbutton" style="font-size: 13px; margin-left: 8px;">
+                отменить этот заказ
+            </button>
+        </div>
+
+        <div class="polling-indicator" id="order-polling-status">
+            <span class="spin-icon">🔄</span>
+            <span>Опрашиваем платёжный шлюз каждые несколько секунд…</span>
+        </div>
+    </div>
+
+    <!-- 2. Состояние: Успешно оплачено и готово -->
+    <div id="order-state-success" hidden>
+        <p class="comment" style="color: var(--fg); font-size: 15px; margin-top: 0;">
+            Оплата успешно зачислена! Ваша персональная ссылка подписки сгенерирована и готова к использованию.
+        </p>
+
+        <!-- Контейнер ссылки -->
+        <div class="pvpn-sub-container">
+            <label class="label" for="sub-url-input">// ваша персональная ссылка на подписку</label>
+            <div class="sub-input-group">
+                <input type="text" id="sub-url-input" class="search-input" readonly autocomplete="off" spellcheck="false">
+                <button type="button" id="btn-copy-sub" class="button">Скопировать</button>
+            </div>
+            <div class="sub-actions">
+                <a id="btn-open-sub" href="#" target="_blank" rel="noopener noreferrer" class="button button-accent">
+                    🌐 Открыть ссылку в браузере ↗
+                </a>
+            </div>
+            <p class="meta" id="sub-expiry-display" style="margin-top: 8px;">
+                Подписка действует до: …
+            </p>
+            <p class="comment" style="font-size: 12px; margin-bottom: 0;">
+                Копия ссылки также отправлена на указанную вами электронную почту.
+            </p>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- ПОДРОБНАЯ ИНСТРУКЦИЯ ПО НАСТРОЙКЕ И ПОДКЛЮЧЕНИЮ -->
+        <!-- ============================================== -->
+        <div class="pvpn-setup-section">
+            <h2 class="comment">инструкция по подключению<span class="tag">[как настроить]</span></h2>
+
+            <!-- Способ 1 -->
+            <div class="setup-method-box">
+                <div class="meta">// самый простой способ</div>
+                <h3>1. Веб-страница подписки (Рекомендуется)</h3>
+                <p>
+                    Нажмите кнопку <strong>«Открыть ссылку в браузере»</strong> выше.
+                    Откроется ваша персональная веб-страница pVPN, на которой доступны:
+                </p>
+                <ul>
+                    <li><strong>QR-код</strong> — можно отсканировать камерой любого VPN-приложения;</li>
+                    <li><strong>Кнопки быстрого импорта</strong> в один клик для Happ, FoXray, v2rayNG, Streisand и др.;</li>
+                    <li>Актуальный список локаций: Франция, Нидерланды, Германия, Латвия, Турция, Швеция и транзитные ноды;</li>
+                    <li>Остаток срока действия и статистика трафика.</li>
+                </ul>
+            </div>
+
+            <!-- Способ 2 -->
+            <div class="setup-manual-box">
+                <div class="meta">// настройка на устройстве</div>
+                <h3>2. Пошаговая настройка в приложениях</h3>
+
+                <div class="platform-tabs" role="tablist">
+                    <button type="button" class="platform-tab active" data-platform="ios" role="tab">// iOS (iPhone / iPad)</button>
+                    <button type="button" class="platform-tab" data-platform="android" role="tab">// Android</button>
+                    <button type="button" class="platform-tab" data-platform="windows" role="tab">// Windows</button>
+                    <button type="button" class="platform-tab" data-platform="macos" role="tab">// macOS</button>
+                </div>
+
+                <!-- Инструкция: iOS -->
+                <div id="panel-ios" class="platform-panel" role="tabpanel">
+                    <p><strong>Рекомендуемые клиенты из App Store:</strong> <strong>Happ</strong> (рекомендуется), <strong>FoXray</strong>, <strong>Streisand</strong>, <strong>V2Box</strong>.</p>
+                    <ol>
+                        <li>Установите приложение <strong>Happ</strong> или <strong>FoXray</strong> из App Store.</li>
+                        <li>Нажмите кнопку <strong>«Скопировать»</strong> выше, чтобы сохранить вашу ссылку подписки в буфер обмена.</li>
+                        <li>Откройте Happ: приложение автоматически обнаружит ссылку и предложит добавить подписку (если нет — нажмите значок <strong>«+»</strong> в правом верхнем углу → <em>«Добавить из буфера обмена»</em>).</li>
+                        <li>Выберите желаемый сервер в списке и нажмите кнопку подключения. При первом подключении подтвердите добавление VPN-конфигурации в системе iOS.</li>
+                    </ol>
+                </div>
+
+                <!-- Инструкция: Android -->
+                <div id="panel-android" class="platform-panel" role="tabpanel" hidden>
+                    <p><strong>Рекомендуемые клиенты:</strong> <strong>v2rayNG</strong> (рекомендуется), <strong>Happ</strong>, <strong>Hiddify</strong>.</p>
+                    <ol>
+                        <li>Установите <strong>v2rayNG</strong> из Google Play или загрузите APK с официального GitHub.</li>
+                        <li>Скопируйте вашу ссылку подписки выше.</li>
+                        <li>В v2rayNG нажмите значок <strong>«+»</strong> вверху справа и выберите <strong>«Импорт профиля из буфера обмена»</strong>.</li>
+                        <li>В правом верхнем углу нажмите меню трёх точек <strong>⋮</strong> → <strong>«Обновить подписку»</strong>. Появится список серверов.</li>
+                        <li>Выберите подходящий сервер и нажмите круглую кнопку подключения в правом нижнем углу экрана.</li>
+                    </ol>
+                </div>
+
+                <!-- Инструкция: Windows -->
+                <div id="panel-windows" class="platform-panel" role="tabpanel" hidden>
+                    <p><strong>Рекомендуемые клиенты:</strong> <strong>v2rayN</strong> (рекомендуется), <strong>Hiddify</strong>.</p>
+                    <ol>
+                        <li>Скачайте архив <strong>v2rayN-with-dependencies.zip</strong> с официального GitHub и распакуйте в любую удобную папку.</li>
+                        <li>Запустите <code>v2rayN.exe</code>. В верхнем меню откройте <strong>«Подписка» (Subscription)</strong> → <strong>«Настройки подписки» (Subscription setting)</strong>.</li>
+                        <li>Нажмите <strong>«Добавить»</strong>, в строке <em>URL</em> вставьте вашу ссылку подписки и нажмите «Подтвердить».</li>
+                        <li>В меню «Подписка» выберите <strong>«Обновить подписку без прокси»</strong>. Загрузятся серверы.</li>
+                        <li>В нижней строке в выпадающем списке <em>«Системный прокси» (System Proxy)</em> выберите <strong>«Установить системный прокси» (Set system proxy)</strong> и выберите сервер в списке.</li>
+                    </ol>
+                </div>
+
+                <!-- Инструкция: macOS -->
+                <div id="panel-macos" class="platform-panel" role="tabpanel" hidden>
+                    <p><strong>Рекомендуемые клиенты из Mac App Store:</strong> <strong>FoXray</strong>, <strong>V2Box</strong>, <strong>Hiddify</strong>.</p>
+                    <ol>
+                        <li>Установите <strong>FoXray</strong> или <strong>V2Box</strong> из Mac App Store.</li>
+                        <li>Скопируйте вашу ссылку подписки выше.</li>
+                        <li>В приложении нажмите <strong>«+»</strong> и выберите добавление из буфера обмена (или отсканируйте QR-код со страницы подписки в браузере).</li>
+                        <li>Нажмите <strong>«Подключиться»</strong> и подтвердите создание VPN-профиля в системных настройках macOS.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Поддержка -->
+            <div class="pvpn-support-card">
+                <div class="meta">// поддержка и закрытый чат</div>
+                <h4>Если что-то не работает или возникли вопросы</h4>
+                <p>
+                    • Чат-бот поддержки в Telegram: <a href="{{ site.data.pvpn.bot_url }}" target="_blank" rel="noopener">@{{ site.data.pvpn.bot_username }}</a><br>
+                    • Электронная почта: <a href="mailto:bork@potatom.net">bork@potatom.net</a><br>
+                    • Напишите нам, чтобы получить ссылку на закрытую группу пользователей pVPN.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Состояние: Отмена / Истекло -->
+    <div id="order-state-terminal" hidden>
+        <div class="pvpn-notice-box pvpn-notice-warning">
+            <div class="pvpn-notice-header">
+                <span>✕</span>
+                <span id="terminal-title">Заказ завершён</span>
+            </div>
+            <p id="terminal-desc">Срок действия счёта истёк или заказ был отменён.</p>
+        </div>
+        <p>
+            <a href="{{ '/pvpn/' | relative_url }}" class="button button-accent">Выбрать тариф и оформить заново →</a>
+        </p>
+    </div>
+
+    <p class="notice-error" id="order-error-display" hidden></p>
+</div>
+
+<script>
+    window.PVPN_CONFIG = {
+        api_base: {{ api_base | jsonify }},
+        landing_url: {{ '/pvpn/' | relative_url | jsonify }}
+    };
+</script>
+<script src="{{ '/assets/js/pvpn-common.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/pvpn-order.js' | relative_url }}"></script>
