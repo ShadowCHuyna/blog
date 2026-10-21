@@ -31,6 +31,12 @@
         checkoutModal: pick("checkout-modal"),
         checkoutTitle: pick("checkout-title"),
         checkoutClose: pick("checkout-close"),
+        tabNew: pick("tab-new"),
+        tabRenew: pick("tab-renew"),
+        flowNew: pick("flow-new"),
+        flowRenew: pick("flow-renew"),
+        landingRenew: pick("landing-renew"),
+
         stepEmail: pick("step-email"),
         stepCode: pick("step-code"),
         contact: pick("contact"),
@@ -41,6 +47,20 @@
         changeEmail: pick("change-email"),
         codeError: pick("code-error"),
         codeSubmit: pick("code-submit"),
+
+        stepRenewInput: pick("step-renew-input"),
+        renewUrl: pick("renew-url"),
+        renewError: pick("renew-error"),
+        renewSubmit: pick("renew-submit"),
+
+        stepRenewConfirm: pick("step-renew-confirm"),
+        renewUsername: pick("renew-username"),
+        renewStatus: pick("renew-status"),
+        renewExpires: pick("renew-expires"),
+        renewDuration: pick("renew-duration"),
+        renewConfirmError: pick("renew-confirm-error"),
+        renewPay: pick("renew-pay"),
+        renewChange: pick("renew-change"),
 
         order: pick("order"),
         orderAmount: pick("order-amount"),
@@ -66,6 +86,8 @@
 
     var plans = [];
     var selectedPlan = null;
+    var checkoutMode = "new";
+    var resolvedSubscription = null;
     var paymentId = null;
     var pollTimer = null;
     var inFlight = false;
@@ -233,25 +255,59 @@
         return null;
     }
 
-    function openCheckout(planId) {
+    function switchMode(mode) {
+        checkoutMode = mode;
+        var plan = currentPlan();
+        if (mode === "renew") {
+            if (el.tabNew) el.tabNew.classList.remove("active");
+            if (el.tabRenew) el.tabRenew.classList.add("active");
+            show(el.flowNew, false);
+            show(el.flowRenew, true);
+            setError(el.renewError, "");
+            setError(el.renewConfirmError, "");
+            if (resolvedSubscription && plan) {
+                show(el.stepRenewInput, false);
+                show(el.stepRenewConfirm, true);
+                if (el.renewDuration) {
+                    el.renewDuration.textContent = plan.duration_days + " дн.";
+                }
+            } else {
+                show(el.stepRenewInput, true);
+                show(el.stepRenewConfirm, false);
+                setTimeout(function () {
+                    if (el.renewUrl) el.renewUrl.focus();
+                }, 60);
+            }
+        } else {
+            if (el.tabRenew) el.tabRenew.classList.remove("active");
+            if (el.tabNew) el.tabNew.classList.add("active");
+            show(el.flowRenew, false);
+            show(el.flowNew, true);
+            show(el.stepEmail, true);
+            show(el.stepCode, false);
+            setError(el.emailError, "");
+            setError(el.codeError, "");
+            setTimeout(function () {
+                if (el.contact) el.contact.focus();
+            }, 60);
+        }
+    }
+
+    function openCheckout(planId, mode) {
         selectedPlan = planId;
         var plan = currentPlan();
         if (!plan) return;
         el.checkoutTitle.textContent = plan.title + " — " + money(plan) + " (" + plan.duration_days + " дн.)";
-        show(el.stepEmail, true);
-        show(el.stepCode, false);
-        setError(el.emailError, "");
-        setError(el.codeError, "");
+        switchMode(mode || checkoutMode || "new");
         show(el.checkoutModal, true);
-        setTimeout(function () {
-            if (el.contact) el.contact.focus();
-        }, 60);
     }
 
     function closeCheckout() {
         show(el.checkoutModal, false);
         setError(el.emailError, "");
         setError(el.codeError, "");
+        setError(el.renewError, "");
+        setError(el.renewConfirmError, "");
     }
 
     // --- подтверждение контакта (только e-mail) ---
@@ -378,6 +434,128 @@
                 el.codeSubmit.disabled = false;
                 el.codeSubmit.textContent = "подтвердить и перейти к оплате →";
                 setError(el.codeError, "Не удалось связаться с сервисом. Попробуйте ещё раз.");
+            });
+    }
+
+    function submitRenewUrl() {
+        var rawUrl = (el.renewUrl && el.renewUrl.value) ? el.renewUrl.value.trim() : "";
+        if (!rawUrl) {
+            setError(el.renewError, "Введите ссылку на подписку или short UUID.");
+            if (el.renewUrl) el.renewUrl.focus();
+            return;
+        }
+        setError(el.renewError, "");
+        if (el.renewSubmit) {
+            el.renewSubmit.disabled = true;
+            el.renewSubmit.textContent = "ищем подписку…";
+        }
+
+        api("/api/v1/subscriptions/resolve", {
+            method: "POST",
+            body: { url: rawUrl }
+        })
+            .then(function (response) {
+                return readJsonResponse(response).then(function (payload) {
+                    return { status: response.status, payload: payload };
+                });
+            })
+            .then(function (result) {
+                if (el.renewSubmit) {
+                    el.renewSubmit.disabled = false;
+                    el.renewSubmit.textContent = "найти подписку";
+                }
+                if (result.status !== 200) {
+                    var msg = "Подписка не найдена. Проверьте ссылку.";
+                    if (result.payload && result.payload.error && result.payload.error.message) {
+                        msg = result.payload.error.message;
+                    }
+                    setError(el.renewError, msg);
+                    if (el.renewUrl) el.renewUrl.focus();
+                    return;
+                }
+                var data = result.payload;
+                resolvedSubscription = {
+                    token: data.verification_token,
+                    shortUuid: data.short_uuid,
+                    username: data.username,
+                    status: data.status,
+                    expireAt: data.expire_at,
+                    email: data.email
+                };
+                var plan = currentPlan();
+                if (el.renewUsername) el.renewUsername.textContent = data.username || data.short_uuid;
+                if (el.renewStatus) el.renewStatus.textContent = data.status || "активна";
+                if (el.renewExpires) el.renewExpires.textContent = humanDate(data.expire_at) || "—";
+                if (el.renewDuration && plan) el.renewDuration.textContent = plan.duration_days + " дн.";
+
+                show(el.stepRenewInput, false);
+                show(el.stepRenewConfirm, true);
+                setError(el.renewConfirmError, "");
+                setTimeout(function () {
+                    if (el.renewPay) el.renewPay.focus();
+                }, 60);
+            })
+            .catch(function () {
+                if (el.renewSubmit) {
+                    el.renewSubmit.disabled = false;
+                    el.renewSubmit.textContent = "найти подписку";
+                }
+                setError(el.renewError, "Не удалось связаться с сервисом. Попробуйте ещё раз.");
+            });
+    }
+
+    function submitRenewPay() {
+        if (!resolvedSubscription) {
+            switchMode("renew");
+            return;
+        }
+        var plan = currentPlan();
+        if (!plan) return;
+
+        if (el.renewPay) {
+            el.renewPay.disabled = true;
+            el.renewPay.textContent = "создаём заказ…";
+        }
+        setError(el.renewConfirmError, "");
+        var key = idempotencyKey();
+
+        api("/api/v1/payments", {
+            method: "POST",
+            idempotencyKey: key,
+            body: {
+                client_uuid: clientUuid(),
+                plan_id: selectedPlan,
+                contact: {
+                    type: "subscription_url",
+                    value: resolvedSubscription.shortUuid
+                },
+                verification_token: resolvedSubscription.token
+            }
+        })
+            .then(function (response) {
+                return readJsonResponse(response).then(function (payload) {
+                    return { status: response.status, payload: payload };
+                });
+            })
+            .then(function (result) {
+                if (el.renewPay) {
+                    el.renewPay.disabled = false;
+                    el.renewPay.textContent = "перейти к оплате →";
+                }
+                if (result.status !== 200 && result.status !== 201) {
+                    store(PENDING_KEY, null);
+                    setError(el.renewConfirmError, describeError(result.status, result.payload));
+                    return;
+                }
+                closeCheckout();
+                acceptedOrder(result.payload);
+            })
+            .catch(function () {
+                if (el.renewPay) {
+                    el.renewPay.disabled = false;
+                    el.renewPay.textContent = "перейти к оплате →";
+                }
+                setError(el.renewConfirmError, "Не удалось связаться с сервисом. Попробуйте ещё раз.");
             });
     }
 
@@ -591,6 +769,48 @@
             closeCheckout();
         }
     });
+
+    if (el.tabNew) {
+        el.tabNew.addEventListener("click", function () {
+            switchMode("new");
+        });
+    }
+    if (el.tabRenew) {
+        el.tabRenew.addEventListener("click", function () {
+            switchMode("renew");
+        });
+    }
+    if (el.landingRenew) {
+        el.landingRenew.addEventListener("click", function () {
+            var targetPlan = selectedPlan || (plans.length > 0 ? plans[0].plan_id : null);
+            if (targetPlan) {
+                openCheckout(targetPlan, "renew");
+            }
+        });
+    }
+
+    if (el.renewSubmit) {
+        el.renewSubmit.addEventListener("click", submitRenewUrl);
+    }
+    if (el.renewUrl) {
+        el.renewUrl.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                submitRenewUrl();
+            }
+        });
+    }
+    if (el.renewPay) {
+        el.renewPay.addEventListener("click", submitRenewPay);
+    }
+    if (el.renewChange) {
+        el.renewChange.addEventListener("click", function () {
+            show(el.stepRenewConfirm, false);
+            show(el.stepRenewInput, true);
+            setError(el.renewError, "");
+            if (el.renewUrl) el.renewUrl.focus();
+        });
+    }
 
     el.changeEmail.addEventListener("click", function () {
         show(el.stepCode, false);

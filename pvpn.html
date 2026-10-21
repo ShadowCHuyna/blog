@@ -48,6 +48,7 @@ extra_css: /assets/css/pvpn.css
 
     <p class="comment">
         Нажмите на подходящий тариф, чтобы перейти к оформлению.
+        Уже есть подписка? <button type="button" id="landing-renew" class="linkbutton">Продлить по ссылке →</button>
     </p>
 
     <div class="list" id="plans" aria-label="выбор тарифа">
@@ -68,46 +69,93 @@ extra_css: /assets/css/pvpn.css
             <button type="button" id="checkout-close" class="checkout-close" aria-label="Закрыть">✕</button>
         </div>
 
-        <!-- Шаг 1: ввод почты -->
-        <div id="step-email">
-            <label class="label" for="contact">// e-mail для подписки</label>
-            <p>
-                <input
-                    type="email"
-                    id="contact"
-                    class="search-input"
-                    autocomplete="email"
-                    spellcheck="false"
-                    placeholder="ваш e-mail">
-                <span class="meta" style="margin-top: 6px;">на этот адрес придёт 4-значный код подтверждения</span>
-            </p>
-            <p class="notice-error" id="email-error" hidden></p>
-            <p class="buttons" style="margin-bottom: 0;">
-                <button type="button" id="email-submit" class="button">оплатить</button>
-            </p>
+        <!-- Переключатель: новая / продление -->
+        <div class="checkout-tabs">
+            <button type="button" id="tab-new" class="checkout-tab active">// новая (e-mail)</button>
+            <button type="button" id="tab-renew" class="checkout-tab">// продлить по ссылке</button>
         </div>
 
-        <!-- Шаг 2: ввод кода -->
-        <div id="step-code" hidden>
-            <label class="label" for="code">// код подтверждения из письма</label>
-            <p>
-                <input
-                    type="text"
-                    id="code"
-                    class="search-input"
-                    maxlength="4"
-                    inputmode="numeric"
-                    autocomplete="one-time-code"
-                    placeholder="0000">
-                <span class="meta" style="margin-top: 6px;">
-                    код отправлен на <strong id="code-sent-email"></strong> ·
-                    <button type="button" id="change-email" class="linkbutton">изменить</button>
-                </span>
-            </p>
-            <p class="notice-error" id="code-error" hidden></p>
-            <p class="buttons" style="margin-bottom: 0;">
-                <button type="button" id="code-submit" class="button">подтвердить и перейти к оплате →</button>
-            </p>
+        <!-- Поток новой подписки -->
+        <div id="flow-new">
+            <!-- Шаг 1: ввод почты -->
+            <div id="step-email">
+                <label class="label" for="contact">// e-mail для подписки</label>
+                <p>
+                    <input
+                        type="email"
+                        id="contact"
+                        class="search-input"
+                        autocomplete="email"
+                        spellcheck="false"
+                        placeholder="ваш e-mail">
+                    <span class="meta" style="margin-top: 6px;">на этот адрес придёт 4-значный код подтверждения</span>
+                </p>
+                <p class="notice-error" id="email-error" hidden></p>
+                <p class="buttons" style="margin-bottom: 0;">
+                    <button type="button" id="email-submit" class="button">оплатить</button>
+                </p>
+            </div>
+
+            <!-- Шаг 2: ввод кода -->
+            <div id="step-code" hidden>
+                <label class="label" for="code">// код подтверждения из письма</label>
+                <p>
+                    <input
+                        type="text"
+                        id="code"
+                        class="search-input"
+                        maxlength="4"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        placeholder="0000">
+                    <span class="meta" style="margin-top: 6px;">
+                        код отправлен на <strong id="code-sent-email"></strong> ·
+                        <button type="button" id="change-email" class="linkbutton">изменить</button>
+                    </span>
+                </p>
+                <p class="notice-error" id="code-error" hidden></p>
+                <p class="buttons" style="margin-bottom: 0;">
+                    <button type="button" id="code-submit" class="button">подтвердить и перейти к оплате →</button>
+                </p>
+            </div>
+        </div>
+
+        <!-- Поток продления по ссылке -->
+        <div id="flow-renew" hidden>
+            <!-- Шаг 1: ввод ссылки -->
+            <div id="step-renew-input">
+                <label class="label" for="renew-url">// ссылка на подписку</label>
+                <p>
+                    <input
+                        type="text"
+                        id="renew-url"
+                        class="search-input"
+                        autocomplete="off"
+                        spellcheck="false"
+                        placeholder="https://sub.pvpn.potatom.net/... или short UUID">
+                    <span class="meta" style="margin-top: 6px;">ссылка из вашего VPN-клиента или письма активации</span>
+                </p>
+                <p class="notice-error" id="renew-error" hidden></p>
+                <p class="buttons" style="margin-bottom: 0;">
+                    <button type="button" id="renew-submit" class="button">найти подписку</button>
+                </p>
+            </div>
+
+            <!-- Шаг 2: подтверждение найденной подписки -->
+            <div id="step-renew-confirm" hidden>
+                <label class="label">// найденная подписка</label>
+                <p class="comment" style="margin-top: 0; line-height: 1.6;">
+                    пользователь: <strong id="renew-username" style="color: var(--fg);"></strong><br>
+                    статус: <strong id="renew-status" style="color: var(--fg);"></strong><br>
+                    действует до: <strong id="renew-expires" style="color: var(--fg);"></strong><br>
+                    будет продлена на: <strong id="renew-duration" style="color: var(--fg);"></strong>
+                </p>
+                <p class="notice-error" id="renew-confirm-error" hidden></p>
+                <p class="buttons" style="margin-bottom: 0;">
+                    <button type="button" id="renew-pay" class="button">перейти к оплате →</button>
+                    <button type="button" id="renew-change" class="linkbutton">другая ссылка</button>
+                </p>
+            </div>
         </div>
     </div>
 </div>

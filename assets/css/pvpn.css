@@ -38,6 +38,36 @@
     margin-bottom: 16px;
 }
 
+.checkout-tabs {
+    display: flex;
+    gap: 12px;
+    border-bottom: 1px solid var(--muted);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+.checkout-tab {
+    background: none;
+    border: none;
+    font: 13px "Courier New", monospace;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 0;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -9px;
+}
+
+.checkout-tab:hover {
+    color: var(--fg);
+}
+
+.checkout-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
 .checkout-close {
     background: none;
     border: none;
