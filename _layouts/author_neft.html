@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090a08">
+  <meta name="description" content="Neft — game server engineering, backend development and infrastructure operations.">
+  <title>NEFT® — Built Below the Surface</title>
+  <script>
+    (() => {
+      try {
+        const saved = localStorage.getItem("neft-artdirection-theme");
+        if (saved) document.documentElement.dataset.theme = saved;
+      } catch (_) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090a08;
+      --bg2: #10120f;
+      --panel: #151812;
+      --panel2: #1e2119;
+      --ink: #f0eee6;
+      --muted: #96978a;
+      --dim: #5d6155;
+      --line: rgba(240,238,230,.13);
+      --line2: rgba(240,238,230,.25);
+      --amber: #ed9b25;
+      --amber2: #ffc05a;
+      --acid: #c2d65a;
+      --accentInk: #171108;
+      --max: 1280px;
+      --display: "Barlow Condensed", Impact, sans-serif;
+      --sans: "Manrope", Inter, ui-sans-serif, system-ui, sans-serif;
+      --mono: "DM Mono", ui-monospace, monospace;
+    }
+    html[data-theme="light"] {
+      color-scheme: light;
+      --bg: #e9e6dc;
+      --bg2: #dedacd;
+      --panel: #f2efe6;
+      --panel2: #e3dfd2;
+      --ink: #171811;
+      --muted: #626456;
+      --dim: #8b8c7e;
+      --line: rgba(23,24,17,.14);
+      --line2: rgba(23,24,17,.28);
+      --amber: #a75c08;
+      --amber2: #c77915;
+      --acid: #657b1e;
+      --accentInk: #fff8e8;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+    body {
+      margin: 0; color: var(--ink); background: var(--bg); font-family: var(--sans);
+      overflow-x: hidden; line-height: 1.65; transition: background .25s, color .25s;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: -3; pointer-events: none;
+      background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg,var(--line) 1px,transparent 1px);
+      background-size: 94px 94px; opacity: .16;
+      mask-image: linear-gradient(to bottom, black, transparent 72%);
+    }
+    body::after {
+      content: ""; position: fixed; inset: 0; z-index: 80; pointer-events: none; opacity: .12;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    ::selection { color: var(--accentInk); background: var(--amber); }
+    .wrap { width: min(var(--max), calc(100% - 64px)); margin: 0 auto; }
+    .mono { font-family: var(--mono); }
+    .display { font-family: var(--display); }
+    .eyebrow { display: flex; align-items: center; gap: 11px; color: var(--amber); font: 10px var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+    .eyebrow:before { content: ""; width: 26px; height: 1px; background: currentColor; }
+    .progress { position: fixed; top: 0; left: 0; z-index: 200; width: 0; height: 2px; background: var(--amber); box-shadow: 0 0 14px var(--amber); }
+    .header { position: sticky; top: 0; z-index: 60; background: color-mix(in srgb, var(--bg) 83%, transparent); backdrop-filter: blur(18px); border-bottom: 1px solid var(--line); }
+    .nav { min-height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 26px; }
+    .brand { display: flex; align-items: center; gap: 11px; font: 500 12px var(--mono); letter-spacing: .18em; }
+    .brand-icon { width: 32px; height: 32px; display: grid; place-items: center; color: var(--amber); border: 1px solid var(--amber); font-weight: 500; position: relative; }
+    .brand-icon:after { content: ""; position: absolute; width: 5px; height: 5px; right: -3px; top: -3px; background: var(--amber); }
+    .brand small { color: var(--dim); font-size: 8px; letter-spacing: .12em; }
+    .navlinks { display: flex; gap: clamp(15px,2.3vw,31px); }
+    .navlinks a { color: var(--muted); font: 9px var(--mono); letter-spacing: .14em; text-transform: uppercase; transition: color .2s; }
+    .navlinks a:hover, .navlinks a.active { color: var(--amber2); }
+    .navright { display: flex; gap: 8px; }
+    .navbtn { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line2); color: var(--ink); background: transparent; cursor: pointer; transition: border .2s,color .2s; }
+    .navbtn:hover { color: var(--amber); border-color: var(--amber); }
+    .menu { display: none; }
+
+    /* Hero: editorial, cinematic, industrial */
+    .hero { min-height: 795px; display: flex; align-items: center; padding: 84px 0 80px; position: relative; }
+    .hero-main { position: relative; z-index: 2; width: 100%; }
+    .hero-topline { display: flex; align-items: center; gap: 14px; color: var(--muted); font: 9px var(--mono); letter-spacing: .15em; text-transform: uppercase; }
+    .led { width: 7px; height: 7px; border-radius: 50%; background: var(--acid); box-shadow: 0 0 12px var(--acid); }
+    .hero-word { position: relative; margin: 27px 0 0 -12px; font: 900 clamp(150px,26vw,345px)/.66 var(--display); letter-spacing: -.065em; white-space: nowrap; }
+    .hero-word .cut { color: transparent; -webkit-text-stroke: 1px var(--line2); }
+    .hero-word .dot { color: var(--amber); -webkit-text-stroke: 0; }
+    .hero-bottom { display: grid; grid-template-columns: 1fr 380px; gap: 60px; align-items: end; margin-top: 41px; }
+    .hero-statement { font: 700 clamp(28px,4vw,51px)/.98 var(--display); text-transform: uppercase; letter-spacing: -.01em; }
+    .hero-statement span { color: var(--amber); }
+    .hero-description { max-width: 370px; color: var(--muted); font-size: 12px; line-height: 1.95; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 24px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 18px; min-height: 46px; padding: 0 16px; border: 1px solid var(--line2); color: var(--ink); font: 9px var(--mono); letter-spacing: .12em; text-transform: uppercase; transition: transform .2s,background .2s,color .2s,border .2s; }
+    .btn:hover { transform: translateY(-3px); border-color: var(--amber); }
+    .btn-primary { background: var(--amber); color: var(--accentInk); border-color: var(--amber); }
+    .btn-primary:hover { background: var(--amber2); border-color: var(--amber2); color: var(--accentInk); }
+    .btn-arrow { font-size: 16px; }
+    .hero-art {
+      position: absolute; z-index: -1; width: min(55vw,700px); height: 620px; right: -4%; top: 4%;
+      opacity: .88; pointer-events: none;
+    }
+    .art-glow { position: absolute; width: 480px; height: 480px; right: 5%; top: 10%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb,var(--amber) 12%,transparent), transparent 68%); filter: blur(6px); }
+    .art-ring { position: absolute; width: 490px; height: 490px; right: 6%; top: 6%; border: 1px solid color-mix(in srgb,var(--amber) 38%, transparent); border-radius: 50%; transform: rotateX(68deg) rotateZ(-27deg); animation: orbit 28s linear infinite; }
+    .art-ring:before,.art-ring:after { content:""; position:absolute; inset:35px; border:1px dashed var(--line2); border-radius:50%; }
+    .art-ring:after { inset:80px; border-style:solid; border-color:color-mix(in srgb,var(--amber) 30%,transparent); }
+    @keyframes orbit { to { transform: rotateX(68deg) rotateZ(333deg); } }
+    .svg-rig { position:absolute; right:1%; top:8%; width:91%; height:88%; overflow:visible; }
+    .hero-stamp { position:absolute; right:1%; bottom:3%; width:112px; height:112px; border:1px solid var(--amber); border-radius:50%; display:grid; place-items:center; color:var(--amber); font:9px var(--mono); text-align:center; letter-spacing:.1em; transform:rotate(12deg); background:color-mix(in srgb,var(--bg) 65%,transparent); }
+    .hero-stamp:before { content:""; position:absolute; inset:7px; border:1px dashed var(--amber); border-radius:50%; }
+
+
+    /* Generic sections */
+    .section { padding: 122px 0; border-top:1px solid var(--line); position:relative; }
+    .head { display:grid; grid-template-columns:1fr minmax(240px,370px); gap:40px; align-items:end; margin-bottom:50px; }
+    .head h2 { margin:14px 0 0; font:800 clamp(50px,7vw,88px)/.86 var(--display); text-transform:uppercase; letter-spacing:-.025em; }
+    .head p { margin:0 0 5px; color:var(--muted); font-size:12px; line-height:1.9; }
+    .index { color:var(--amber); font:9px var(--mono); letter-spacing:.16em; }
+
+    /* About */
+    .about-grid { display:grid; grid-template-columns:.85fr 1.15fr; gap:82px; }
+    .plate { min-height:330px; position:relative; padding:21px; overflow:hidden; border:1px solid var(--line2); background:linear-gradient(145deg,var(--panel2),var(--panel)); }
+    .plate:before { content:""; position:absolute; width:280px;height:280px;right:-95px;bottom:-110px;border:1px solid var(--line2);border-radius:50%;box-shadow:0 0 0 19px var(--line),0 0 0 39px var(--line),0 0 0 59px var(--line); }
+    .plate-meta { display:flex;justify-content:space-between;color:var(--amber);font:8px var(--mono);letter-spacing:.14em; }
+    .plate-big { position:absolute;left:19px;bottom:25px;font:900 164px/.72 var(--display);letter-spacing:-.08em; }
+    .plate-foot { position:absolute;left:23px;bottom:12px;color:var(--muted);font:7px var(--mono);letter-spacing:.16em; }
+    .about-copy .lead { margin:0 0 22px;font:600 clamp(26px,3.7vw,43px)/1.16 var(--display);text-transform:uppercase; }
+    .about-copy p:not(.lead) { color:var(--muted);font-size:12px;line-height:2.05; }
+    .about-copy strong { color:var(--ink); }
+    .quote { margin-top:27px;padding:17px 19px;border-left:2px solid var(--amber);background:var(--panel);font-size:12px; }
+
+    /* Operations list */
+    .ops-list { border-top:1px solid var(--line2); }
+    .op-row { display:grid;grid-template-columns:65px minmax(225px,.8fr) 1.2fr 30px;gap:20px;align-items:start;padding:27px 0;border-bottom:1px solid var(--line);transition:padding .2s,background .2s; }
+    .op-row:hover { padding-left:12px;padding-right:12px;background:linear-gradient(90deg,color-mix(in srgb,var(--amber) 7%,transparent),transparent 68%); }
+    .op-num { color:var(--amber);font:10px var(--mono);padding-top:5px; }
+    .op-title h3 { margin:0;font:700 clamp(24px,3vw,36px)/.9 var(--display);text-transform:uppercase; }
+    .op-title small { display:block;margin-top:9px;color:var(--dim);font:8px var(--mono);letter-spacing:.13em; }
+    .op-copy { color:var(--muted);font-size:11px;line-height:1.95; }
+    .op-arrow { color:var(--amber);font:16px var(--mono);transition:transform .2s; }
+    .op-row:hover .op-arrow { transform:translate(4px,-4px); }
+
+    /* System blueprint */
+    .blueprint { display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line); }
+    .blueprint-cell { min-height:220px;padding:25px;background:var(--panel);position:relative;overflow:hidden; }
+    .blueprint-cell:after { content:attr(data-code);position:absolute;right:13px;bottom:-35px;color:color-mix(in srgb,var(--amber) 9%,transparent);font:900 125px/.8 var(--display);letter-spacing:-.06em; }
+    .bp-head { display:flex;justify-content:space-between;align-items:center;color:var(--amber);font:8px var(--mono);letter-spacing:.14em; }
+    .bp-icon { width:33px;height:33px;border:1px solid var(--line2);display:grid;place-items:center;font-size:14px; }
+    .blueprint-cell h3 { position:relative;z-index:1;margin:35px 0 8px;font:700 27px/.95 var(--display);text-transform:uppercase; }
+    .blueprint-cell p { position:relative;z-index:1;max-width:390px;margin:0;color:var(--muted);font-size:11px;line-height:1.9; }
+
+    /* Toolkit */
+    .tool-grid { display:grid;grid-template-columns:.75fr 1.25fr;gap:68px; }
+    .tool-note { max-width:315px;color:var(--muted);font-size:12px;line-height:2; }
+    .tool-group { display:grid;grid-template-columns:165px 1fr;gap:18px;padding:21px 0;border-top:1px solid var(--line); }
+    .tool-group:last-child { border-bottom:1px solid var(--line); }
+    .tool-group h3 { margin:0;font-size:11px; }
+    .tool-group small { display:block;margin-top:6px;color:var(--dim);font:8px var(--mono);letter-spacing:.13em; }
+    .tags { display:flex;flex-wrap:wrap;gap:7px; }
+    .tag { padding:7px 9px;border:1px solid var(--line);color:var(--muted);font:9px var(--mono);transition:color .2s,border .2s,background .2s; }
+    .tag:hover { color:var(--amber2);border-color:var(--amber);background:var(--panel); }
+
+    /* Protocol */
+    .protocol { display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line); }
+    .protocol-item { min-height:180px;padding:22px;border-right:1px solid var(--line);background:var(--panel); }
+    .protocol-item:last-child { border:0; }
+    .protocol-item span { color:var(--amber);font:8px var(--mono);letter-spacing:.13em; }
+    .protocol-item h3 { margin:35px 0 8px;font:700 25px var(--display);text-transform:uppercase; }
+    .protocol-item p { margin:0;color:var(--muted);font-size:10px;line-height:1.9; }
+
+    /* CTA */
+    .contact { padding:95px 0 115px; }
+    .contact-box { position:relative;overflow:hidden;display:grid;grid-template-columns:1fr auto;gap:28px;align-items:end;padding:clamp(30px,5vw,64px);background:var(--amber);color:var(--accentInk); }
+    .contact-box:after { content:"NEFT";position:absolute;right:15%;bottom:-75px;font:900 220px/.8 var(--display);letter-spacing:-.04em;color:rgba(0,0,0,.07);pointer-events:none; }
+    .contact-box .eyebrow { color:var(--accentInk); }
+    .contact-box .eyebrow:before { background:currentColor; }
+    .contact-box h2 { position:relative;z-index:1;margin:16px 0 11px;font:900 clamp(52px,7vw,84px)/.82 var(--display);text-transform:uppercase; }
+    .contact-box p { position:relative;z-index:1;max-width:480px;margin:0;font-size:11px;line-height:1.9;opacity:.8; }
+    .contact-actions { position:relative;z-index:1;display:flex;flex-direction:column;gap:8px;min-width:190px; }
+    .contact-actions .btn { color:var(--accentInk);border-color:rgba(0,0,0,.35); }
+    .contact-actions .btn-primary { background:var(--accentInk);border-color:var(--accentInk);color:var(--amber); }
+
+    footer { border-top:1px solid var(--line); }
+    .footer { display:flex;justify-content:space-between;gap:20px;padding:23px 0 31px;color:var(--dim);font:8px var(--mono);letter-spacing:.14em;text-transform:uppercase; }
+    .footer a { color:var(--ink); }
+    .footer a:hover { color:var(--amber); }
+
+    .reveal { opacity:0;transform:translateY(24px);transition:opacity .72s ease,transform .72s cubic-bezier(.2,.7,.2,1); }
+    .reveal.visible { opacity:1;transform:none; }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none}}
+
+    @media(max-width:1000px){
+      .hero{min-height:700px}.hero-word{font-size:clamp(145px,24vw,245px)}.hero-art{width:60vw;right:-10%;opacity:.65}
+      .about-grid,.tool-grid{gap:40px}.op-row{grid-template-columns:50px minmax(190px,.8fr) 1.2fr 20px;gap:14px}
+    }
+    @media(max-width:740px){
+      .wrap{width:calc(100% - 34px)}.nav{min-height:66px}.menu{display:grid}
+      .navlinks{display:none;position:absolute;top:66px;left:0;right:0;padding:12px 20px 20px;flex-direction:column;gap:0;background:var(--bg2);border-bottom:1px solid var(--line)}
+      .navlinks.open{display:flex}.navlinks a{padding:12px 0;border-bottom:1px solid var(--line)}
+      .hero{min-height:auto;padding:80px 0 60px}.hero-word{font-size:clamp(136px,25vw,195px)}
+      .hero-art{width:100%;height:400px;top:8%;right:-23%;opacity:.35}.hero-bottom{grid-template-columns:1fr;gap:17px;margin-top:30px}
+      .hero-description{max-width:510px}.section{padding:88px 0}.head{display:block;margin-bottom:35px}.head p{margin-top:17px}
+      .about-grid,.tool-grid{grid-template-columns:1fr;gap:28px}.plate{min-height:240px}
+      .op-row{grid-template-columns:40px 1fr 20px;gap:12px}.op-copy{grid-column:2}.op-arrow{grid-column:3;grid-row:1}
+      .blueprint{grid-template-columns:1fr}.blueprint-cell{min-height:190px}
+      .protocol{grid-template-columns:repeat(2,1fr)}.protocol-item:nth-child(2){border-right:0}.protocol-item:nth-child(n+3){border-top:1px solid var(--line)}
+      .contact-box{grid-template-columns:1fr}.contact-actions{flex-direction:row;flex-wrap:wrap}.contact-actions .btn{flex:1 1 170px}
+    }
+    @media(max-width:460px){
+      .hero-word{font-size:clamp(118px,25vw,150px);margin-left:-6px}.hero-actions .btn{width:100%}
+      .hero-art{top:13%;right:-38%;opacity:.22}.hero-statement{font-size:34px}
+      .hazardbar{font-size:7px;gap:9px}.hazard-pattern{max-width:75px}
+      .head h2{font-size:58px}.protocol{grid-template-columns:1fr}.protocol-item{min-height:0;border-right:0;border-bottom:1px solid var(--line)}.protocol-item:last-child{border-bottom:0}.protocol-item h3{margin-top:17px}
+      .tool-group{grid-template-columns:1fr;gap:12px}.contact-actions .btn{width:100%}.footer{flex-direction:column}
+    }
+
+    /* Final layout audit: keep decorative artwork out of the reading column. */
+    html, body { width: 100%; max-width: 100%; overflow-x: clip; }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
+      align-items: center;
+      gap: 24px;
+      overflow: hidden;
+    }
+    .hero-main {
+      grid-column: 1;
+      grid-row: 1;
+      width: 100%;
+      min-width: 0;
+    }
+    .hero-art {
+      grid-column: 2;
+      grid-row: 1;
+      position: relative;
+      z-index: 1;
+      inset: auto;
+      width: 100%;
+      min-width: 0;
+      height: 570px;
+      opacity: .78;
+      overflow: hidden;
+    }
+    .hero-bottom {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+      margin-top: 31px;
+    }
+    .hero-description { max-width: 520px; margin: 0; }
+    .hero-word {
+      font-size: clamp(128px, 18vw, 260px);
+      margin-left: -7px;
+      letter-spacing: -.055em;
+    }
+    .hero-stamp { right: 5%; bottom: 5%; }
+    .hazardbar { flex-wrap: wrap; }
+
+    /* Reveal content progressively, but never leave it hidden if JS is unavailable. */
+    .reveal { opacity: 1; transform: none; }
+    .reveal.visible { animation: neft-reveal .68s cubic-bezier(.2,.7,.2,1) both; }
+    @keyframes neft-reveal {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1000px) {
+      .hero {
+        min-height: 700px;
+        grid-template-columns: minmax(0, 1.02fr) minmax(270px, .88fr);
+        gap: 12px;
+      }
+      .hero-word { font-size: clamp(118px, 19vw, 205px); }
+      .hero-art { width: 100%; height: 490px; right: auto; opacity: .7; }
+      .hero-bottom { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+      .hero-description { max-width: 460px; }
+      .hero-stamp { width: 92px; height: 92px; font-size: 8px; }
+    }
+
+    @media (max-width: 740px) {
+      .hero {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        min-height: 0;
+        padding: 72px 0 46px;
+        gap: 0;
+      }
+      .hero-main { order: 1; width: 100%; }
+      .hero-art {
+        order: 2;
+        position: relative;
+        inset: auto;
+        width: min(100%, 570px);
+        height: 330px;
+        margin: 28px auto 0;
+        opacity: .82;
+        z-index: 0;
+      }
+      .hero-word { font-size: clamp(126px, 25vw, 190px); }
+      .hero-bottom { grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 27px; }
+      .hero-description { max-width: 590px; }
+      .hero-stamp { right: 5%; bottom: 4%; }
+      .hazardbar {
+        justify-content: center;
+        gap: 9px 15px;
+        padding: 12px 0;
+      }
+      .hazard-pattern { flex: 1 1 100%; max-width: none; order: 5; }
+    }
+
+    @media (max-width: 460px) {
+      .hero { padding-top: 62px; }
+      .hero-word { font-size: clamp(112px, 25vw, 150px); margin-left: -5px; }
+      .hero-actions .btn { width: 100%; }
+      .hero-art { width: 100%; height: 275px; margin-top: 22px; opacity: .78; }
+      .art-ring { width: 360px; height: 360px; right: -1%; top: 3%; }
+      .art-glow { width: 340px; height: 340px; right: -2%; top: 5%; }
+      .svg-rig { width: 100%; height: 100%; right: -1%; top: 0; }
+      .hero-stamp { width: 82px; height: 82px; right: 3%; bottom: 2%; font-size: 7px; }
+      .hazardbar { font-size: 7px; gap: 8px 12px; }
+      .hazard-pattern { max-width: none; }
+    }
+
+
+    /* NEFT wordmark spacing: give every letter its own breathing room. */
+    .hero-word {
+      letter-spacing: .018em !important;
+      font-size: clamp(132px, 17vw, 248px);
+      line-height: .82;
+      white-space: nowrap;
+      width: max-content;
+      max-width: 100%;
+    }
+    @media (max-width: 740px) {
+      .hero-word {
+        font-size: clamp(118px, 24vw, 165px);
+        letter-spacing: .014em !important;
+      }
+    }
+    @media (max-width: 460px) {
+      .hero-word {
+        font-size: clamp(104px, 25vw, 120px);
+        letter-spacing: .012em !important;
+        margin-left: 0;
+      }
+    }
+
+
+    /* Hazard ribbon refinement: identity + stripe travel as one aligned unit. */
+    .hazardbar {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 28px;
+      min-height: 54px;
+      padding: 11px 0;
+    }
+    .hazard-identity {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: clamp(14px, 2vw, 26px);
+    }
+    .hazard-identity > span,
+    .hazard-meta > span {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .hazard-pattern {
+      flex: 0 1 210px !important;
+      width: 210px;
+      max-width: 210px !important;
+      min-width: 74px;
+      height: 7px;
+      margin: 0;
+      opacity: .9;
+    }
+    .hazard-meta {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: clamp(15px, 2.4vw, 32px);
+      white-space: nowrap;
+    }
+    .hazard-status {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 9px var(--green);
+    }
+
+
+    /* Inspection plate: separate the oversized N from its bottom caption. */
+    .plate {
+      min-height: 350px;
+      padding-bottom: 58px;
+    }
+    .plate-big {
+      left: 19px;
+      bottom: 55px;
+      font-size: 148px;
+      line-height: .82;
+      z-index: 1;
+    }
+    .plate-foot {
+      left: 22px;
+      right: 18px;
+      bottom: 14px;
+      z-index: 2;
+      line-height: 1.5;
+      letter-spacing: .11em;
+      max-width: calc(100% - 40px);
+    }
+    @media (max-width: 740px) {
+      .plate { min-height: 300px; padding-bottom: 52px; }
+      .plate-big { bottom: 51px; font-size: 136px; }
+      .plate-foot { bottom: 13px; font-size: 7px; }
+    }
+    @media (max-width: 460px) {
+      .plate { min-height: 260px; padding-bottom: 48px; }
+      .plate-big { bottom: 48px; font-size: 122px; }
+      .plate-foot { bottom: 12px; font-size: 6px; letter-spacing: .08em; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <header class="header" id="top">
+    <div class="wrap nav">
+      <a class="brand" href="#top" aria-label="Neft home"><span class="brand-icon">N</span><span>NEFT</span></a>
+      <nav class="navlinks" id="navlinks" aria-label="Navigation">
+        <a href="#about">Identity</a><a href="#operations">Operations</a><a href="#systems">Systems</a><a href="#tools">Equipment</a><a href="#contact">Contact</a>
+      </nav>
+      <div class="navright">
+        <button class="navbtn" id="theme" type="button" aria-label="Toggle theme">◐</button>
+        <button class="navbtn menu" id="menu" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="wrap hero">
+      <div class="hero-art" aria-hidden="true">
+        <div class="art-glow"></div><div class="art-ring"></div>
+        <svg class="svg-rig" viewBox="0 0 700 650" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="rigMetal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8e8066" stop-opacity=".62"/><stop offset=".5" stop-color="#e8a13c" stop-opacity=".18"/><stop offset="1" stop-color="#fff2ce" stop-opacity=".04"/></linearGradient>
+            <linearGradient id="oil" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffc05a"/><stop offset="1" stop-color="#7f430d"/></linearGradient>
+          </defs>
+          <g stroke="url(#rigMetal)" stroke-width="2">
+            <path d="M360 70 215 555M360 70 510 555M290 555H570M255 410H470M280 300H438M315 190H405M215 555 470 410M510 555 255 410M255 410 438 300M470 410 280 300M280 300 405 190M438 300 315 190"/>
+            <path d="M340 110H380M316 185H404M284 292H437M252 401H472M220 530H502" stroke-width="4"/>
+            <path d="M360 70V25M333 25H387M350 25V8M370 25V8"/>
+            <path d="M340 70H380M320 125H400M300 240H420M270 350H450M240 465H485" stroke-dasharray="3 7"/>
+          </g>
+          <g stroke="#ed9b25" stroke-width="2" opacity=".8">
+            <path d="M360 85V560M200 555H540"/>
+            <path d="M360 230C445 230 485 270 485 330" stroke-dasharray="5 8"/>
+          </g>
+          <g fill="url(#oil)" opacity=".9">
+            <circle cx="360" cy="70" r="7"/><circle cx="255" cy="410" r="5"/><circle cx="470" cy="410" r="5"/>
+          </g>
+          <g stroke="#ed9b25" stroke-width="1" opacity=".45">
+            <circle cx="360" cy="360" r="178"/><circle cx="360" cy="360" r="200" stroke-dasharray="2 11"/>
+          </g>
+          <g fill="#ed9b25" font-family="monospace" font-size="10" letter-spacing="2" opacity=".8">
+            <text x="510" y="184">01 / PRESSURE</text><text x="65" y="476">FIELD NODE</text><text x="440" y="580">SYSTEM 001</text>
+          </g>
+        </svg>
+        <div class="hero-stamp">BUILT<br>BELOW<br>THE SURFACE</div>
+      </div>
+
+      <div class="hero-main">
+        <div class="hero-topline"><span class="led"></span><span>Independent operator</span><span>·</span><span>Server engineering</span></div>
+        <h1 class="hero-word">NEFT<span class="dot">.</span></h1>
+        <div class="hero-bottom">
+          <div>
+            <div class="hero-statement">BUILT BELOW<br>THE <span>SURFACE.</span></div>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="https://github.com/NeftCobla" target="_blank" rel="noopener">GITHUB PROFILE <span class="btn-arrow">↗</span></a>
+              <a class="btn" href="#operations">VIEW OPERATIONS <span class="btn-arrow">↓</span></a>
+            </div>
+          </div>
+          <p class="hero-description">
+            Game server development, server-side programming and infrastructure operations.
+            Building, configuring and maintaining the systems behind multiplayer experiences —
+            from the first line of code to the machine underneath.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="wrap">
+        <div class="head reveal"><div><div class="eyebrow">01 / Identity</div><h2>THE OPERATOR<br>BEHIND THE SYSTEM.</h2></div><p>Not only the software. Not only the machine. The whole environment — designed, configured and maintained to work.</p></div>
+        <div class="about-grid">
+          <div class="plate reveal"><div class="plate-meta"><span>OPERATOR RECORD</span><span>NO. 001</span></div><div class="plate-big">N.</div><div class="plate-foot">BUILD WITH INTENT / MAINTAIN WITH CARE</div></div>
+          <div class="about-copy reveal">
+            <p class="lead">I'm Neft — a developer and system administrator working where game servers, code and infrastructure meet.</p>
+            <p>I develop, configure and maintain <strong>game servers</strong> for different games. My work includes server-side functionality, scripts, configuration, updates, troubleshooting and ongoing maintenance.</p>
+            <p>I also work with <strong>Linux and Windows Server</strong>, Docker, Nginx, Bash and relational databases. My programming toolkit includes Lua, C#, C++, JavaScript, HTML5, CSS3, VB.NET and other technologies.</p>
+            <div class="quote">“A server isn't finished when it starts. It's finished when it can be relied on.”</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="operations">
+      <div class="wrap">
+        <div class="head reveal"><div><div class="eyebrow">02 / Operations</div><h2>WHAT GETS<br>DONE.</h2></div><p>Four connected fields of work. One goal: dependable systems and a smooth experience for the people using them.</p></div>
+        <div class="ops-list">
+          <article class="op-row reveal"><div class="op-num">01 /</div><div class="op-title"><h3>Game server operations</h3><small>DEVELOP / CONFIGURE / MAINTAIN</small></div><div class="op-copy">Developing and maintaining multiplayer game servers, configuring environments, extending server functionality and handling updates, issues and day-to-day operation.</div><div class="op-arrow">↗</div></article>
+          <article class="op-row reveal"><div class="op-num">02 /</div><div class="op-title"><h3>Server-side development</h3><small>CODE / LOGIC / TOOLS</small></div><div class="op-copy">Writing server logic, scripts, custom features and supporting tools. Connecting application behaviour with the systems and data behind it.</div><div class="op-arrow">↗</div></article>
+          <article class="op-row reveal"><div class="op-num">03 /</div><div class="op-title"><h3>System administration</h3><small>HOST / CONFIGURE / SUPPORT</small></div><div class="op-copy">Working with Linux and Windows Server environments, service configuration, system maintenance, diagnostics and troubleshooting.</div><div class="op-arrow">↗</div></article>
+          <article class="op-row reveal"><div class="op-num">04 /</div><div class="op-title"><h3>DevOps & infrastructure</h3><small>DEPLOY / CONNECT / IMPROVE</small></div><div class="op-copy">Using Docker, Nginx, Git, Bash and relational databases to support applications and the infrastructure they depend on.</div><div class="op-arrow">↗</div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="systems">
+      <div class="wrap">
+        <div class="head reveal"><div><div class="eyebrow">03 / System map</div><h2>UNDER THE<br>HOOD.</h2></div><p>From the host environment to the application layer — the pieces that keep a server project moving.</p></div>
+        <div class="blueprint reveal">
+          <article class="blueprint-cell" data-code="01"><div class="bp-head"><span>01 / ENVIRONMENT</span><span class="bp-icon">⌘</span></div><h3>Operating systems</h3><p>Linux and Windows Server environments, configuration, system services and maintenance.</p></article>
+          <article class="blueprint-cell" data-code="02"><div class="bp-head"><span>02 / RUNTIME</span><span class="bp-icon">▤</span></div><h3>Server infrastructure</h3><p>Docker, Nginx, Git and Bash for service deployment, configuration and day-to-day operations.</p></article>
+          <article class="blueprint-cell" data-code="03"><div class="bp-head"><span>03 / APPLICATION</span><span class="bp-icon">⌁</span></div><h3>Code & logic</h3><p>Lua, C#, C++, JavaScript and web technologies for server-side functionality and supporting tools.</p></article>
+          <article class="blueprint-cell" data-code="04"><div class="bp-head"><span>04 / DATA</span><span class="bp-icon">◉</span></div><h3>Database layer</h3><p>PostgreSQL and MySQL for relational data used by applications and server environments.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="tools">
+      <div class="wrap">
+        <div class="head reveal"><div><div class="eyebrow">04 / Equipment</div><h2>THE TOOL<br>CRIB.</h2></div><p>A practical set of technologies used across development, administration and server operations.</p></div>
+        <div class="tool-grid">
+          <p class="tool-note reveal">Different jobs call for different tools. This is the technical ground I work across — from low-level server environments to application code and persistent data.</p>
+          <div class="tool-list reveal">
+            <div class="tool-group"><div><h3>Operating systems</h3><small>HOST / MANAGE</small></div><div class="tags"><span class="tag">Linux</span><span class="tag">Windows Server</span></div></div>
+            <div class="tool-group"><div><h3>Infrastructure</h3><small>DEPLOY / OPERATE</small></div><div class="tags"><span class="tag">Docker</span><span class="tag">Nginx</span><span class="tag">Git</span><span class="tag">Bash</span></div></div>
+            <div class="tool-group"><div><h3>Programming</h3><small>DEVELOP / AUTOMATE</small></div><div class="tags"><span class="tag">Lua</span><span class="tag">C#</span><span class="tag">C++</span><span class="tag">JavaScript</span><span class="tag">HTML5</span><span class="tag">CSS3</span><span class="tag">VB.NET</span></div></div>
+            <div class="tool-group"><div><h3>Databases</h3><small>STORE / QUERY</small></div><div class="tags"><span class="tag">PostgreSQL</span><span class="tag">MySQL</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="method">
+      <div class="wrap">
+        <div class="head reveal"><div><div class="eyebrow">05 / Procedure</div><h2>FROM SETUP<br>TO UPTIME.</h2></div><p>Clear steps. Understandable configuration. Maintenance that doesn't stop after deployment.</p></div>
+        <div class="protocol reveal">
+          <article class="protocol-item"><span>PHASE / 01</span><h3>Inspect</h3><p>Understand requirements, the current environment and its constraints.</p></article>
+          <article class="protocol-item"><span>PHASE / 02</span><h3>Configure</h3><p>Prepare the host, services, runtime and server settings.</p></article>
+          <article class="protocol-item"><span>PHASE / 03</span><h3>Develop</h3><p>Implement features, scripts and supporting functionality.</p></article>
+          <article class="protocol-item"><span>PHASE / 04</span><h3>Maintain</h3><p>Validate, troubleshoot, update and improve over time.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact" id="contact">
+      <div class="wrap">
+        <div class="contact-box reveal">
+          <div>
+            <div class="eyebrow">06 / Establish contact</div>
+            <h2>LET'S KEEP<br>IT RUNNING.</h2>
+            <p>Have an idea, a server project or a technical challenge? Get in touch by email or explore what I'm building on GitHub.</p>
+            <p style="margin-top:22px;font:500 13px var(--mono);letter-spacing:.04em;">
+              <span style="opacity:.65;">DIRECT LINE / </span>
+              <a href="mailto:neft@potatom.net" style="text-decoration:underline;text-underline-offset:5px;">neft@potatom.net</a>
+            </p>
+          </div>
+          <div class="contact-actions">
+            <a class="btn btn-primary" href="mailto:neft@potatom.net">SEND AN EMAIL ↗</a>
+            <a class="btn" href="https://github.com/NeftCobla" target="_blank" rel="noopener">GITHUB PROFILE ↗</a>
+            <a class="btn" href="https://github.com/NeftCobla?tab=repositories" target="_blank" rel="noopener">VIEW REPOSITORIES ↗</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="wrap footer"><span>© <span id="year"></span> NEFT</span><span>BUILT BELOW THE SURFACE</span><a href="#top" data-scroll-top>BACK TO TOP ↑</a></div></footer>
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const theme = document.getElementById("theme");
+      const menu = document.getElementById("menu");
+      const nav = document.getElementById("navlinks");
+      const progress = document.getElementById("progress");
+
+      function setTheme(value) {
+        root.dataset.theme = value;
+        theme.textContent = value === "dark" ? "☼" : "◐";
+        theme.setAttribute("aria-label", value === "dark" ? "Switch to light theme" : "Switch to dark theme");
+      }
+      setTheme(root.dataset.theme || "dark");
+      theme.addEventListener("click", () => {
+        const next = root.dataset.theme === "dark" ? "light" : "dark";
+        setTheme(next);
+        try { localStorage.setItem("neft-artdirection-theme", next); } catch (_) {}
+      });
+
+      const scrollUpdate = () => {
+        const max = document.documentElement.scrollHeight - innerHeight;
+        progress.style.width = (max > 0 ? scrollY / max * 100 : 0) + "%";
+      };
+      addEventListener("scroll", scrollUpdate, { passive: true });
+      scrollUpdate();
+
+      function closeMenu() {
+        nav.classList.remove("open");
+        menu.setAttribute("aria-expanded", "false");
+        menu.setAttribute("aria-label", "Open menu");
+        menu.textContent = "☰";
+      }
+      menu.addEventListener("click", () => {
+        const opened = !nav.classList.contains("open");
+        nav.classList.toggle("open", opened);
+        menu.setAttribute("aria-expanded", String(opened));
+        menu.setAttribute("aria-label", opened ? "Close menu" : "Open menu");
+        menu.textContent = opened ? "×" : "☰";
+      });
+      nav.querySelectorAll("a").forEach(a => a.addEventListener("click", closeMenu));
+
+      const backToTop = document.querySelector("[data-scroll-top]");
+      if (backToTop) {
+        backToTop.addEventListener("click", event => {
+          event.preventDefault();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
+
+      document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
+      addEventListener("resize", () => { if (innerWidth > 740) closeMenu(); });
+
+      const sections = [...document.querySelectorAll("main section[id]")];
+      const navAnchors = [...nav.querySelectorAll("a")];
+      if ("IntersectionObserver" in window) {
+        const sectionObserver = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              navAnchors.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + entry.target.id));
+            }
+          });
+        }, { rootMargin: "-30% 0px -60% 0px" });
+        sections.forEach(section => sectionObserver.observe(section));
+      }
+
+      document.getElementById("year").textContent = new Date().getFullYear();
+      const reveals = document.querySelectorAll(".reveal");
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: .12 });
+        reveals.forEach(el => observer.observe(el));
+      } else {
+        reveals.forEach(el => el.classList.add("visible"));
+      }
+    })();
+  </script>
+</body>
+</html>
