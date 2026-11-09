@@ -18,6 +18,9 @@
 
         titles:
           "f20b4416-d224-4cc7-953c-c123dcc83022.mp3": SHARED NEURON
+
+    Альбомы свёрнуты по умолчанию (details/summary), плеер — всплывающая
+    панель внизу экрана, появляется, когда выбран трек.
 {%- endcomment -%}
 {%- assign music_base = page.music.path -%}
 {%- assign music_files = site.static_files | where_exp: "f", "f.path contains music_base" | where_exp: "f", "f.extname == '.mp3' or f.extname == '.wav' or f.extname == '.ogg' or f.extname == '.m4a'" | sort: 'name' -%}
@@ -29,63 +32,72 @@
     {% endif %}
 
     <div class="player" data-player role="region" aria-label="плеер" tabindex="0" hidden>
-        <div class="player-row">
-            <button type="button" class="pbtn" data-prev title="предыдущий трек" aria-label="предыдущий трек">|&#9664;</button>
-            <button type="button" class="pbtn pbtn-main" data-play title="играть / пауза" aria-label="играть или пауза">&#9654;</button>
-            <button type="button" class="pbtn" data-next title="следующий трек" aria-label="следующий трек">&#9654;|</button>
-            <button type="button" class="pbtn" data-stop title="остановить" aria-label="остановить">&#9632;</button>
-            <button type="button" class="pbtn" data-shuffle aria-pressed="false" title="играть в перемешку">перемешать</button>
-            <button type="button" class="pbtn" data-repeat aria-pressed="false" title="повтор треков">&#8635; повтор: нет</button>
+        <div class="player-row player-top">
             <span class="np">
                 <span class="np-album" data-np-album></span>
                 <span class="np-title" data-np-title>&mdash;</span>
             </span>
             <span class="player-time"><span data-time-now>0:00</span> / <span data-time-total>0:00</span></span>
+            <button type="button" class="pbtn pbtn-close" data-close title="закрыть плеер" aria-label="закрыть плеер">&#10005;</button>
         </div>
         <input type="range" class="seek" data-seek min="0" max="0" step="0.1" value="0" aria-label="позиция в треке">
-        <div class="player-row player-extra">
+        <div class="player-row">
+            <button type="button" class="pbtn" data-prev title="предыдущий трек" aria-label="предыдущий трек">|&#9664;</button>
+            <button type="button" class="pbtn pbtn-main" data-play title="играть / пауза" aria-label="играть или пауза">&#9654;</button>
+            <button type="button" class="pbtn" data-next title="следующий трек" aria-label="следующий трек">&#9654;|</button>
+            <button type="button" class="pbtn" data-stop title="остановить" aria-label="остановить">&#9632;</button>
+            <button type="button" class="pbtn" data-shuffle aria-pressed="false" title="перемешать и играть другой трек">перемешать</button>
+            <button type="button" class="pbtn" data-repeat aria-pressed="false" title="повтор треков">&#8635; повтор: нет</button>
             <label class="vol">громкость
                 <input type="range" class="vol-range" data-volume min="0" max="1" step="0.05" value="1" aria-label="громкость">
             </label>
             <span class="player-status" data-status></span>
-            <span class="player-hint">space &mdash; играть/пауза (фокус в плеере) &middot; shift+&#8592;/&#8594; &mdash; трек</span>
         </div>
+        <p class="player-hint">space &mdash; играть/пауза (фокус в плеере) &middot; shift+&#8592;/&#8594; &mdash; трек &middot; esc &mdash; закрыть</p>
     </div>
 
     <div class="albums">
+        <div class="albums-bar">
+            <span class="mono">{{ music_files.size }} тр. &middot; {{ page.music.albums | size }} релиза</span>
+            <button type="button" class="button albums-toggle" data-toggle-all>+ развернуть всё</button>
+        </div>
+
         {% for album in page.music.albums %}
         {% assign album_name = album.name | default: album.dir %}
         {% assign album_path = music_base | append: "/" | append: album.dir %}
         {% assign tracks = music_files | where_exp: "f", "f.path contains album_path" %}
         {% if tracks.size > 0 %}
-        <div class="album" data-album="{{ album_name }}">
-            <div class="album-head">
-                <button type="button" class="button album-play" data-play-album>&#9654; слушать альбом</button>
+        <details class="album" data-album="{{ album_name }}">
+            <summary class="album-head">
+                <span class="album-fold" aria-hidden="true"></span>
                 <span class="album-name">{{ album_name }}</span>
                 <span class="album-count">{{ tracks.size }} тр.</span>
+            </summary>
+            <div class="album-body">
+                <p class="album-actions">
+                    <button type="button" class="button album-play" data-play-album>&#9654; слушать альбом</button>
+                </p>
+                <div class="tracks">
+                    {% for t in tracks %}
+                    {% assign title = t.name | remove: t.extname %}
+                    {% assign prefix = album_name | append: " - " %}
+                    {% if title contains prefix %}
+                    {% assign title = title | remove: prefix %}
+                    {% endif %}
+                    {% if page.music.titles %}
+                    {% assign override = page.music.titles[t.name] %}
+                    {% if override %}{% assign title = override %}{% endif %}
+                    {% endif %}
+                    <a class="track" data-track href="{{ t.path }}" data-src="{{ t.path }}">
+                        <span class="num">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</span>
+                        <span class="title" data-title>{{ title }}</span>
+                        <span class="state" aria-hidden="true">&#9654;</span>
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="tracks">
-                {% for t in tracks %}
-                {% assign title = t.name | remove: t.extname %}
-                {% assign prefix = album_name | append: " - " %}
-                {% if title contains prefix %}
-                {% assign title = title | remove: prefix %}
-                {% endif %}
-                {% if page.music.titles %}
-                {% assign override = page.music.titles[t.name] %}
-                {% if override %}{% assign title = override %}{% endif %}
-                {% endif %}
-                <a class="track" data-track href="{{ t.path }}" data-src="{{ t.path }}">
-                    <span class="num">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</span>
-                    <span class="title" data-title>{{ title }}</span>
-                    <span class="state" aria-hidden="true">&#9654;</span>
-                </a>
-                {% endfor %}
-            </div>
-        </div>
+        </details>
         {% endif %}
         {% endfor %}
     </div>
-
-    <p class="mono music-total">треков: {{ music_files.size }} &middot; релизов: {{ page.music.albums | size }}</p>
 </section>

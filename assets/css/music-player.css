@@ -1,13 +1,18 @@
 /* --- плеер на страницах команды (страницы с front matter music) --- */
 
+/* --- всплывающий плеер внизу экрана --- */
+
 .music .player {
-    position: sticky;
-    bottom: 0;
-    z-index: 40;
-    margin: 1.2em 0 1.8em;
-    padding: 10px 12px;
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    width: min(680px, calc(100vw - 24px));
+    z-index: 50;
+    padding: 10px 12px 8px;
     background: var(--bg);
-    border: 1px solid var(--muted);
+    border: 1px solid var(--fg);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
     font-family: "Courier New", monospace;
     font-size: 13px;
     text-align: left;
@@ -15,12 +20,25 @@
 
 .music .player[hidden] { display: none; }
 
+body.has-player { padding-bottom: 200px; }
+
+@media (prefers-reduced-motion: no-preference) {
+    .music .player { animation: player-up .18s ease-out; }
+}
+
+@keyframes player-up {
+    from { transform: translate(-50%, 14px); opacity: 0; }
+    to   { transform: translate(-50%, 0); opacity: 1; }
+}
+
 .music .player-row {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
 }
+
+.music .player-top { gap: 12px; }
 
 .music .pbtn {
     border: 1px solid var(--fg);
@@ -43,6 +61,14 @@
 }
 
 .music .pbtn-main { min-width: 44px; }
+
+.music .pbtn-close {
+    border-color: var(--muted);
+    color: var(--muted);
+    padding: 4px 7px;
+}
+
+.music .pbtn-close:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 
 /* загрузка трека */
 .music.player-busy .pbtn-main::after { content: " \2026"; }
@@ -100,37 +126,84 @@
 
 .music input[type="range"]:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
 
-.music .player-extra { margin-top: 8px; color: var(--muted); font-size: 12px; text-align: left; }
+.music .vol { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
 
-.music .vol { display: inline-flex; align-items: center; gap: 8px; }
+.music .player-status { color: var(--accent); margin-left: auto; }
 
-.music .player-hint { margin-left: auto; }
+.music .player-hint {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 11px;
+    text-align: left;
+}
 
-.music .player-status { color: var(--accent); }
+/* --- альбомы: свёрнуты по умолчанию --- */
 
-/* --- альбомы и треки --- */
+.music .albums-bar {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 1.4em;
+    color: var(--muted);
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    text-align: left;
+}
 
-.music .album { margin-top: 1.8em; }
+.music .albums-toggle {
+    margin: 0 0 0 auto;
+    padding: 3px 10px;
+    font-size: 12px;
+}
+
+.music .album {
+    margin: 0;
+    border-bottom: 1px solid var(--muted);
+}
 
 .music .album-head {
     display: flex;
-    text-align: left;
     align-items: baseline;
     gap: 12px;
-    flex-wrap: wrap;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--muted);
+    padding: 10px 2px;
+    cursor: pointer;
+    list-style: none;
     font-family: "Courier New", monospace;
     font-size: 13px;
     text-transform: uppercase;
+    text-align: left;
     color: var(--muted);
 }
+
+.music .album-head::-webkit-details-marker { display: none; }
+
+.music .album-head:hover { color: var(--accent); }
+
+.music .album-head:hover .album-name { color: var(--accent); }
+
+.music .album-fold::before { content: "+"; }
+
+.music .album[open] > .album-head .album-fold::before { content: "\2212"; }
 
 .music .album-name { color: var(--fg); letter-spacing: .05em; }
 
 .music .album-count { margin-left: auto; font-size: 12px; }
 
+.music .album.is-current > .album-head,
+.music .album.is-current > .album-head .album-name { color: var(--accent); }
+
+.music .album.is-playing > .album-head .album-name::after {
+    content: " \25b6";
+    animation: music-blink 1.1s steps(1, end) infinite;
+}
+
+.music .album-body { padding: 0 2px 14px; }
+
+.music .album-actions { margin: 0 0 10px; }
+
 .music .album-play { margin: 0; padding: 3px 10px; font-size: 12px; }
+
+/* --- треки --- */
 
 .music .track {
     display: grid;
@@ -166,21 +239,31 @@
 @keyframes music-blink { 50% { opacity: .2; } }
 
 @media (prefers-reduced-motion: reduce) {
-    .music .track.is-playing .state { animation: none; }
+    .music .track.is-playing .state,
+    .music .album.is-playing > .album-head .album-name::after { animation: none; }
 }
 
 .music .track.is-broken { color: var(--muted); text-decoration: line-through; }
 
-.music .music-total { color: var(--muted); font-size: 12px; margin-top: 1.6em; text-align: left; }
-
 /* --- мобилки --- */
 
 @media (max-width: 560px) {
-    .music .player { padding: 8px; }
+    .music .player {
+        bottom: 0;
+        width: 100vw;
+        border-left: 0;
+        border-right: 0;
+        border-bottom: 0;
+        padding: 8px 10px 6px;
+    }
+
+    body.has-player { padding-bottom: 220px; }
 
     .music .np { flex-basis: 100%; order: -1; }
 
     .music .player-hint { display: none; }
+
+    .music .player-status { margin-left: 0; }
 
     .music .track { grid-template-columns: 26px 1fr 14px; gap: 8px; }
 }
