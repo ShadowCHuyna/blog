@@ -23,7 +23,16 @@
     панель внизу экрана, появляется, когда выбран трек.
 {%- endcomment -%}
 {%- assign music_base = page.music.path -%}
-{%- assign music_files = site.static_files | where_exp: "f", "f.path contains music_base" | where_exp: "f", "f.extname == '.mp3' or f.extname == '.wav' or f.extname == '.ogg' or f.extname == '.m4a'" | sort: 'name' -%}
+{%- assign music_files = "" | split: "" -%}
+{%- for f in site.static_files -%}
+    {%- assign in_music = f.path | slice: 0, music_base.size -%}
+    {%- if in_music == music_base -%}
+        {%- if f.extname == '.mp3' or f.extname == '.wav' or f.extname == '.ogg' or f.extname == '.m4a' -%}
+            {%- assign music_files = music_files | push: f -%}
+        {%- endif -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- assign music_files = music_files | sort: 'name' -%}
 <section class="section music" id="music" data-music data-artist="{{ page.music.artist }}">
     <h2 class="comment">музыка — <span class="hlline">{{ page.music.artist }}</span></h2>
 
