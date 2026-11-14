@@ -47,4 +47,4 @@ ASR-движок висит фоном и держит модель в VRAM, п�
 
 ---
 
-Нагитхабил - https://github.com/TheStepashich/rapcoding
+[Нагитхабил - репозиторий GitHub](https://github.com/TheStepashich/rapcoding)
