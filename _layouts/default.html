@@ -19,6 +19,7 @@
     <link rel="alternate" type="application/rss+xml" title="{{ site.title }} — блог" href="{{ '/feed.xml' | absolute_url }}">
     <link rel="alternate" type="application/rss+xml" title="{{ site.title }} — статьи" href="{{ '/articles.xml' | absolute_url }}">
     {% seo %}
+    {% if page.noindex %}<meta name="robots" content="noindex, follow">{% endif %}
     <link rel="shortcut icon" href="{{ '/favicon.ico' | relative_url }}">
 </head>
 
@@ -58,6 +59,7 @@
     <span class="footer-links">
         <a href="{{ '/feed.xml' | relative_url }}">rss · блог</a>
         <a href="{{ '/articles.xml' | relative_url }}">rss · статьи</a>
+        <a href="https://memearchive.potatom.net/">мемархив</a>
     </span>
 </footer>
 
